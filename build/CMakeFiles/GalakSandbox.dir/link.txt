@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/GalakSandbox.dir/example/Sandbox/main.cpp.o -o bin/GalakSandbox  lib/libGalakticEngine.a ../libs/SDL/build/libSDL3.a -lpthread -ldl -lX11 
