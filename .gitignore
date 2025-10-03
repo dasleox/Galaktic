@@ -1,0 +1,10 @@
+*.pch
+*.gch
+*.ipch
+*.o
+*.obj
+*.out
+
+/build/
+/CMakeFiles/
+/cmake-build-*/

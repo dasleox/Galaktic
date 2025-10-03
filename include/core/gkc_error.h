@@ -22,80 +22,91 @@
 */
 
 
-
+// @todo Make an error catching function which calls another funciton to do something specific
+//      like telling the engine to do an specific thing or display something like a message box
 #ifndef GKC_ERROR_H
 #define GKC_ERROR_H
 
-namespace Galaktic
-{
-    namespace Core
-    {
-        typedef enum ErrorType
-        {
-            // General  
-            None = 0,
-            Unknown = -1,
-            NotImplemented,
-            InvalidArgument,
-            NullPointer,
-            OutOfMemory,
-            Timeout,
-            OperationFailed,
+#include <pch.hpp>
+#include <core/gkc_main.h>
 
-            // Core / Galaktic
-            DependencyFailure,
-            InitFailure,
-            ShutdownFailure,
-            ConfigError,
-            VersionMismatch,
+using std::string;
 
-            // Renderer
-            RendererFailure,
-            InvalidTexture,
-            TextureLoad,
-            TexureFormatUnsupported,
-            BufferFailure,
-            BufferOverflow,
-            GPUNotFound,
-            GPUOutofMemory,
-            
-            // Audio
-            AudioInitFaliure,
-            AudioDeviceNotFound,
-            AudioFormatUnsupported,
-            
-            // Input
-            InputInitFailure,
-            KeyboardNotFound,
-            MouseNotFound,
-            InvalidKey,
-            InvalidMouseKey,
+namespace Galaktic {
+namespace Core {
+    extern void InitLibraries();
+    enum class ErrorType {
+        // General  
+        Unknown = -1,
+        None,
+        NotImplemented,
+        InvalidArgument,
+        NullPointer,
+        OutOfMemory,
+        Timeout,
+        OperationFailed,
 
-            // Files
-            InvalidDirectory,
-            DirectoryNotFound,
-            InvalidFile,
-            FileNotFound,
-            FilePermissionError,
-            DiskFull,
-            
-            // Entity
-            EntityPathNotFound,
-            InvalidEntity,
-            EntityImportFailure,
+        // Core / Galaktic
+        DependencyFailure,
+        InitFailure,
+        ShutdownFailure,
+        ConfigError,
+        VersionMismatch,
 
-            // Application
-            ApplicationNameExists,
-            ApplicationCorrupted,
-            ApplicationTerminated,
+        // Renderer
+        RendererFailure,
+        InvalidTexture,
+        TextureLoad,
+        TexureFormatUnsupported,
+        BufferFailure,
+        BufferOverflow,
+        GPUNotFound,
+        GPUOutofMemory,
+        
+        // Audio
+        AudioInitFaliure,
+        AudioDeviceNotFound,
+        AudioFormatUnsupported,
+        
+        // Input
+        InputInitFailure,
+        KeyboardNotFound,
+        MouseNotFound,
+        InvalidKey,
+        InvalidMouseKey,
 
-            // Scripting
-            ScriptNotValid,
-            ScriptNotFound,
-            ScriptRuntimeError
-        };
-    }
+        // Files
+        InvalidDirectory,
+        DirectoryNotFound,
+        InvalidFile,
+        FileNotFound,
+        FilePermissionError,
+        DiskFull,
+        
+        // Entity
+        EntityPathNotFound,
+        InvalidEntity,
+        EntityImportFailure,
+
+        // Application
+        ApplicationNameExists,
+        ApplicationCorrupted,
+        ApplicationTerminated,
+
+        // Scripting
+        ScriptNotValid,
+        ScriptNotFound,
+        ScriptRuntimeError
+    };
+    class GalakticException : public std::runtime_error {
+        public:
+            GalakticException(ErrorType type, const std::string& message);
+    };
+
+    std::string ErrorTypeToString(ErrorType error);
 }
+}
+
 /*  Speaking of errors this is cool as fuck 
     https://www.youtube.com/watch?v=5BZLz21ZS_Y
 */

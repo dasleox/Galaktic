@@ -31,48 +31,50 @@
 // Operating System Detection
 
 #if __WIN64
-    #define GKC_OS "Windows"
-    #define GKC_OS_INT 0
+#define GKC_OS "Windows"
+#define GKC_OS_INT 0
 #elif __linux__
-    #define GKC_OS "Linux"
-    #define GKC_OS_INT 1
+#define GKC_OS "Linux"
+#define GKC_OS_INT 1
 #elif __APPLE__
-    #define GKC_OS "Apple"
-    #define GKC_OS_INT 2
-#endif    
+#define GKC_OS "Apple"
+#define GKC_OS_INT 2
+#endif
 
 // Architecture detection
 
 #if __i386__ || __WIN32
-    #error "32-bit architecture is not supported in the Galaktic Engine!"
+#error "32-bit architecture is not supported in the Galaktic Engine!"
 #elif __amd64__ || __x86_64__
-    #define GKC_ARCH "x64"
+#define GKC_ARCH "x64"
 #else
-    #error "The Galaktic Engine does not support the current architecture!"
+#error "The Galaktic Engine does not support the current architecture!"
 #endif
 
+#define C_ARRAY_MAX_BUFFER 128
 
-#include <SDL3/SDL.h>
-#include <spdlog/spdlog.h>
-#include <memory>
+#include <pch.hpp>
 
-using std::shared_ptr;
+using std::shared_ptr, std::unique_ptr, std::cout, std::cin, std::endl;
+using std::string, std::vector;
 
-namespace Galaktic
-{
-    namespace Debug
-    {
+namespace Galaktic {
+
+    namespace Debug {
         extern void PrintEngineInformation();
-        class Logger
-        {
-            public:
-                static void Init();
-                inline static shared_ptr<spdlog::logger>& GetEngineLogger()     { return engine_logger; }
-                inline static shared_ptr<spdlog::logger>& GetClientLogger()     { return client_logger; }
-            private:
-                static shared_ptr<spdlog::logger> engine_logger;
-                static shared_ptr<spdlog::logger> client_logger;
+    }
 
+    namespace Core {
+        /**
+         * @struct
+         * @brief Struct used for saving the device information, like the width and height of the screen
+         *        the OS and the CPU architecture
+         */
+        struct DeviceInformation {
+            Uint16 width_;
+            Uint16 height_;
+            string os_;
+            string arch_;
         };
     }
 }

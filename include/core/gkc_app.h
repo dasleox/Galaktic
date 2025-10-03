@@ -24,47 +24,40 @@
 #ifndef GKC_APP_H
 #define GKC_APP_H
 
-#include <iostream>
-#include <SDL3/SDL.h>
+#include <pch.hpp>
+#include <core/gkc_main.h>
+#include <graphics/gkc_renderer.h>
 
 using std::string;
 
-namespace Galaktic
-{
-    namespace Core
-    {
-        class App
-        {
-            public:
-                void Init();
-                void Run();
-                void Loop();
-            private:
-                SDL_Window* window_;
-                SDL_Event event_;
+namespace Galaktic {
+namespace Core {
+    enum class AppType;
 
-        };
+    struct AppInformation {
+        std::string app_name_;
+        AppType app_type_;
+    };
 
-        typedef enum AppType
-        {
-            Undefined = -1,
-            Game = 0,
-            Application = 1,
-        };
-        typedef struct DeviceInformation
-        { 
-            Uint16 width_;
-            Uint16 height_;
-            string os_;
-            string arch_;
-        };
-        typedef struct AppInformation
-        {
-            string app_name_;
-            AppType app_type_;
+    class App {
+        public:
+            App(std::string title, AppType type);
+            void Init();
+            void Run();
+            void Loop();
+            void Free();
+        private:
+            Renderer::Renderer* renderer_;
+            AppInformation app_info_; 
             DeviceInformation device_info_;
-        };
-    }
-}
+            SDL_Event event_;
+    };
+
+    enum class AppType {
+        Undefined = -1,
+        Game = 0,
+        Application = 1,
+    };
+}}
 
 #endif

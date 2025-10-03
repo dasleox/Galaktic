@@ -1,2 +1,0 @@
-/usr/bin/ar qc lib/libGalakticEngine.a CMakeFiles/GalakticEngine.dir/src/core/gkc_main.cpp.o
-/usr/bin/ranlib lib/libGalakticEngine.a

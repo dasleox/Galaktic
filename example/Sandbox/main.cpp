@@ -3,11 +3,11 @@
 
 int main()
 {
-    Galaktic::Debug::PrintEngineInformation();
-    Galaktic::Debug::Logger::Init();
+    Galaktic::Core::App* app = new Galaktic::Core::App("Nadaplete :,)", Galaktic::Core::AppType::Application);
 
-    GKC_ENGINE_FATAL("M83-Midnight City is needed bitch!");
-    GKC_CLIENT_ERROR("You need a better dick bruh!");
-    
+    app->Run();
+
+    delete app;
+
     return 0;
 }

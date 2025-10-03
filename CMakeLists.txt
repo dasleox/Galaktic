@@ -3,6 +3,8 @@ project(GalakticEngine VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -fsanitize=address")
 
 # ===========================
 # Engine Library (.a) || Satanic, ehm Static!
@@ -15,12 +17,15 @@ endif()
 
 add_library(GalakticEngine STATIC ${ENGINE_SOURCES})
 
+
 target_include_directories(GalakticEngine
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/spdlog/include
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL/include
 )
+
+target_precompile_headers(GalakticEngine PRIVATE include/pch.hpp)
 
 # SDL3 (static .a from libs/SDL/build)
 set(SDL3_LIB ${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL/build/libSDL3.a)
@@ -50,7 +55,7 @@ file(GLOB_RECURSE SANDBOX_SOURCES example/Sandbox/*.cpp)
 if(SANDBOX_SOURCES)
     add_executable(GalakSandbox ${SANDBOX_SOURCES})
     target_link_libraries(GalakSandbox PRIVATE GalakticEngine)
-
+    
     # Put executable in build/bin
     set_target_properties(GalakSandbox PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin

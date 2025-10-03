@@ -20,3 +20,29 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
+
+#ifndef GKC_RENDERER_H
+#define GKC_RENDERER_H
+
+#include <pch.hpp>
+#include <core/gkc_main.h>
+
+namespace Galaktic {
+	namespace Core {
+		struct AppInformation;
+	}
+	namespace Renderer {
+		class Window;
+		class Renderer {
+			public:
+				Renderer(Core::DeviceInformation& device_info, Core::AppInformation& app_info);
+				SDL_Renderer* GetRenderer() { return renderer_; }
+				Window* window_ = nullptr;
+			private:
+				SDL_Renderer* renderer_ = nullptr;
+		};
+	}
+}
+
+#define GKC_GET_RENDERER(renderer) renderer->GetRenderer()
+#endif

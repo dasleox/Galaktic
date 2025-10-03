@@ -1,4 +1,0 @@
-/home/yennerchip/Desktop/C++/Galaktic-Engine/build/CMakeFiles/GalakticEngine.dir
-/home/yennerchip/Desktop/C++/Galaktic-Engine/build/CMakeFiles/GalakSandbox.dir
-/home/yennerchip/Desktop/C++/Galaktic-Engine/build/CMakeFiles/edit_cache.dir
-/home/yennerchip/Desktop/C++/Galaktic-Engine/build/CMakeFiles/rebuild_cache.dir
