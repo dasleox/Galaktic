@@ -59,7 +59,9 @@ void Console::CallSimpleConsole(){
 
 void Galaktic::Debug::StartLibraries() {
     Logger::Init();
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) || !TTF_Init()) {
+
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) || !TTF_Init()
+        || !MIX_Init()) {
         GKC_THROW_EXCEPTION(GalakticException, "SDL could not initialize!");
     }
     GKC_ENGINE_INFO("Initialized SDL successfully.");

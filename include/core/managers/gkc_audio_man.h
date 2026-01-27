@@ -1,5 +1,5 @@
 /*
-  Galaktic Engine
+ Galaktic Engine
   Copyright (C) 2025 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,30 +23,39 @@
 
 #pragma once
 #include <pch.hpp>
-#include <core/gkc_scene.h>
 
-namespace Galaktic::Core::Managers {
-    class SceneManager;
+typedef Uint32 AudioID;
+
+namespace Galaktic::Audio {
+    class AudioFile;
+    struct AudioInfo;
+    typedef unordered_map<string, unique_ptr<AudioInfo>> Audio_List;
 }
 
-namespace Galaktic::Core {
-    /**
-     * @brief Main application class that initializes and runs the application.
-     * @class App
-     */
-    class App {
+namespace Galaktic::Core::Managers {
+    class AudioManager {
         public:
-            App(const path& project_path, const string& title);
+            explicit AudioManager(const path& folder);
 
-            Managers::SceneManager*& GetSceneManager() { return m_sceneManager; }
+            void AddAudioFile(const path& filepath);
+            void RemoveAudioFile(const string& name);
+
+            void PlayAudioFile(const string& name, int loops = 0);
+            void PlayMusicFile(const string& name);
+            void StopSound(const string& name, Sint64 fadeOutMs = 0);
+            void StopAllSounds(Sint64 fadeOutMs = 0) const;
+
+            Audio::AudioFile* GetAudioFile(const string& name);
+            Audio::Audio_List& GetAudioList() { return m_audioFiles; }
+
+            void PrintList() const;
         private:
-            Managers::SceneManager* m_sceneManager; // Scene Manager
-            DeviceInformation m_deviceInfo;     // Device Info
-            string m_appName;                   // App name
+            Audio::Audio_List m_audioFiles;
+            unordered_multimap<AudioID, MIX_Track*> m_activeTracks;
+            SDL_AudioSpec m_audioSpec{};
+            SDL_AudioDeviceID m_deviceID;
+            MIX_Mixer* m_mixer = nullptr;
 
-            /**
-             * @brief Get the screen information and set the width and height of the built window
-             */
-            void ScreenStartup();
+            void RegisterTrack(AudioID id, MIX_Track* track);
     };
 }

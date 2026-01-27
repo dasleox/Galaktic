@@ -1,6 +1,6 @@
 /*
-  Galaktic Engine
-  Copyright (C) 2025 SummerChip
+Galaktic Engine
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -23,30 +23,26 @@
 
 #pragma once
 #include <pch.hpp>
-#include <core/gkc_scene.h>
-
-namespace Galaktic::Core::Managers {
-    class SceneManager;
-}
 
 namespace Galaktic::Core {
-    /**
-     * @brief Main application class that initializes and runs the application.
-     * @class App
-     */
-    class App {
-        public:
-            App(const path& project_path, const string& title);
-
-            Managers::SceneManager*& GetSceneManager() { return m_sceneManager; }
-        private:
-            Managers::SceneManager* m_sceneManager; // Scene Manager
-            DeviceInformation m_deviceInfo;     // Device Info
-            string m_appName;                   // App name
-
-            /**
-             * @brief Get the screen information and set the width and height of the built window
-             */
-            void ScreenStartup();
-    };
+    class Scene;
 }
+
+namespace Galaktic::Core::Managers {
+
+    class SceneManager {
+        public:
+            SceneManager(const path& folder, const DeviceInformation& info);
+
+            void CreateScene(const string& name);
+            void LoadSpecificScene(const string& name) const;
+            void LoadSpecificSceneFromFile(const path& filepath);
+
+            unique_ptr<Scene> GetScene(const string& name);
+        private:
+            DeviceInformation m_deviceInfo;
+            path m_folder;
+            unordered_map<string, unique_ptr<Scene>> m_sceneList;
+    };
+
+} // namespace Galaktic::Core::Managers

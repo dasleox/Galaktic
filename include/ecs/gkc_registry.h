@@ -1,4 +1,4 @@
-/*
+    /*
   Galaktic Engine
   Copyright (C) 2025 SummerChip
 
@@ -23,12 +23,11 @@
 
 #pragma once
 #include <pch.hpp>
+#include "gkc_component_registry.h"
 
 namespace Galaktic::Core {
     class Scene;
 }
-
-typedef Uint32 EntityID;
 
 namespace Galaktic::ECS {
     /**
@@ -49,6 +48,13 @@ namespace Galaktic::ECS {
             T& Add(EntityID id, Args&&... args) {
                 auto& any = m_componentPools[typeid(T)][id];
                 any.emplace<T>(std::forward<Args>(args)...);
+                return std::any_cast<T&>(any);
+            }
+
+            template<typename T>
+            T& Add(EntityID id) {
+                auto& any = m_componentPools[typeid(T)][id];
+                any.emplace<T>();
                 return std::any_cast<T&>(any);
             }
 
@@ -94,6 +100,62 @@ namespace Galaktic::ECS {
                 return m_componentPools;
             }
 
+            vector<type_index> GetComponentsFromEntity(EntityID id) {
+                vector<type_index> components;
+
+                for (const auto& [type, map] : m_componentPools) {
+                    if (map.contains(id)) {
+                        components.emplace_back(type);
+                    }
+                }
+
+                return components;
+            }
+
+            /**
+             * @brief Defines a lambda for all the entity components if the entity exists
+             *
+             * This function is used by the component registry, writer and reader to write
+             * or read the components of an entity, determine the size of the entity, etc.
+             * @param id Entity's ID
+             * @param func Lambda Function
+             */
+            void ForEachComponentDo(EntityID id,
+                                    const function<void(const ComponentTypeInfo&, const any&)> func) {
+                for (const auto& [type, map] : m_componentPools) {
+                    auto it = map.find(id);
+                    if (it == map.end())
+                        continue;
+
+                    const ComponentTypeInfo& info = ComponentRegistry::Get(type);
+                    func(info, it->second);
+                }
+            }
+            void ForEachRegisteredComponent(const std::function<void(const ComponentTypeInfo&)>& fn) const {
+                for (const auto& [type, info] : ComponentRegistry::GetComponentTypes()) {
+                    fn(info);
+                }
+            }
+
+            size_t GetAllComponentsSize(EntityID id) {
+                size_t size = 0;
+
+                for (const auto& [type, entityMap] : m_componentPools) {
+                    auto it = entityMap.find(id);
+                    if (it == entityMap.end())
+                        continue;
+
+                    const any& componentAny = it->second;
+                    const ComponentTypeInfo& info = ComponentRegistry::Get(type);
+                    size += info.size_func(componentAny);
+                }
+                return size;
+            }
+
+            template<typename T>
+            bool IsComponentType(const type_index& type) {
+                return type == std::type_index(typeid(T));
+            }
         private:
             unordered_map<type_index,unordered_map<EntityID, any>> m_componentPools;
     };

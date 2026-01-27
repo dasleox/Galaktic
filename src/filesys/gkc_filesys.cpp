@@ -10,7 +10,7 @@ bool Filesystem::CheckDirectory(const path& dir_path) {
     return exists(dir_path) && is_directory(dir_path);
 }
 bool Filesystem::CheckFile(const path& file_path) {
-    return exists(file_path) && is_regular_file(file_path);
+    return exists(file_path);
 }
 
 bool Filesystem::CreateFolder(const path& dir_name) {
@@ -33,10 +33,19 @@ void Filesystem::RenameFile(const path& old_name, const path& new_name) {
     }
     try {
         rename(old_name, new_name);
-        GKC_ENGINE_INFO("Renamed file from '{}' to '{}'", old_name.string(), new_name.string());
     }
     catch (const filesystem_error& e) {
         GKC_ENGINE_ERROR("Error renaming file from '{}' to '{}': {}", old_name.string(), new_name.string(), e.what());
+        throw;
+    }
+}
+
+void Filesystem::RemoveFile(const path& filepath) {
+    try {
+        std::filesystem::remove(filepath.string().c_str());
+    }
+    catch (const filesystem_error& e) {
+        GKC_ENGINE_ERROR("Error removing file '{0}': {1}", filepath.string(), e.what());
     }
 }
 
@@ -69,10 +78,10 @@ void Filesystem::ReadFileInfo(const path& file_path) {
 }
 
 void Filesystem::CreateAppDirectoryStructure(const path& project_path) {
+    const auto &fullPath = path(project_path);
     for(const auto& dir : APP_DIRECTORY_STRUCTURE) {
-        path fullPath = path(project_path) / dir;
-        if(!CheckDirectory(fullPath.string())) {
-            CreateFolder(fullPath.string());
+        if(!CheckDirectory(fullPath / dir)) {
+            CreateFolder(fullPath / dir);
         }
     }
 }
@@ -96,6 +105,14 @@ vector<string> Filesystem::GetFilenamesInFolder(const path &folder) {
     return fileNames;
 }
 
+string Filesystem::GetFilename(const path &fullPath) {
+    return path(fullPath).filename().generic_string();
+}
+
+string Filesystem::GetFilenameFromRelativePath(const path &fullPath, const path &relativePath) {
+    return relative(fullPath, relativePath).generic_string();
+}
+
 void Filesystem::RefreshFolderContents(vector<string>& content, const path& folder) {
     content.empty() ? GKC_ENGINE_INFO("Passed folder content is empty!") : void(0);
     try {
@@ -108,17 +125,6 @@ void Filesystem::RefreshFolderContents(vector<string>& content, const path& fold
     }
 }
 
-/* File Writer class */
-void Filesystem::FileWriter::WriteString(ofstream& file, const string& str) {
-    Uint32 length = str.size();
-    file.write(reinterpret_cast<const char*>(&length), sizeof(length) );
-    file.write(str.c_str(), length);
-}
-/* File Reader class */
-
-void Filesystem::FileReader::ReadString(ifstream& file, string& str) {
-    Uint32 length;
-    Read(file, length);
-    str.resize(length);
-    file.read(str.data(), length);
+path Filesystem::GetFullPath() {
+    return current_path().string().c_str();
 }

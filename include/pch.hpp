@@ -13,8 +13,8 @@
 #include <iomanip>
 #include <string>
 #include <SDL3/SDL.h>
+#include <../libs/SDL_mixer/include/SDL3_mixer/SDL_mixer.h>
 #include <SDL3/SDL_video.h>
-#include <SDL3/SDL_audio.h>
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <spdlog/spdlog.h>
@@ -27,6 +27,7 @@
 #include <core/gkc_main.h>
 #include <../libs/luacpp-0.3.0/Source/LuaCpp.hpp>
 #include <typeindex>
+#include <cxxabi.h>
 
 #if _WIN64
     #include <windows.h>

@@ -17,6 +17,7 @@ find_package(SDL3_image CONFIG REQUIRED)
 find_package(SDL3_ttf CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(SDL3_Mixer CONFIG REQUIRED)
 
 # ===========================
 # Engine
@@ -26,26 +27,28 @@ if(NOT ENGINE_SOURCES)
     message(FATAL_ERROR "No sources were found for Galaktic!")
 endif()
 
-add_library(Galaktic STATIC ${ENGINE_SOURCES})
+add_library(Galaktic SHARED ${ENGINE_SOURCES})
+
 target_include_directories(Galaktic PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 
 target_compile_definitions(Galaktic
-        PRIVATE
+        PUBLIC
             GKC_ENABLE_ASSERTS=$<CONFIG:DEBUG>
             GKC_DEBUG=$<CONFIG:DEBUG>
             GKC_EVENT_DEBUG=$<CONFIG:DEBUG>
             GKC_PRINT_ADDRESSES=$<CONFIG:DEBUG>
+            GKC_PRINT_TEXTURE_ADDED=$<CONFIG:DEBUG>
 )
 
-##
-if(ENABLE_UBSAN)
-   # target_compile_options(Galaktic PRIVATE -fsanitize=undefined)
-   # target_link_options(Galaktic PRIVATE -fsanitize=undefined)
-endif ()
-#
+target_compile_options(Galaktic
+        PUBLIC
+            -Wextra
+            -Wconversion
+)
+
 target_precompile_headers(Galaktic PRIVATE include/pch.hpp)
 
 target_link_libraries(Galaktic
@@ -54,7 +57,9 @@ target_link_libraries(Galaktic
         SDL3_image::SDL3_image
         SDL3_ttf::SDL3_ttf
         spdlog::spdlog
+        fmt::fmt
         nlohmann_json::nlohmann_json
+        SDL3_mixer::SDL3_mixer
 )
 
 # ===========================

@@ -1,7 +1,17 @@
 #pragma once
 
+#include <audio/gkc_audio.h>
+
 #include <core/events/gkc_event.h>
 #include <core/events/gkc_dispatcher.h>
+
+#include <core/helpers/gkc_ecs_helper.h>
+
+#include <core/managers/gkc_ecs_man.h>
+#include <core/managers/gkc_texture_man.h>
+#include <core/managers/gkc_audio_man.h>
+#include <core/managers/gkc_scene_man.h>
+#include <core/managers/gkc_window_man.h>
 
 #include <core/systems/gkc_system.h>
 #include <core/systems/gkc_key.h>
@@ -9,9 +19,9 @@
 #include <core/systems/gkc_mouse_system.h>
 #include <core/systems/gkc_physics_system.h>
 #include <core/systems/gkc_ui_system.h>
+#include <core/systems/gkc_camera_system.h>
 #include <core/systems/gkc_movement_system.h>
 
-#include <core/managers/gkc_ecs_man.h>
 
 #include <core/gkc_app.h>
 #include <core/gkc_debugger.h>
@@ -23,7 +33,10 @@
 #include <ecs/gkc_components.h>
 #include <ecs/gkc_entity.h>
 #include <ecs/gkc_registry.h>
+#include <ecs/gkc_component_registry.h>
 
+#include <filesys/gkc_reader.h>
+#include <filesys/gkc_writer.h>
 #include <filesys/gkc_filesys.h>
 
 #include <render/gkc_window.h>

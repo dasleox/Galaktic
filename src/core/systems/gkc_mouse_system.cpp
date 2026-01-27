@@ -13,7 +13,6 @@ void MouseSystem::OnEvent(Events::GKC_Event &e) {
     dispatcher.DispatchEvent<Events::MouseClickEvent>(
         [this](Events::MouseClickEvent& e) {
             if (GKC_SDLMOUSE_TO_ENUM(e) == MouseClick::LeftClick) {
-                GKC_DEBUG_EVENT("Left Click!");
                 m_mouseState[GKC_SDLMOUSE_TO_ENUM(e)] = true;
             }
             return false;
@@ -23,7 +22,6 @@ void MouseSystem::OnEvent(Events::GKC_Event &e) {
     dispatcher.DispatchEvent<Events::MouseClickEvent>(
         [this](Events::MouseClickEvent& e) {
             if (GKC_SDLMOUSE_TO_ENUM(e) == MouseClick::RightClick) {
-                GKC_DEBUG_EVENT("Right Click!");
                 m_mouseState[GKC_SDLMOUSE_TO_ENUM(e)] = true;
             }
             return false;
@@ -33,7 +31,6 @@ void MouseSystem::OnEvent(Events::GKC_Event &e) {
     dispatcher.DispatchEvent<Events::MouseClickEvent>(
         [this](Events::MouseClickEvent& e) {
             if (GKC_SDLMOUSE_TO_ENUM(e) == MouseClick::MiddleClick) {
-                GKC_DEBUG_EVENT("Middle Click!");
                 m_mouseState[GKC_SDLMOUSE_TO_ENUM(e)] = true;
             }
             return false;

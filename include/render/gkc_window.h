@@ -69,7 +69,8 @@ namespace Galaktic::Render {
             void Draw(SDL_Renderer* renderer) const;
 
             [[nodiscard]] string GetTitle() const { return m_title; }
-            [[nodiscard]] SDL_WindowID GetWindowId() const { return m_ID; }
+            [[nodiscard]] SDL_WindowID GetSDLWindowID() const { return SDL_GetWindowID(m_window); }
+            [[nodiscard]] GKC_WindowID GetWindowID() const { return m_windowID; }
             [[nodiscard]] Uint32 GetWidth() const { return m_width; }
             [[nodiscard]] Uint32 GetHeight() const { return m_height; }
             [[nodiscard]] Window_Type GetType() const { return m_type; }
@@ -79,6 +80,8 @@ namespace Galaktic::Render {
 
             void SetTitle(const string& title) { m_title = title; }
             void SetWidth(Uint32 width) { m_width = width; }
+            void SetSDLWindowID(SDL_WindowID id) { m_ID = id; }
+            void SetWindowID(GKC_WindowID id) { m_windowID = id; }
             void SetHeight(Uint32 height) { m_height = height; }
             void SetType(Window_Type type) { m_type = type; }
             void SetCallback(const EventCallback& callback) { m_callback = callback; }
@@ -99,9 +102,12 @@ namespace Galaktic::Render {
              * @brief Requests to close the current window
              */
             void RequestClose();
+
+            bool IsValid();
         private:
             string m_title;
             SDL_WindowID m_ID = 0;
+            GKC_WindowID m_windowID = 0;
             Uint32 m_width = 0;
             Uint32 m_height = 0;
             Window_Type m_type;

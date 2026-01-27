@@ -69,6 +69,8 @@ namespace Galaktic::Filesystem {
 	 */
 	extern void RenameFile(const path& old_path, const path& new_path);
 
+	extern void RemoveFile(const path& filepath);
+
 	/**
 	 * @brief Reads and lists the contents of a given folder.
 	 * @param folder_path Folder path to read.
@@ -90,61 +92,17 @@ namespace Galaktic::Filesystem {
 
 	extern vector<string> GetFilenamesInFolder(const path& folder);
 
+	extern string GetFilename(const path& fullPath);
+
+	extern string GetFilenameFromRelativePath(const path& fullPath, const path& relativePath);
+
 	extern void RefreshFolderContents(vector<string> &content, const path &folder);
 
-	/**
-	 * @class FileReader
-	 * @brief Provides utility functions for reading various data types and engine objects from files.
-	 */
-	class FileReader {
-		public:
-			/**
-			 * @brief Reads a string from an input file stream.
-			 * @param file Input file stream to read from.
-			 * @param str String reference to store the result.
-			 */
-			static void ReadString(ifstream& file, string& str);
-
-			/**
-			 * @brief Reads a generic data type from an input file stream.
-			 * @tparam T Type of the value to read.
-			 * @param file Input file stream to read from.
-			 * @param value Variable to store the read value.
-			 */
-			template<typename T>
-			static void Read(ifstream& file, T& value) {
-				file.read(reinterpret_cast<char*>(&value), sizeof(T));
-			}
-	};
-
-	/**
-	 * @class FileWriter
-	 * @brief Provides utility functions for writing various data types and engine objects to files.
-	 */
-	class FileWriter {
-		public:
-			/**
-			 * @brief Writes a string to an output file stream.
-			 * @param file Output file stream to write to.
-			 * @param str String to write.
-			 */
-			static void WriteString(ofstream& file, const string& str);
-
-			/**
-			 * @brief Writes a generic data type to an output file stream.
-			 * @tparam T Type of the value to write.
-			 * @param file Output file stream to write to.
-			 * @param value Value to write.
-			 */
-			template<typename T>
-			static void Write(ofstream& file, const T& value) {
-				file.write(reinterpret_cast<const char*>(&value), sizeof(T));
-			}
-	};
+	extern path GetFullPath();
 
 	const inline vector<path> APP_DIRECTORY_STRUCTURE = {
-		"assets","scenes",
-		"build"
+		"assets", "assets/textures", "assets/sounds",
+		"scenes",
 	};
 }
 

@@ -31,6 +31,7 @@ namespace Galaktic::Core {
 }
 
 namespace Galaktic::ECS {
+
     /**
      * @class Entity
      * @brief Entity of the scene which contains modifiable-removable components
@@ -63,7 +64,7 @@ namespace Galaktic::ECS {
             }
 
             template<typename T>
-            bool Has() const {
+            [[nodiscard]] bool Has() const {
                 return m_registry->Has<T>(m_ID);
             }
 
@@ -80,10 +81,14 @@ namespace Galaktic::ECS {
             bool operator!=(const Entity& other) const {
                 return !(*this == other);
             }
+
         private:
             EntityID m_ID = InvalidEntity;
             Registry* m_registry= nullptr;
     };
 
     typedef unordered_map<EntityID, Entity> Entity_List;
+
+    // Searching by name helper list
+    typedef unordered_multimap<string, EntityID> NameToEntity_List;
 }

@@ -40,10 +40,12 @@ namespace Galaktic::Core::Systems {
             virtual ~BaseSystem() = default;
             virtual void Update(float dt) {}
             virtual void Update(const unordered_map<EntityID, ECS::Entity>& list, float dt) {}
+            virtual void Update(const unordered_map<EntityID, ECS::Entity>& list, float dt,
+                Uint32 width, Uint32 height) {}
             virtual void OnEvent(Events::GKC_Event& e) {}
     };
 
     typedef unordered_map<string, shared_ptr<BaseSystem>> System_List;
 }
 
-constexpr int GKC_SYSTEMS_COUNTER = 6;
+constexpr int GKC_SYSTEMS_COUNTER = 7;

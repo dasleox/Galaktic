@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -25,12 +25,13 @@
 #include <pch.hpp>
 
 /**
- * @brief This macro overrides functions from the base class 'GKC_Event'
+ * @brief This macro overrides functions from the base class \c GKC_Event
  *        with the given arguments
+ *
  * @param type The type of the event
  * @param name The name of the event
  * @param category The category of the event
- * @note The type SHOULD exist in GKC_EventType enum
+ * @note The type \b SHOULD exist in \c GKC_EventType enum
  */
 #define GKC_WRITE_EVENT_FUNCS(type, name, category) \
     static GKC_EventType GetStaticType() {          \
@@ -46,13 +47,13 @@
         return GKC_EventCategory::category;         \
     }
 
-// ###################################
-// ### Enums
-// ###################################
 namespace Galaktic::Core::Events {
     /**
      * @enum GKC_EventType
-     * @brief Event types
+     * @brief Event types enumerator
+     *
+     * This enumerator identifies an event type, in order for event
+     * classes an enumerator has to be added here to work.
      */
     enum class GKC_EventType {
         None = 0,
@@ -66,7 +67,7 @@ namespace Galaktic::Core::Events {
 
     /**
      * @enum GKC_EventCategory
-     * @brief Event category
+     * @brief Category of events
      */
     enum GKC_EventCategory {
         None            = 0,
@@ -76,13 +77,16 @@ namespace Galaktic::Core::Events {
     };
 }
 
-// ###################################
-// ### Base Event Class
-// ###################################
 namespace Galaktic::Core::Events {
     /**
      * @class GKC_Event
-     * @brief Base class for events, any event type should inherit from this class
+     * @brief Base class for events
+     *
+     *  Is the base class of any event in Galaktic, any event type should inherit from this class
+     *  so it can work correctly, for retrieving information of an event there are 3 functions that
+     *  returns information about an event: \c GetEventType, \c GetName and \c GetCategoryFlags.
+     *  If you want that information you need to override the mentioned functions, for automatization
+     *  in this process use a macro called \c GKC_WRITE_EVENT_FUNCS, it will override all of these for you
      */
     class GKC_Event {
         public:
@@ -102,6 +106,7 @@ namespace Galaktic::Core::Events {
 // ###################################
 // ### Key Events
 // ###################################
+
 namespace Galaktic::Core::Events {
     /**
      * @class KeyPressedEvent
@@ -135,6 +140,7 @@ namespace Galaktic::Core::Events {
 // ###################################
 // ### Mouse Events
 // ###################################
+
 namespace Galaktic::Core::Events {
     /**
      * @class MouseClickEvent
@@ -165,16 +171,16 @@ namespace Galaktic::Core::Events {
      */
     class WindowResizeEvent final : public GKC_Event {
         public:
-            explicit WindowResizeEvent(Uint32 w, Uint32 h, SDL_WindowID id)
+            explicit WindowResizeEvent(Uint32 w, Uint32 h, GKC_WindowID id)
                 : m_width(w), m_height(h), m_ID(id) {}
             GKC_WRITE_EVENT_FUNCS(WindowResize, "WindowResize", Application);
             [[nodiscard]] Uint32 GetWidth() const { return m_width; }
             [[nodiscard]] Uint32 GetHeight() const { return m_height; }
-            [[nodiscard]] SDL_WindowID GetWindowID() const { return m_ID; }
+            [[nodiscard]] GKC_WindowID GetWindowID() const { return m_ID; }
         private:
             Uint32 m_width;
             Uint32 m_height;
-            SDL_WindowID m_ID;
+            GKC_WindowID m_ID;
     };
 
     /**
@@ -183,11 +189,11 @@ namespace Galaktic::Core::Events {
      */
     class WindowCloseEvent final : public GKC_Event {
         public:
-            explicit WindowCloseEvent(SDL_WindowID id) : m_ID(id) {}
+            explicit WindowCloseEvent(GKC_WindowID id) : m_ID(id) {}
             GKC_WRITE_EVENT_FUNCS(WindowClose, "WindowCloseEvent", Application);
-            [[nodiscard]] SDL_WindowID GetWindowID() const { return m_ID; }
+            [[nodiscard]] GKC_WindowID GetWindowID() const { return m_ID; }
         private:
-            SDL_WindowID m_ID;
+            GKC_WindowID m_ID;
     };
 
     /**
@@ -196,11 +202,11 @@ namespace Galaktic::Core::Events {
      */
     class WindowMinimizedEvent final : public GKC_Event {
         public:
-            explicit WindowMinimizedEvent(SDL_WindowID id) : m_ID(id) {}
+            explicit WindowMinimizedEvent(GKC_WindowID id) : m_ID(id) {}
             GKC_WRITE_EVENT_FUNCS(WindowMinimized, "WindowMinimized", Application);
-            [[nodiscard]] SDL_WindowID GetWindowID() const { return m_ID; }
+            [[nodiscard]] GKC_WindowID GetWindowID() const { return m_ID; }
         private:
-            SDL_WindowID m_ID;
+            GKC_WindowID m_ID;
     };
 }
 

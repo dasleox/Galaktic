@@ -23,30 +23,47 @@
 
 #pragma once
 #include <pch.hpp>
+
+namespace Galaktic::Core {
+    class Scene;
+}
+
 typedef Uint32 EntityID;
 
 namespace Galaktic::ECS {
     class Entity;
+    class Registry;
 }
 
-namespace Galaktic::Core::Systems {
-    class CameraSystem;
-}
-
-namespace Galaktic::Render {
+namespace Galaktic::Filesystem {
     /**
-     * @class Drawer
-     * @brief Helper to render different things on the scene
+     * @class FileWriter
+     * @brief Provides utility functions for writing various data types and engine objects to files.
      */
-    class Drawer {
+    class FileWriter {
         public:
             /**
-             * @brief Draws all entities
-             * @param list List of entities to draw
-             * @param renderer SDL_Renderer
-             * @param cameraSystem CameraSystem reference
+             * @brief Writes a string to an output file stream.
+             * @param file Output file stream to write to.
+             * @param str String to write.
              */
-            static void DrawEntities(const unordered_map<EntityID, ECS::Entity>& list, SDL_Renderer* renderer,
-                Core::Systems::CameraSystem& cameraSystem);
+            static void WriteString(ofstream& file, const string& str);
+
+            /**
+             * @brief Writes a generic data type to an output file stream.
+             * @tparam T Type of the value to write.
+             * @param file Output file stream to write to.
+             * @param value Value to write.
+             */
+            template<typename T>
+            static void Write(ofstream& file, const T& value) {
+                file.write(reinterpret_cast<const char*>(&value), sizeof(T));
+            }
+
+            static void WriteEntity(ofstream& file, const ECS::Entity& entity,
+                ECS::Registry* registry);
+
+            static void WriteScene(const path& name, Core::Scene &scene, ECS::Registry *registry);
+
     };
 }

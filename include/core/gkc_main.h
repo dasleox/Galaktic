@@ -76,22 +76,42 @@
     #define GKC_ASSERT(_Expression, msg) ((void)0)
 #endif
 
-
+#define GKC_MAJOR_VERSION 0
+#define GKC_MINOR_VERSION 2
+#define GKC_PATCH_VERSION 0
 #define GKC_SET_COLOR(color) color.r, color.g, color.b, color.a
+
 // 'using' declarations
 using std::shared_ptr, std::unique_ptr, std::weak_ptr, std::cout, std::cin, std::endl;
 using std::string, std::to_string, std::vector, std::map, std::unordered_map, std::unordered_set;
 using std::stringstream, std::ifstream, std::ofstream;
 using std::make_shared, std::make_unique, std::function;
-using std::filesystem::path;
+using std::filesystem::path, std::unordered_multimap;
 using std::type_index, std::any, std::array;
 
-const string GKC_VERSION = "0.21a";
 const string GKC_SUFFIX = "Earthy";
-const Uint32 GKC_BUILD_VERSION = 132;
+const Uint32 GKC_BUILD_VERSION = 252;
+inline const string GKC_VERSION_STR = to_string(GKC_MAJOR_VERSION) + "."
+    + "." + to_string(GKC_MINOR_VERSION) + to_string(GKC_PATCH_VERSION);
 
-inline constexpr Uint32 InvalidEntity = 0;
+typedef Uint32 EntityID;
+typedef Uint32 AudioID;
+typedef Uint32 GKC_WindowID;
+
+inline constexpr Uint32 MAX_WINDOW_QUANTITY = 256;
+inline constexpr EntityID InvalidEntity = 0;
 inline constexpr double FIXED_DELTA_TIME = 1.0 / 60;
+
+#if GKC_OS_INT == 0
+    inline const path GKC_TEXTURE_PATH = "assets\\textures";
+    inline const path GKC_SOUND_PATH = "assets\\sounds";
+    inline const path GKC_SCENE_PATH = "scenes";
+#else
+    inline const path GKC_TEXTURE_PATH = "assets/textures";
+    inline const path GKC_SOUND_PATH = "assets/sounds";
+    inline const path GKC_SCENE_PATH = "assets/scenes"
+#endif
+
 inline constexpr SDL_Color WHITE_COLOR = {255, 255, 255, 255};
 inline constexpr SDL_Color BLACK_COLOR = {0, 0, 0, 255};
 inline constexpr SDL_Color RED_COLOR = {255, 0, 0, 255};
@@ -220,6 +240,13 @@ namespace Galaktic::Core {
     inline string Vec2ToString(const Render::Vec2& vec) {
         return "X: " + std::to_string(vec.x) + "," + " Y: " + std::to_string(vec.y);
     }
+
+    inline std::string StripExtension(const std::string& filename) {
+        size_t pos = filename.find_last_of(".");
+        if (pos == std::string::npos)
+            return filename;
+        return filename.substr(0, pos);
+    }
 }
 
 /**
@@ -275,3 +302,22 @@ namespace Galaktic::Debug {
         */
     #endif
 }
+
+namespace Galaktic::Filesystem {
+    constexpr unsigned int GKC_VERSION_ENTITY = 1;
+    constexpr unsigned int GKC_VERSION_SCENE = 1;
+}
+
+    #if GKC_DEBUG
+        #define GKC_ENSURE_FILE_OPEN(file, ex)                          \
+            do {                                                        \
+                if (!(file).is_open()) {                                \
+                    GKC_THROW_EXCEPTION(ex, "file is not open!");       \
+                }                                                       \
+            } while (0)
+    #else
+        #define GKC_ENSURE_FILE_OPEN(file, ex) (void(0))
+    #endif
+
+    #define GKC_WRITE_BINARY(var) reinterpret_cast<const char*>(&var)
+    #define GKC_READ_BINARY(var) reinterpret_cast<char*>(&var)

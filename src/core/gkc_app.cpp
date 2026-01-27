@@ -4,6 +4,7 @@
 #include <core/gkc_debugger.h>
 #include <core/gkc_scene.h>
 #include "core/gkc_exception.h"
+#include <core/managers/gkc_scene_man.h>
 
 using namespace Galaktic::Core;
 
@@ -28,23 +29,20 @@ void App::ScreenStartup() {
     m_deviceInfo.height_ = mode->h;
 }
 
-void App::LoadSpecificScene(const string& scene_name) {
-    if (!m_sceneList.contains(scene_name)) {
-        GKC_THROW_EXCEPTION(Debug::FilesystemException, "Scene not found!");
-    }
-    m_sceneList.find(scene_name)->second.Run();
-}
-
 App::App(const path& project_path, const string &title)
     : m_appName(title) {
 
     Debug::Logger::PrintEngineInformation();
     Debug::StartLibraries();
     Filesystem::CreateFolder(title);
-    Filesystem::CreateAppDirectoryStructure(project_path);
+    Filesystem::CreateAppDirectoryStructure(project_path / title);
     ScreenStartup();
 
-    // Create a new default Scene
-    m_sceneList.emplace("Main", Scene("Main", m_deviceInfo, project_path));
+    m_sceneManager = new Managers::SceneManager(project_path / title, m_deviceInfo);
+
+    if (m_sceneManager == nullptr) {
+        GKC_ENGINE_FATAL("SCENE MANAGER IS NULL, CRITICAL ERROR D:");
+        abort();
+    }
 }
 

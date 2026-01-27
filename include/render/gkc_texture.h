@@ -40,7 +40,19 @@ namespace Galaktic::Render {
             SDL_Texture* m_texture = nullptr;
     };
 
-    typedef unordered_map<TextureID, shared_ptr<Texture>> Texture_List;
+    struct TextureInfo {
+        TextureID id_;
+        unique_ptr<Texture> texture_;
+    };
+
+    typedef unordered_map<string, unique_ptr<TextureInfo>> Texture_List;
+
+    /**
+     * @brief Checks if the file is an image file
+     * @param path filepath
+     * @return true if the file is an image file, false otherwise
+     */
+    extern bool CheckTextureExtension(const path& path);
 }
 
 #define GKC_GET_SDLTEXTURE(tex) tex->GetSDLTexture()

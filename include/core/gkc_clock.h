@@ -31,7 +31,14 @@ namespace Galaktic::Core {
      */
     class Clock {
         public:
+            /**
+             * @brief Starts the clock
+             */
             static void Init();
+
+            /**
+             * @brief Updates delta time
+             */
             static void Update();
             static double GetDeltaTime() { return m_deltaTime; }
         private:

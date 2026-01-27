@@ -1,5 +1,5 @@
 /*
-  Galaktic Engine
+Galaktic Engine
   Copyright (C) 2025 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,30 +23,21 @@
 
 #pragma once
 #include <pch.hpp>
-#include <core/gkc_scene.h>
+#include <core/systems/gkc_system.h>
 
-namespace Galaktic::Core::Managers {
-    class SceneManager;
-}
+namespace Galaktic::Core::Systems {
+    // I got tired taking care of my siblings && doing this shit :,v
 
-namespace Galaktic::Core {
-    /**
-     * @brief Main application class that initializes and runs the application.
-     * @class App
-     */
-    class App {
+    class CameraSystem final : public BaseSystem {
         public:
-            App(const path& project_path, const string& title);
+            explicit CameraSystem(ECS::Entity& camera);
+            void Update(const unordered_map<EntityID, ECS::Entity> &list, float dt, Uint32 width,
+                Uint32 height) override;
 
-            Managers::SceneManager*& GetSceneManager() { return m_sceneManager; }
+            ECS::Entity& GetActiveCamera() { return m_activeCamera; }
+            void SetFollowEntity(EntityID id);
         private:
-            Managers::SceneManager* m_sceneManager; // Scene Manager
-            DeviceInformation m_deviceInfo;     // Device Info
-            string m_appName;                   // App name
-
-            /**
-             * @brief Get the screen information and set the width and height of the built window
-             */
-            void ScreenStartup();
+            void FindPrimaryCamera(const unordered_map<EntityID, ECS::Entity>& list);
+            ECS::Entity& m_activeCamera;
     };
 }

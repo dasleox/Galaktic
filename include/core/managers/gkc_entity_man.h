@@ -26,27 +26,26 @@
 #include <core/gkc_scene.h>
 
 namespace Galaktic::Core::Managers {
-    class SceneManager;
-}
-
-namespace Galaktic::Core {
-    /**
-     * @brief Main application class that initializes and runs the application.
-     * @class App
-     */
-    class App {
+    class SceneManager {
         public:
-            App(const path& project_path, const string& title);
+            explicit SceneManager(const path& folder, const DeviceInformation& info);
 
-            Managers::SceneManager*& GetSceneManager() { return m_sceneManager; }
-        private:
-            Managers::SceneManager* m_sceneManager; // Scene Manager
-            DeviceInformation m_deviceInfo;     // Device Info
-            string m_appName;                   // App name
-
+            void CreateScene(const string& name);
             /**
-             * @brief Get the screen information and set the width and height of the built window
+             * @brief Loads the specific scene inside the App's directory
+             *        structure, this will search up the name inside the Scene_List
+             *        in this class (map)
+             * @param name The name of the scene to load
              */
-            void ScreenStartup();
+            void LoadSpecificScene(const string& name) const;
+            void LoadSpecificSceneFromFile(const path& filepath);
+
+            unique_ptr<Scene> GetScene(const string& name);
+
+            Scene_List& GetSceneList() { return m_sceneList; }
+        private:
+            Scene_List m_sceneList;
+            const DeviceInformation & m_deviceInfo;
+            path m_folder;
     };
 }

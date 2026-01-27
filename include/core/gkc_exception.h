@@ -60,6 +60,18 @@ namespace Galaktic::Debug {
     class RenderException : public GalakticException {
         using GalakticException::GalakticException;
     };
+
+    class AudioException : public GalakticException {
+        using GalakticException::GalakticException;
+    };
+
+    class WritingException : public GalakticException {
+        using GalakticException::GalakticException;
+    };
+
+    class ReadingException : public GalakticException {
+        using GalakticException::GalakticException;
+    };
 }
 
 /**

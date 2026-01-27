@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -27,17 +27,26 @@
 
 namespace Galaktic::Core::Events {
     /**
-     * @class GKC_EventDispatcher gkc_dispatcher.h
+     * @class GKC_EventDispatcher
      * @brief Dispatch events
-     * @todo Make events queued in this class
+     *
+     * \c GKC_EventDispatcher is initialized by passing a reference to an event
+     * and for dispatching a \c std::function with a boolean return value, true
+     * if the event was handled, false otherwise.
+     *
+     * This class dispatches events on the go and doesn't have any 'queue' style
+     * for dispatch.
      */
     class GKC_EventDispatcher {
         public:
+            /**
+             * @param event GKC_Event
+             */
             explicit GKC_EventDispatcher(GKC_Event& event) : m_event(event) {};
 
             /**
              * @brief Dispatch events and check if they were handled
-             * @tparam T event typename (GKC_Event children)
+             * @tparam T event typename (\c GKC_Event children)
              * @param func function/lambda
              * @return true if the function passed is handled, false is the event wasn't handled
              */

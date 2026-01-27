@@ -40,8 +40,27 @@ namespace Galaktic::Debug {
              * @brief Prints engine information
              */
             static void PrintEngineInformation();
+
+            /**
+             * @brief Gets the engine version
+             * @return A string with the engine version
+             */
             static string GetEngineName();
+
+            /**
+             * @brief Returns a string with the display information
+             * FORMAT: Width x Height @ (Hertz) Hz
+             * @param deviceInfo DeviceInformation instance
+             * @return A string with the display information
+             */
             static string GetDisplayInfo(const Core::DeviceInformation& deviceInfo);
+
+            /**
+             * @brief Demangle a typename
+             * @param name Typename
+             * @return name of the typename
+             */
+            static string DemangleTypename(const char* name);
 
             static shared_ptr<spdlog::logger>& GetEngineLogger()   { return engine_logger_; }
             static shared_ptr<spdlog::logger>& GetClientLogger()   { return client_logger_; }

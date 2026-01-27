@@ -47,7 +47,15 @@ namespace Galaktic::Debug {
      */
     class Console {
         public:
+            /**
+             * @brief Calls the console and display bugs information
+             */
             static void CallConsole();
+
+            /**
+             * @brief Displays simple debugging information about the scene
+             * @deprecated This function was used in early versions to test spdlog formatting
+             */
             static void CallSimpleConsole();
             static DebugInformation*& GetDebugInformation() { return m_info; }
             static bool& GetIsActive() { return m_isActive; }
@@ -62,8 +70,12 @@ namespace Galaktic::Debug {
      * @brief Inits all required libraries for Galaktic
      * @note This function needs to be called before using any library (For now only SDL requires this function)
      */
-    void StartLibraries();
+    extern void StartLibraries();
 
-    Core::DeviceInformation GetDeviceInformation();
+    /**
+     * @brief Gets hardware information of the device
+     * @return A DeviceInformation instance
+     */
+    extern Core::DeviceInformation GetDeviceInformation();
 }
 

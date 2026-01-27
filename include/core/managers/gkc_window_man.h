@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -23,30 +23,26 @@
 
 #pragma once
 #include <pch.hpp>
-#include <core/gkc_scene.h>
 
-namespace Galaktic::Core::Managers {
-    class SceneManager;
+namespace Galaktic::Render {
+    class Window;
+    enum class Window_Type;
 }
 
-namespace Galaktic::Core {
-    /**
-     * @brief Main application class that initializes and runs the application.
-     * @class App
-     */
-    class App {
+namespace Galaktic::Core::Managers {
+    class WindowManager {
         public:
-            App(const path& project_path, const string& title);
+            static void CreateGKCWindow(const string& title, Uint32 width, Uint32 height, Render::Window_Type type);
+            static void RegisterWindow(shared_ptr<Render::Window> window);
+            static void UnregisterWindow(GKC_WindowID id);
+            static shared_ptr<Render::Window> GetWindow(GKC_WindowID id);
 
-            Managers::SceneManager*& GetSceneManager() { return m_sceneManager; }
+            static unordered_map<GKC_WindowID, shared_ptr<Render::Window>>& GetWindowList() {
+                return m_windowList;
+            }
         private:
-            Managers::SceneManager* m_sceneManager; // Scene Manager
-            DeviceInformation m_deviceInfo;     // Device Info
-            string m_appName;                   // App name
-
-            /**
-             * @brief Get the screen information and set the width and height of the built window
-             */
-            void ScreenStartup();
+            static unordered_map<GKC_WindowID, shared_ptr<Render::Window>> m_windowList;
     };
+
+    typedef unordered_map<GKC_WindowID, shared_ptr<Render::Window>> Window_List;
 }

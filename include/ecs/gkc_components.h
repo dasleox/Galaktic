@@ -23,11 +23,15 @@
 
 #pragma once
 #include <pch.hpp>
+#include "core/gkc_exception.h"
+
+typedef Uint32 TextureID;
+typedef Uint32 ComponentTypeID;
 
 namespace Galaktic::ECS {
     struct TransformComponent {
         Render::Vec2 location_{0.f, 0.f};
-        Render::Vec2 size_;
+        Render::Vec2 size_{50.f, 50.f};
         float rotation_ = 0.f;
     };
 
@@ -61,14 +65,45 @@ namespace Galaktic::ECS {
     };
 
     struct NameComponent {
-        std::string name_;
+        string name_;
+
+         static void Write(ofstream& file, const NameComponent& comp) {
+            GKC_ENSURE_FILE_OPEN(file, Debug::WritingException);
+             auto len = static_cast<Uint32>(comp.name_.size());
+             file.write(GKC_WRITE_BINARY(len), sizeof(len));
+             file.write(comp.name_.data(), len);
+        }
+
+        static void Read(ifstream& file, NameComponent& comp) {
+             GKC_ENSURE_FILE_OPEN(file, Debug::ReadingException);
+             Uint32 len;
+             file.read(GKC_READ_BINARY(len), sizeof(len));
+             comp.name_.resize(len);
+             file.read(comp.name_.data(), len);
+         }
+
+        static size_t Size(const NameComponent& comp) {
+             return sizeof(Uint32) + comp.name_.size();
+        }
     };
 
     struct LightComponent {
-        Render::Vec2 position_;
+        Render::Vec2 location_ = {0.f, 0.f};
         float watts_ = 100.f;
         float radius = 1.f;  // 1 meter = 32px
         SDL_Color color_ = WHITE_COLOR;
+    };
+
+    struct CameraComponent {
+        Render::Vec2 location_ = {0.f, 0.f};
+        EntityID entityToFollowID_ = InvalidEntity;
+        float zoom_ = 1.f;
+        float smoothing_ = 3.f;
+        bool active_ = false;
+    };
+
+    struct TextureComponent {
+        TextureID id_;
     };
 
     struct PhysicsObjectTag {};
@@ -76,4 +111,37 @@ namespace Galaktic::ECS {
     struct LightTag {};
     struct PlayerTag {};
     struct EnemyTag {};
+    struct CameraTag {};\
+
+    struct ComponentTypeInfo {
+        type_index type_;
+        size_t size_;
+        EntityID parentID_;
+        bool isTag_;
+        bool isPOD_;
+
+        // Modifiable Lambdas
+        size_t (*size_func) (const std::any&);
+        void (*serialize)(const std::any&, ofstream&);
+        void (*deserialize)(std::any&, ifstream&);
+
+        ComponentTypeInfo(type_index type,
+            size_t size,
+            EntityID parentID,
+            bool isTag,
+            bool isPOD,
+            size_t (*sizeFn)(const any&),
+            void (*serializeFn)(const any&, ofstream&),
+            void (*deserializeFn)(any&, ifstream&)
+        )
+            : type_(type)
+            , size_(size)
+            , parentID_(parentID)
+            , isTag_(isTag)
+            , isPOD_(isPOD)
+            , size_func(sizeFn)
+            , serialize(serializeFn)
+            , deserialize(deserializeFn)
+        {}
+    };
 }

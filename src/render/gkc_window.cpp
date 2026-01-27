@@ -47,8 +47,12 @@ void Window::PollEvents() {
 }
 
 void Window::RequestClose() {
-    GKC_ENGINE_INFO("Requested close for: '{0}' [ID: {1}]", m_title, m_ID);
+    GKC_ENGINE_INFO("Requested close for: '{0}' [ID: {1}]", m_title, m_windowID);
     m_requestedClose = true;
+}
+
+bool Window::IsValid() {
+     return m_window != nullptr;
 }
 
 SDL_WindowFlags Window::TranslateSDLType(const Window_Type& type) {
@@ -87,11 +91,11 @@ void Window::SDL_WindowEventCheck(SDL_Event &e) {
     using namespace Galaktic::Core::Events;
     switch (e.type) {
         case SDL_EVENT_WINDOW_RESIZED: {
-            WindowResizeEvent event(e.window.data1, e.window.data2, e.window.windowID);
+            WindowResizeEvent event(e.window.data1, e.window.data2, m_windowID);
             m_callback(event); break;
         }
         case SDL_EVENT_WINDOW_CLOSE_REQUESTED: {
-            WindowCloseEvent event(e.window.windowID);
+            WindowCloseEvent event(m_windowID);
             m_callback(event); break;
         }
     }

@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,12 @@
 #pragma once
 #include <pch.hpp>
 #include <core/systems/gkc_system.h>
-
 #include "ecs/gkc_registry.h"
 
 typedef Uint32 EntityID;
+namespace Galaktic::Core::Helpers {
+    class ECS_Helper;
+}
 namespace Galaktic::Core::Events {
     class GKC_Event;
 }
@@ -42,7 +44,10 @@ namespace Galaktic::Core::Systems {
 }
 
 namespace Galaktic::Core::Managers {
+    class WindowManager;
     class ECS_Manager;
+    class TextureManager;
+    class AudioManager;
 }
 
 namespace Galaktic::Core {
@@ -60,14 +65,21 @@ namespace Galaktic::Core {
      * @class Scene
      * @brief Scene containing objects, texts, etc...
      */
-    class Scene  {
+    class Scene {
         public:
+            /**
+             * @param name Name of the scene
+             * @param device_information DeviceInformation instance
+             * @param path Path of the app
+             */
             Scene(const string& name, const DeviceInformation& device_information, const path& path);
 
             /**
              * @brief Runs the Scene.
              */
             void Run();
+
+            void Save();
 
             /**
              * @brief Executes all events using the engine's systems
@@ -86,18 +98,31 @@ namespace Galaktic::Core {
              */
             void Free() const;
 
-            ECS::Registry*& GetRegistry() { return m_registry; }
-            SceneInformation m_sceneInfo;
+            void CreateStaticObject(const string &name);
 
+            void CreatePhysicsObject(const string &name);
+
+            void CreateLightEntity(const string &name);
+
+            ECS::Registry*& GetRegistry() { return m_registry; }
+            Managers::ECS_Manager*& GetECSManager() { return m_ecsManager; }
+            SceneInformation m_sceneInfo;
         private:
             bool m_isRunning = true;
             shared_ptr<Render::Window> m_window;
-            Systems::System_List m_system_manager;
+            Systems::System_List m_systemList;
             ECS::Registry* m_registry = nullptr;
+            Managers::WindowManager* m_windowManager = nullptr;
             Managers::ECS_Manager* m_ecsManager = nullptr;
+            Helpers::ECS_Helper* m_ecsHelper = nullptr;
+            Managers::TextureManager* m_textureManager = nullptr;
+            Managers::AudioManager* m_audioManager = nullptr;
+            path m_appPath;
+            void CreatePlayer();
+            void CreateCamera(const string &name);
     };
 
-    typedef map<string, Scene> Scene_List;
+    typedef unordered_map<string, unique_ptr<Scene>> Scene_List;
 }
 
 
