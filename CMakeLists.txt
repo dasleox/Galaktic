@@ -8,9 +8,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" ON)
 
-# ===========================
-# Dependencies
-# ===========================
 find_package(Freetype REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
 find_package(SDL3_image CONFIG REQUIRED)
@@ -19,9 +16,6 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(SDL3_Mixer CONFIG REQUIRED)
 
-# ===========================
-# Engine
-# ===========================
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS src/*.cpp)
 if(NOT ENGINE_SOURCES)
     message(FATAL_ERROR "No sources were found for Galaktic!")
@@ -62,9 +56,6 @@ target_link_libraries(Galaktic
         SDL3_mixer::SDL3_mixer
 )
 
-# ===========================
-# Platform-specific
-# ===========================
 if(UNIX AND NOT APPLE AND NOT MINGW)
     target_link_libraries(Galaktic
             PUBLIC
@@ -74,9 +65,6 @@ if(UNIX AND NOT APPLE AND NOT MINGW)
     )
 endif()
 
-# ===========================
-# Sandbox
-# ===========================
 file(GLOB_RECURSE SANDBOX_SOURCES CONFIGURE_DEPENDS examples/sandbox/*.cpp)
 
 if(SANDBOX_SOURCES)
