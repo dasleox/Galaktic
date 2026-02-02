@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,7 @@ using EventCallback = function<void(Galaktic::Core::Events::GKC_Event&)>;
 namespace Galaktic::Render {
     /**
      * @enum Window_Type
+     * @brief Types of windows 
      */
     enum class Window_Type {
         Fullscreen,
@@ -102,8 +103,13 @@ namespace Galaktic::Render {
              * @brief Requests to close the current window
              */
             void RequestClose();
-
+            
+            /**
+             * @brief Checks if the window is valid
+             * @return true if the window is valid, false otherwise
+             */
             bool IsValid();
+
         private:
             string m_title;
             SDL_WindowID m_ID = 0;
@@ -116,7 +122,7 @@ namespace Galaktic::Render {
             EventCallback m_callback = nullptr;
             bool m_requestedClose = false;
             static bool m_isFullscreen;
-
+        private:
             /**
              * @brief Translates the Window_Type to an SDL_WindowFlags flag used to create an SDL_Window
              * @param type type of the window
@@ -146,6 +152,14 @@ namespace Galaktic::Render {
             void SDL_WindowEventCheck(SDL_Event& e);
     };
 }
-
+/**
+ * Helper macro to get the SDL_Renderer from a window
+ * @param window Pointer to the window
+ */
 #define GKC_GET_RENDERER(window) window->GetRenderer()
+
+/**
+ * Helper macro to get the SDL_Window from a window
+ * @param window Pointer to the window
+ */
 #define GKC_GET_WINDOW(window) window->GetWindow()

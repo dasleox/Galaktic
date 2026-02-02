@@ -126,5 +126,5 @@ void Filesystem::RefreshFolderContents(vector<string>& content, const path& fold
 }
 
 path Filesystem::GetFullPath() {
-    return current_path().string().c_str();
+    return current_path();
 }

@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@
 #include <pch.hpp>
 #include <core/systems/gkc_system.h>
 
-typedef Uint32 EntityID;
 namespace Galaktic::ECS {
     class Entity;
 }
@@ -34,6 +33,11 @@ namespace Galaktic::Core::Systems {
     /**
      * @class PhysicsSystem
      * @brief Manages the physics of entities that have physics components
+     * 
+     * Manages all physics of entities that have physics components, applying forces,
+     * integrating motion, and resolving collisions.
+     * A custom gravity can be applied to the whole scene, it will affect all entities
+     * inside the scene that have physics components.
      */
     class PhysicsSystem final : public BaseSystem {
         public:

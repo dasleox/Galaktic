@@ -1,13 +1,10 @@
 #include <audio/gkc_audio.h>
 #include <core/managers/gkc_audio_man.h>
-
 #include "core/gkc_logger.h"
 #include "filesys/gkc_filesys.h"
 
 using namespace Galaktic;
 using namespace Galaktic::Core;
-
-//@todo Refactor this system so it can be more customizable
 
 Managers::AudioManager::AudioManager(const path &folder) {
     m_audioSpec.channels = 2;
@@ -37,6 +34,12 @@ Managers::AudioManager::AudioManager(const path &folder) {
 void Managers::AudioManager::AddAudioFile(const path& path) {
     AudioID id = m_audioFiles.size() + 1;
     auto info = make_unique<Audio::AudioInfo>(id, make_unique<Audio::AudioFile>(path, m_mixer));
+
+    if(!info->audioFile_->IsValid() || info->id_ == 0) {
+        GKC_ENGINE_ERROR("Audio file is invalid!: {}", path.string());
+        return;
+    }
+
     auto [it, inserted] = m_audioFiles.emplace(Filesystem::GetFilename(path),
         std::move(info));
 
@@ -49,8 +52,9 @@ void Managers::AudioManager::AddAudioFile(const path& path) {
 void Managers::AudioManager::RemoveAudioFile(const string &name) {
     auto audioFile = m_audioFiles.find(name);
     if (audioFile != m_audioFiles.end()) {
+        StopAllTracksFromSound(name);
         m_audioFiles.erase(audioFile);
-        GKC_ENGINE_INFO("Erased {0}", name);
+        GKC_ENGINE_INFO("Erased audio file {0}", name);
     }
 }
 
@@ -96,6 +100,18 @@ void Managers::AudioManager::StopSound(const string &name, Sint64 fadeOutMs) {
         auto track = m_activeTracks.find(id)->second;
         if (track != nullptr) {
             MIX_StopTrack(track, fadeOutMs);
+        }
+    }
+}
+
+void Managers::AudioManager::StopAllTracksFromSound(const string &name, Sint64 fadeOutMs) {
+    auto it = m_audioFiles.find(name);
+    if (it != m_audioFiles.end()) {
+        auto id = it->second->id_;
+
+        auto [first, last] = m_activeTracks.equal_range(id);
+        for (auto& itTrack = first; itTrack != last; ++itTrack) {
+            StopSound(it->first, fadeOutMs);
         }
     }
 }

@@ -30,11 +30,50 @@ namespace Galaktic::Render {
 }
 
 namespace Galaktic::Core::Managers {
+    /**
+     * @class WindowManager
+     * 
+     * Manager for windows, responsible for creating, registering, and retrieving windows.
+     * All of the functions and list are static, an instance of this class is not needed.
+     * 
+     * When a window is registered, is assigned a unique GKC_WindowID that is increased by
+     * 1 for each new window created. However a limit of 256 windows is set, after which
+     * the manager will not allow any new windows to be created. 
+     * When a window is unregistered, its ID is freed along with its Window instance and the
+     * ID can be reused for a new window.
+     */
     class WindowManager {
         public:
+            /**
+             * @param title Title of the window
+             * @param width Width of the window
+             * @param height Height of the window
+             * @param type Type of the window
+             * @see Window_Type for types of windows that can be created
+             */
             static void CreateGKCWindow(const string& title, Uint32 width, Uint32 height, Render::Window_Type type);
+
+            /**
+             * Registers a window into the list, it is automatically assigned a GKC_WindowID
+             * a maximum of 256 windows can be created. Calling this function with more than
+             * 256 windows will not register the window.
+             * @param window shared_ptr Window
+             */
             static void RegisterWindow(shared_ptr<Render::Window> window);
+
+            /**
+             * Unregisters a window from the list, its resources are freed, the destructor
+             * of Window is automatically called when erased from the list.
+             * @param id GKC_WindowID 
+             */
             static void UnregisterWindow(GKC_WindowID id);
+
+            /**
+             * Retrieves a window from the list using its ID, if the window is not found,
+             * A warning is emitted and nullptr is returned.
+             * @param id GKC_WindowID
+             * @return shared_ptr Window associated with the given GKC_WindowID, nullptr if not found
+             */
             static shared_ptr<Render::Window> GetWindow(GKC_WindowID id);
 
             static unordered_map<GKC_WindowID, shared_ptr<Render::Window>>& GetWindowList() {

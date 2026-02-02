@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,20 +24,28 @@
 #pragma once
 #include <pch.hpp>
 
-typedef Uint32 TextureID;
 namespace Galaktic::Render {
     struct TextureInfo;
     class Texture;
     typedef unordered_map<string, unique_ptr<TextureInfo>> Texture_List;
+    typedef unordered_map<TextureID, string> TextureID_List;
+}
+
+namespace Galaktic::ECS { 
+    class Entity;
+    typedef unordered_map<EntityID, Entity> Entity_List;
 }
 
 namespace Galaktic::Core::Managers {
-
     /**
     * @class TextureManager
-    * @brief Manages all textures inside a specified folder
-    * @note This class manages all textures inside a folder recursively
-    * @note Multiples instances are allowed :)
+    * Manages all textures inside a specified folder, all files that are not situable
+    * for textures are automatically ignored. The textures are put inside
+    * the texture list an can be accessed statically from anywhere in the engine.
+    * However, a previous initialization of this manager is required.
+    * 
+    * Textures are stored in the list with their filename (extension included: e.g. texture.png)
+    * as a key and the value stored inside a TextureInfo struct.
     */
     class TextureManager {
         public:
@@ -52,7 +60,7 @@ namespace Galaktic::Core::Managers {
              * @param path path to the texture (relative or full)
              * @param renderer SDL_Renderer
              */
-            void AddTexture(const path &path, SDL_Renderer *renderer);
+            static void AddTexture(const path &path, SDL_Renderer *renderer);
 
             /**
              * @brief Deletes the texture on the list
@@ -60,7 +68,7 @@ namespace Galaktic::Core::Managers {
              * @note The input SHOULD be the key of the list, not the path as seen here,
              *       this is a string not a path ;)
              */
-            void DeleteTexture(const string &name);
+            static void DeleteTexture(const string &name);
 
             /**
              * @brief Gets a pointer to the texture in the list
@@ -69,11 +77,26 @@ namespace Galaktic::Core::Managers {
              * @note The input SHOULD be the key of the list, not the path as seen here
              *       this is a string not a path ;)
              */
-            Render::Texture* GetTexture(const string &name);
-            Render::Texture_List& GetTextureList() { return m_textureList; }
+            static Render::Texture* GetTexture(const string &name);
 
-            void PrintList() const;
+            /**
+             * Gets a pointer to the texture in the list, if the texture doesn't
+             * exist in the list it returns nullptr
+             * @param id The ID of the texture
+             * @return Pointer to the Texture if it exists, nullptr otherwise
+             */
+            static Render::Texture* GetTexture(TextureID id);
+
+            /**
+             * Prints the list of all texture files with their filenames,
+             * ID's and address in memory
+             */
+            static void PrintList();
+
+            static Render::Texture_List& GetTextureList() { return m_textureList; }
+            static Render::TextureID_List& GetIDTextureList() { return m_IDToNameList; } 
         private:
-            Render::Texture_List m_textureList;
+            static Render::Texture_List m_textureList;
+            static Render::TextureID_List m_IDToNameList;
     };
 }

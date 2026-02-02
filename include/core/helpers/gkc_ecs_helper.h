@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,6 @@
 namespace Galaktic::ECS {
     class Entity;
 }
-namespace Galaktic::Core::Managers {
-    class ECS_Manager;
-}
 
 
 namespace Galaktic::Core::Helpers {
@@ -39,8 +36,8 @@ namespace Galaktic::Core::Helpers {
      * @class ECS_Helper
      * @brief Helper to create entities directly without any overheads for the editor/user
      *
-     * Highest layer of the ECS System, it creates entities using an entity manager, it
-     * requires a previous registry and a component pool to work
+     * Highest layer of the ECS System, it creates entities using an \c ECS_Manager reference, it
+     * requires a previous \c Registry instance to work properly
      */
     class ECS_Helper {
         public:
@@ -52,7 +49,6 @@ namespace Galaktic::Core::Helpers {
             /**
              * @brief Creates a player entity with default properties
              * @param name Name of the player
-             * @note This function does not support multiplayer
              */
             void CreatePlayer(const string& name);
 
@@ -104,6 +100,11 @@ namespace Galaktic::Core::Helpers {
                 }
             }
 
+            /**
+             * @brief Gets an entity by name
+             * @param name Entity's name
+             * @return A reference to the entity given
+             */
             [[nodiscard]] ECS::Entity& GetEntityByName(const string& name) const;
         private:
             Managers::ECS_Manager& m_ecsManager;

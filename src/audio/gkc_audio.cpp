@@ -8,12 +8,12 @@ using namespace Galaktic;
 Audio::AudioFile::AudioFile(const path &filepath, MIX_Mixer* mixer) {
     GKC_ENGINE_INFO("Loading {0}...", filepath.string());
     if (filepath.empty() || !Filesystem::CheckFile(filepath)) {
-        GKC_THROW_EXCEPTION(Debug::AudioException, "given path doesn't exists!");
+        GKC_ENGINE_ERROR("given path doesn't exists!");
     }
 
     m_audio = MIX_LoadAudio(mixer, filepath.string().c_str(), true);
     if (m_audio == nullptr) {
-        GKC_THROW_EXCEPTION(Debug::AudioException, "failed to load audio!");
+        GKC_ENGINE_ERROR("failed to load audio!");
     }
 }
 

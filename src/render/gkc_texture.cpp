@@ -8,12 +8,12 @@ using namespace Galaktic::Render;
 Texture::Texture(const path &path, SDL_Renderer* renderer) {
     GKC_ENGINE_INFO("Loading {0}...", path.string());
     if (path.empty() || !Filesystem::CheckFile(path)) {
-        GKC_THROW_EXCEPTION(Debug::RenderException, "given path doesn't exists!");
+        GKC_ENGINE_ERROR( "given path doesn't exists!");
     }
 
     m_texture = IMG_LoadTexture(renderer, path.string().c_str());
     if (m_texture == nullptr) {
-        GKC_THROW_EXCEPTION(Debug::RenderException, "failed to load texture!");
+        GKC_ENGINE_ERROR("failed to load texture!");
     }
 }
 

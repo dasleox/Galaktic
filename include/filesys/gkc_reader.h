@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,6 @@
 namespace Galaktic::Core::Managers {
     class ECS_Manager;
 }
-
 namespace Galaktic::Core {
     class Scene;
 }
@@ -40,6 +39,10 @@ namespace Galaktic::Filesystem {
     /**
     * @class FileReader
     * @brief Provides utility functions for reading various data types and engine objects from files.
+    * 
+    * @attention Many versions of reading or writing functions may be incompatible with different
+    * verions of Galaktic. Please ensure that the version of the engine used to read a scene
+    * matches the version used to write it.
     */
     class FileReader {
         public:
@@ -60,10 +63,35 @@ namespace Galaktic::Filesystem {
             static void Read(ifstream& file, T& value) {
                 file.read(reinterpret_cast<char*>(&value), sizeof(T));
             }
-
+            
+            /**
+             * Reads an entity from a input file stream, adding its components to the provided
+             * ECS_Manager and Registry. No checks are made to verify the integrity of the data,
+             * if a scene has been tampered with, it may lead to crashes or undefined behavior.
+             * 
+             * @attention Many versions of reading or writing functions may be incompatible with different
+             * verions of Galaktic. Please ensure that the version of the engine used to read a scene
+             * matches the version used to write it.
+             * @param file File stream to read from
+             * @param manager ECS_Manager
+             * @param registry Registry (ECS)
+             */
             static void ReadEntity(ifstream& file, Core::Managers::ECS_Manager& manager,
                 ECS::Registry* registry);
 
+            /**
+             * Reads the scene from a file path, adding its entities and components to the provided
+             * ECS_Manager and Registry. No checks are made to verify the integrity of the data,
+             * if a scene has been tampered with, it may lead to crashes or undefined behavior.
+             * 
+             * @attention Many versions of reading or writing functions may be incompatible with different
+             * verions of Galaktic. Please ensure that the version of the engine used to read a scene
+             * matches the version used to write it.
+             * @param path Path to the scene file (.gkscene)
+             * @param manager ECS_Manager
+             * @param registry Registry (ECS)
+             * @param scene Scene reference to read data into
+             */
             static void ReadScene(const path& path, Core::Managers::ECS_Manager& manager,
                 ECS::Registry* registry, Core::Scene& scene);
     };

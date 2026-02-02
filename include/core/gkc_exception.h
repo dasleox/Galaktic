@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,14 @@
 #include <pch.hpp>
 
 namespace Galaktic::Debug {
+
+    /**
+     * @class GalakticException
+     * @brief Base class for all Galaktic exceptions
+     * 
+     * Stores message, file, function and line number information, all
+     * specific excpetions can be inherited from this class.
+     */
     class GalakticException : public std::exception {
         public:
             GalakticException(const string& message, const string& file,

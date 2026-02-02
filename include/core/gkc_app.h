@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -33,16 +33,27 @@ namespace Galaktic::Core {
     /**
      * @brief Main application class that initializes and runs the application.
      * @class App
+     * 
+     * This class is responsible for setting up the application environment,
+     * managing scenes inside the project folder, and handling device information.
+     * A SceneManager instance is created to manage scenes within the application,
+     * can be accsessed using \c GetSceneManager()..
+     * 
+     * @see gkc_scene_man.h for more information about SceneManager.
      */
     class App {
         public:
+            /**
+             * @param project_path Project folder path
+             * @param title Title of the app
+             */
             App(const path& project_path, const string& title);
 
             Managers::SceneManager*& GetSceneManager() { return m_sceneManager; }
         private:
             Managers::SceneManager* m_sceneManager; // Scene Manager
-            DeviceInformation m_deviceInfo;     // Device Info
-            string m_appName;                   // App name
+            DeviceInformation m_deviceInfo;         // Device Info
+            string m_appName;                       // App name
 
             /**
              * @brief Get the screen information and set the width and height of the built window

@@ -1,0 +1,176 @@
+[
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -x c++-header -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -o CMakeFiles\\Galaktic.dir\\cmake_pch.hxx.gch -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\build\\CMakeFiles\\Galaktic.dir\\cmake_pch.hxx.cxx",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx.cxx",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx.gch"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\audio\\gkc_audio.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\audio\\gkc_audio.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\audio\\gkc_audio.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/audio/gkc_audio.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/audio/gkc_audio.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\gkc_app.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\gkc_app.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\gkc_app.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/gkc_app.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/gkc_app.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\gkc_clock.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\gkc_clock.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\gkc_clock.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/gkc_clock.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/gkc_clock.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\gkc_debugger.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\gkc_debugger.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\gkc_debugger.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/gkc_debugger.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/gkc_debugger.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\gkc_exception.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\gkc_exception.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\gkc_exception.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/gkc_exception.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/gkc_exception.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\gkc_logger.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\gkc_logger.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\gkc_logger.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/gkc_logger.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/gkc_logger.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\gkc_scene.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\gkc_scene.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\gkc_scene.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/gkc_scene.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/gkc_scene.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\helpers\\gkc_ecs_helper.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\helpers\\gkc_ecs_helper.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\helpers\\gkc_ecs_helper.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/helpers/gkc_ecs_helper.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/helpers/gkc_ecs_helper.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\managers\\gkc_audio_man.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\managers\\gkc_audio_man.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\managers\\gkc_audio_man.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/managers/gkc_audio_man.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/managers/gkc_audio_man.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\managers\\gkc_scene_man.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\managers\\gkc_scene_man.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\managers\\gkc_scene_man.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/managers/gkc_scene_man.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/managers/gkc_scene_man.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\managers\\gkc_texture_man.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\managers\\gkc_texture_man.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\managers\\gkc_texture_man.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/managers/gkc_texture_man.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/managers/gkc_texture_man.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\managers\\gkc_window_man.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\managers\\gkc_window_man.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\managers\\gkc_window_man.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/managers/gkc_window_man.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/managers/gkc_window_man.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_camera_system.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_camera_system.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\systems\\gkc_camera_system.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/systems/gkc_camera_system.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/systems/gkc_camera_system.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_ecs_event_system.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_ecs_event_system.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\systems\\gkc_ecs_event_system.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/systems/gkc_ecs_event_system.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/systems/gkc_ecs_event_system.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_key.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_key.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\systems\\gkc_key.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/systems/gkc_key.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/systems/gkc_key.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_mouse_system.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_mouse_system.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\systems\\gkc_mouse_system.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/systems/gkc_mouse_system.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/systems/gkc_mouse_system.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_movement_system.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_movement_system.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\systems\\gkc_movement_system.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/systems/gkc_movement_system.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/systems/gkc_movement_system.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_physics_system.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_physics_system.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\systems\\gkc_physics_system.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/systems/gkc_physics_system.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/systems/gkc_physics_system.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_ui_system.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_ui_system.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\systems\\gkc_ui_system.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/systems/gkc_ui_system.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/systems/gkc_ui_system.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_window_system.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\core\\systems\\gkc_window_system.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\core\\systems\\gkc_window_system.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/core/systems/gkc_window_system.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/core/systems/gkc_window_system.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\ecs\\gkc_component_registry.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\ecs\\gkc_component_registry.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\ecs\\gkc_component_registry.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/ecs/gkc_component_registry.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/ecs/gkc_component_registry.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\filesys\\gkc_filesys.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\filesys\\gkc_filesys.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\filesys\\gkc_filesys.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/filesys/gkc_filesys.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/filesys/gkc_filesys.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\filesys\\gkc_reader.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\filesys\\gkc_reader.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\filesys\\gkc_reader.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/filesys/gkc_reader.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/filesys/gkc_reader.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\filesys\\gkc_writer.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\filesys\\gkc_writer.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\filesys\\gkc_writer.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/filesys/gkc_writer.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/filesys/gkc_writer.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\render\\gkc_drawer.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\render\\gkc_drawer.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\render\\gkc_drawer.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/render/gkc_drawer.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/render/gkc_drawer.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\render\\gkc_texture.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\render\\gkc_texture.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\render\\gkc_texture.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/render/gkc_texture.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/render/gkc_texture.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DGalaktic_EXPORTS -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -Winvalid-pch -include C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/cmake_pch.hxx -fmodules-ts -fmodule-mapper=CMakeFiles\\Galaktic.dir\\src\\render\\gkc_window.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\Galaktic.dir\\src\\render\\gkc_window.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\src\\render\\gkc_window.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/src/render/gkc_window.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/Galaktic.dir/src/render/gkc_window.cpp.obj"
+},
+{
+  "directory": "C:/Users/ronsa/Desktop/C++/Galaktic/build",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DGKC_DEBUG=1 -DGKC_ENABLE_ASSERTS=1 -DGKC_EVENT_DEBUG=1 -DGKC_PRINT_ADDRESSES=1 -DGKC_PRINT_TEXTURE_ADDED=1 -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSPDLOG_SHARED_LIB -IC:/Users/ronsa/Desktop/C++/Galaktic/include -isystem C:/Users/ronsa/Desktop/C++/Galaktic/libs/SDL_mixer/include -g -std=c++20 -Wextra -fmodules-ts -fmodule-mapper=CMakeFiles\\GalakticSandbox.dir\\examples\\sandbox\\main.cpp.obj.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles\\GalakticSandbox.dir\\examples\\sandbox\\main.cpp.obj -c C:\\Users\\ronsa\\Desktop\\C++\\Galaktic\\examples\\sandbox\\main.cpp",
+  "file": "C:/Users/ronsa/Desktop/C++/Galaktic/examples/sandbox/main.cpp",
+  "output": "C:/Users/ronsa/Desktop/C++/Galaktic/build/CMakeFiles/GalakticSandbox.dir/examples/sandbox/main.cpp.obj"
+}
+]

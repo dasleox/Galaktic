@@ -1,6 +1,5 @@
 #include <core/managers/gkc_scene_man.h>
 #include <filesys/gkc_filesys.h>
-
 #include "core/gkc_logger.h"
 #include "core/gkc_scene.h"
 #include "filesys/gkc_reader.h"
@@ -12,6 +11,14 @@ Managers::SceneManager::SceneManager(const path &folder, const DeviceInformation
 
 void Managers::SceneManager::CreateScene(const string &name) {
     m_sceneList.emplace(name, make_unique<Scene>(name, m_deviceInfo, m_folder));
+}
+
+void Managers::SceneManager::DeleteScene(const string &name) {
+    auto it = m_sceneList.find(name);
+    if (it != m_sceneList.end()) {
+        it->second->Close();
+        m_sceneList.erase(it);
+    }
 }
 
 void Managers::SceneManager::LoadSpecificScene(const string &name) const {
@@ -40,6 +47,7 @@ unique_ptr<Scene> Managers::SceneManager::GetScene(const string &name) {
     if (it != m_sceneList.end()) {
         return std::move(it->second);
     }
+    GKC_ENGINE_WARNING("Scene not found!");
     return nullptr;
 }
 

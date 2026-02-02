@@ -42,7 +42,9 @@ void Managers::WindowManager::UnregisterWindow(GKC_WindowID id) {
 }
 
 shared_ptr<Galaktic::Render::Window> Managers::WindowManager::GetWindow(GKC_WindowID id) {
-    if (m_windowList.contains(id))
+    if (m_windowList.contains(id)) {
         return m_windowList[id];
+    }
+    GKC_ENGINE_WARNING("Window with ID: {0} not found!", id);
     return nullptr;
 }

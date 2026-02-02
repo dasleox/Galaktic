@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 namespace Galaktic::Debug {
     /**
      * @struct DebugInformation
-     * @brief Saves all the debug information, shows when pressing F3
+     * @brief Saves all the debug information used by the console
      */
     struct DebugInformation {
         size_t ram_usage_;
@@ -41,6 +41,7 @@ namespace Galaktic::Debug {
         DebugInformation();
     };
 
+    /// @todo Remake this class to be an actual console and not a logger :v
     /**
      * @class Console
      * @brief Shows the debug information in the current scene
@@ -57,6 +58,7 @@ namespace Galaktic::Debug {
              * @deprecated This function was used in early versions to test spdlog formatting
              */
             static void CallSimpleConsole();
+            
             static DebugInformation*& GetDebugInformation() { return m_info; }
             static bool& GetIsActive() { return m_isActive; }
             static void SetRenderer(SDL_Renderer* renderer) { m_renderer = renderer; }

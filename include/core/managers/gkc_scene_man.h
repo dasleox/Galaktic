@@ -1,5 +1,5 @@
 /*
-Galaktic Engine
+  Galaktic Engine
   Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,20 +29,53 @@ namespace Galaktic::Core {
 }
 
 namespace Galaktic::Core::Managers {
-
+    /**
+     * @brief Manages all scenes
+     *
+     * Manages all scenes inside a list and associated folder (application/project)
+     * folder, a DeviceInfo instance is required to initialize scenes, this class
+     * can create, delete, and load scenes from files using a file format
+     * with the extension .gkscene
+     */
     class SceneManager {
         public:
             SceneManager(const path& folder, const DeviceInformation& info);
 
+            /**
+             * Creates a scene with the passed name
+             * @param name scene's name
+             */
             void CreateScene(const string& name);
+
+            /**
+             * Deletes a scene with the passed name
+             * @param name scene's name
+             */
+            void DeleteScene(const string& name);
+
+            /**
+             * Loads a specific scene by its name inside the list,
+             * and runs it
+             * @param name 
+             */
             void LoadSpecificScene(const string& name) const;
+
+            /**
+             * Loads a specific scene from a file (.gkscene), if the file
+             * is loaded correctly, it is added to the scene list.
+             * @param filepath 
+             */
             void LoadSpecificSceneFromFile(const path& filepath);
 
+            /**
+             * Gets the scene pointer if it exists on the list
+             * @param name 
+             * @return unique_ptr<Scene> if the scene exists, nullptr otherwise
+             */
             unique_ptr<Scene> GetScene(const string& name);
         private:
             DeviceInformation m_deviceInfo;
             path m_folder;
             unordered_map<string, unique_ptr<Scene>> m_sceneList;
     };
-
-} // namespace Galaktic::Core::Managers
+}

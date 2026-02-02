@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,6 @@
 #pragma once
 #include <pch.hpp>
 #include "core/gkc_exception.h"
-
-typedef Uint32 TextureID;
-typedef Uint32 ComponentTypeID;
 
 namespace Galaktic::ECS {
     struct TransformComponent {
@@ -99,7 +96,7 @@ namespace Galaktic::ECS {
         EntityID entityToFollowID_ = InvalidEntity;
         float zoom_ = 1.f;
         float smoothing_ = 3.f;
-        bool active_ = false;
+        bool isActive_ = false;
     };
 
     struct TextureComponent {
@@ -120,7 +117,7 @@ namespace Galaktic::ECS {
         bool isTag_;
         bool isPOD_;
 
-        // Modifiable Lambdas
+        // Modifiable Lambdas for writing/reading/size
         size_t (*size_func) (const std::any&);
         void (*serialize)(const std::any&, ofstream&);
         void (*deserialize)(std::any&, ifstream&);

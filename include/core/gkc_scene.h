@@ -26,7 +26,6 @@
 #include <core/systems/gkc_system.h>
 #include "ecs/gkc_registry.h"
 
-typedef Uint32 EntityID;
 namespace Galaktic::Core::Helpers {
     class ECS_Helper;
 }
@@ -35,6 +34,7 @@ namespace Galaktic::Core::Events {
 }
 namespace Galaktic::ECS {
     class Entity;
+    typedef unordered_map<EntityID, Entity> Entity_List;
 }
 namespace Galaktic::Render {
     class Window;
@@ -42,7 +42,6 @@ namespace Galaktic::Render {
 namespace Galaktic::Core::Systems {
     typedef unordered_map<string, shared_ptr<BaseSystem>> System_List;
 }
-
 namespace Galaktic::Core::Managers {
     class WindowManager;
     class ECS_Manager;
@@ -88,21 +87,49 @@ namespace Galaktic::Core {
             void OnEvent(Events::GKC_Event& event);
 
             /**
-             * @brief Close the current scene
-             * @param is_running Bool scene running
+             * @brief Closes the current scene
              */
-            void Close(bool& is_running) const;
+            void Close();
 
             /**
              * @brief Free all the resources from the scene
              */
             void Free() const;
 
+            /**
+             * @brief Create a Static Object object
+             * @param name Entity's name
+             */
             void CreateStaticObject(const string &name);
 
+            /**
+             * @brief Create a Physics Object object
+             * @param name Entity's name
+             */
             void CreatePhysicsObject(const string &name);
 
+            /**
+             * @brief Create a Light Entity object
+             * @param name Entity's name
+             */
             void CreateLightEntity(const string &name);
+
+            /**
+             * @brief Copy an entity list into the scene's entity list
+             * @param list Entity_List to copy from
+             */
+            void CopyEntityList(ECS::Entity_List list);
+
+            /**
+             * @brief Create a Player entity
+             */
+            void CreatePlayer();
+            
+            /**
+             * @brief Create a Camera entity
+             * @param name Entity's name
+             */
+            void CreateCamera(const string &name);
 
             ECS::Registry*& GetRegistry() { return m_registry; }
             Managers::ECS_Manager*& GetECSManager() { return m_ecsManager; }
@@ -118,12 +145,8 @@ namespace Galaktic::Core {
             Managers::TextureManager* m_textureManager = nullptr;
             Managers::AudioManager* m_audioManager = nullptr;
             path m_appPath;
-            void CreatePlayer();
-            void CreateCamera(const string &name);
+            
     };
 
     typedef unordered_map<string, unique_ptr<Scene>> Scene_List;
 }
-
-
-#define GKC_GSCENE_STRING(name) (name + ".gscene")

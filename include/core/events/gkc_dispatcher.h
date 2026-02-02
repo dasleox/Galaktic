@@ -31,8 +31,8 @@ namespace Galaktic::Core::Events {
      * @brief Dispatch events
      *
      * \c GKC_EventDispatcher is initialized by passing a reference to an event
-     * and for dispatching a \c std::function with a boolean return value, true
-     * if the event was handled, false otherwise.
+     * and for dispatching a \n \c std::function with a boolean return value is used,
+     * returns true if the event was handled, false otherwise.
      *
      * This class dispatches events on the go and doesn't have any 'queue' style
      * for dispatch.
@@ -42,7 +42,7 @@ namespace Galaktic::Core::Events {
             /**
              * @param event GKC_Event
              */
-            explicit GKC_EventDispatcher(GKC_Event& event) : m_event(event) {};
+            explicit GKC_EventDispatcher(GKC_Event& event) : m_event(event) {}
 
             /**
              * @brief Dispatch events and check if they were handled

@@ -26,8 +26,8 @@
 
 namespace Galaktic::Audio {
     /**
-     * @brief Stores a MIX_Audio and initializes it by providing a path to the sound file
      * @class AudioFile
+     * @brief Stores a \c MIX_Audio and initializes it by providing a path to the sound file
      */
     class AudioFile {
         public:
@@ -60,6 +60,10 @@ namespace Galaktic::Audio {
         unique_ptr<AudioFile> audioFile_;
     };
 
+    /**
+     * @brief Type for saving the filename <b>(includes extension, e.g: file.mp3) </b> and
+     *        a unique_ptr to an \c AudioInfo struct
+     */
     typedef unordered_map<string, unique_ptr<AudioInfo>> Audio_List;
 
     /**

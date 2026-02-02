@@ -47,6 +47,10 @@
         return GKC_EventCategory::category;         \
     }
 
+namespace Galaktic::Core {
+    class Scene;
+}
+
 namespace Galaktic::Core::Events {
     /**
      * @enum GKC_EventType
@@ -62,7 +66,8 @@ namespace Galaktic::Core::Events {
         MouseClick,
         WindowResize,
         WindowClose,
-        WindowMinimized
+        WindowMinimized,
+        ObjectCreated, EntityCreated, EntityDeleted, EntityModified
     };
 
     /**
@@ -207,6 +212,48 @@ namespace Galaktic::Core::Events {
             [[nodiscard]] GKC_WindowID GetWindowID() const { return m_ID; }
         private:
             GKC_WindowID m_ID;
+    };
+}
+
+
+// ###################################
+// ### Entity Events
+// ###################################
+namespace Galaktic::Core::Events {
+    class EntityCreatedEvent final : public GKC_Event {
+        public:
+            explicit EntityCreatedEvent(const string& name, const type_index& type) :
+                m_name(name), m_type(type) {}
+            GKC_WRITE_EVENT_FUNCS(EntityCreated, "EntityCreated", Application);
+            [[nodiscard]] string& GetEntityName() { return m_name; }
+            [[nodiscard]] type_index GetEntityType() { return m_type; }
+        private:
+            string m_name;
+            type_index m_type;
+    };
+
+    class EntityModifiedEvent final : public GKC_Event {
+        public:
+            explicit EntityModifiedEvent(EntityID id, const type_index& type, any&& comp) :
+                m_id(id), m_type(type), m_comp(comp) {}
+            GKC_WRITE_EVENT_FUNCS(EntityModified, "EntityModified", Application);
+            [[nodiscard]] EntityID GetEntityID() { return m_id; }
+            [[nodiscard]] type_index GetEntityType() { return m_type; }
+            [[nodiscard]] any GetEntityComponent() { return m_comp; }
+        private:
+            EntityID m_id;
+            type_index m_type;
+            any& m_comp;
+    };
+
+
+    class EntityDestroyedEvent final : public GKC_Event {
+        public:
+            explicit EntityDestroyedEvent(EntityID id) : m_id(id) {}
+            GKC_WRITE_EVENT_FUNCS(EntityDeleted, "EntityDeleted", Application);
+            [[nodiscard]] EntityID GetEntityID() { return m_id; }
+        private:
+            EntityID m_id;
     };
 }
 

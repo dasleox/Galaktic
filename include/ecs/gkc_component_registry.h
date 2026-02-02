@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -25,23 +25,11 @@
 #include <pch.hpp>
 #include <ecs/gkc_components.h>
 #include <core/gkc_logger.h>
+#include "ecs/gkc_template_traits.h"
 
 typedef Uint32 ComponentTypeID;
 
 namespace Galaktic::ECS {
-    template<typename T>
-    constexpr bool IsTag = false;
-    template<> constexpr bool IsTag<ECS::PlayerTag> = true;
-    template<> constexpr bool IsTag<ECS::StaticObjectTag> = true;
-    template<> constexpr bool IsTag<ECS::PhysicsObjectTag> = true;
-    template<> constexpr bool IsTag<ECS::CameraTag> = true;
-    template<> constexpr bool IsTag<ECS::LightTag> = true;
-    template<> constexpr bool IsTag<ECS::EnemyTag> = true;
-
-    template<typename Y>
-    constexpr bool IsNonPOD = false;
-    template<> constexpr bool IsNonPOD<ECS::NameComponent> = true;
-
 
     /**
      * @class ComponentRegistry
@@ -60,7 +48,7 @@ namespace Galaktic::ECS {
              *
              * Wraps a component of template type Component, its defined a type_index,
              * the size of the actual Component, the entity's id which is from,
-             * and if the entity is an POD/Tag and defined the lambdas for serializing
+             * and if the entity is an POD/Tag and defines the lambdas for serializing
              * and deserializing and then emplaced in the component type's map of this
              * class
              * @tparam Component Component Type

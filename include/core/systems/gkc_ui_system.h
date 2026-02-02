@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,8 @@
 #pragma once
 #include <core/systems/gkc_system.h>
 #include "gkc_key.h"
+
+/// @todo Comment and document this file
 
 namespace Galaktic::Core::Systems {
     /**

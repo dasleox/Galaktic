@@ -23,38 +23,20 @@
 
 #pragma once
 #include <pch.hpp>
-#include <core/systems/gkc_system.h>
+#include <ecs/gkc_components.h>
 
 namespace Galaktic::ECS {
-    class Entity;
-    typedef unordered_map<EntityID, Entity> Entity_List;
-}
+    template<typename T>
+    inline constexpr bool IsTag = false;
+    template<> inline constexpr bool IsTag<ECS::PlayerTag> = true;
+    template<> inline constexpr bool IsTag<ECS::StaticObjectTag> = true;
+    template<> inline constexpr bool IsTag<ECS::PhysicsObjectTag> = true;
+    template<> inline constexpr bool IsTag<ECS::CameraTag> = true;
+    template<> inline constexpr bool IsTag<ECS::LightTag> = true;
+    template<> inline constexpr bool IsTag<ECS::EnemyTag> = true;
 
-namespace Galaktic::Core::Systems {
-    class KeySystem;
+    template<typename Y>
+    inline constexpr bool IsNonPOD = false;
+    template<> inline constexpr bool IsNonPOD<ECS::NameComponent> = true;
 
-    /**
-     * @class MovementSystem
-     * 
-     * Manages player movement based on key inputs, updating entity positions accordingly.
-     * A KeySystem reference is required to check for key states.
-     */
-    class MovementSystem final : public BaseSystem {
-        public:
-            /**
-             * @param system Reference to KeySystem for input handling
-             */
-            explicit MovementSystem(KeySystem& system) : m_keySystem(system) {}
-
-            /// @todo Implement diagonal movement normalization
-            /// @todo Make a configurable system for key bindings
-            /**
-             * Updates the entities movement using delta time, with WASD keys for navigation.
-             * @param list List of entities
-             * @param dt Delta time
-             */
-            void Update(const ECS::Entity_List& list, float dt) override;
-        private:
-            KeySystem& m_keySystem;
-    };
 }

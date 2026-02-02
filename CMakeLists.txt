@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 4.0)
-project(Galaktic VERSION 0.1.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.28)
+project(Galaktic VERSION 0.2.0 LANGUAGES CXX)
 
-set(CMAKE_PREFIX_PATH "C:/msys64/mingw64" ${CMAKE_PREFIX_PATH})
-set(CMAKE_CXX_STANDARD 23)
+list(APPEND CMAKE_PREFIX_PATH "C:/msys64/mingw64")
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" ON)
 
@@ -40,7 +41,6 @@ target_compile_definitions(Galaktic
 target_compile_options(Galaktic
         PUBLIC
             -Wextra
-            -Wconversion
 )
 
 target_precompile_headers(Galaktic PRIVATE include/pch.hpp)

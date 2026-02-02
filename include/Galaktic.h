@@ -21,7 +21,7 @@
 #include <core/systems/gkc_ui_system.h>
 #include <core/systems/gkc_camera_system.h>
 #include <core/systems/gkc_movement_system.h>
-
+#include <core/systems/gkc_ecs_event_system.h>
 
 #include <core/gkc_app.h>
 #include <core/gkc_debugger.h>

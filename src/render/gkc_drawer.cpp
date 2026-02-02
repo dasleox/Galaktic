@@ -1,8 +1,10 @@
 #include <render/gkc_drawer.h>
 #include "core/gkc_logger.h"
+#include "core/managers/gkc_texture_man.h"
 #include "core/systems/gkc_camera_system.h"
 #include "ecs/gkc_components.h"
 #include "ecs/gkc_entity.h"
+#include "render/gkc_texture.h"
 
 using namespace Galaktic::Render;
 
@@ -13,6 +15,7 @@ namespace {
 void Drawer::DrawEntities(const ECS::Entity_List& list, SDL_Renderer *renderer,
     Core::Systems::CameraSystem& cameraSystem)
 {
+    using namespace Core::Managers;
     auto& camera = cameraSystem.GetActiveCamera().Get<ECS::CameraComponent>();
 
     for (auto entity : list) {
@@ -40,7 +43,20 @@ void Drawer::DrawEntities(const ECS::Entity_List& list, SDL_Renderer *renderer,
         // @TODO make a class to automatically assign the entities a texture by ID
         if (entity.second.Has<ECS::TextureComponent>()) {
             auto& texture = entity.second.Get<ECS::TextureComponent>();
-            SDL_RenderTexture(renderer, NULL, NULL ,&rect);
+            auto sdlTexture = TextureManager::GetTexture(texture.id_)->GetSDLTexture();
+            auto& textureName = TextureManager::GetIDTextureList().find(texture.id_)->second;
+
+            // If the texture doesn't exist, log an error and display color instead
+            if (sdlTexture == nullptr) {
+                if (!checkedEntities.contains(entity.first) ) {
+                    GKC_ENGINE_ERROR("('{0}' ID: {1}) has an invalid texture: '{2}'",
+                    name, entity.first, textureName);
+                    SDL_RenderTexture(renderer, NULL, NULL ,&rect);
+                    continue;
+                }
+            }
+
+            SDL_RenderTexture(renderer, sdlTexture, NULL ,&rect);
         }
 
         // Color Rendering

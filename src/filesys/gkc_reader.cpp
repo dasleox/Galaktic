@@ -34,7 +34,7 @@ void Filesystem::FileReader::ReadEntity(ifstream &file, Core::Managers::ECS_Mana
     Read(file, id);
 
     Entity entity(id, registry); entity.SetID(id);
-    manager.CreateEmptyEntity(id, entity);
+    manager.AddEmptyEntity(id, entity);
     registry->ForEachRegisteredComponent([&](const ComponentTypeInfo& info) {
         if (info.isTag_) {
             manager.AddTagByType(id, info.type_);
@@ -66,11 +66,11 @@ void Filesystem::FileReader::ReadScene(const path& path, Core::Managers::ECS_Man
     file.read(GKC_READ_BINARY(sceneSize), sizeof(sceneSize));
     Read(file, version);
     if (version != GKC_VERSION_SCENE) {
-        if (version > GKC_VERSION_SCENE) {
+        if (version < GKC_VERSION_SCENE) {
             GKC_ENGINE_ERROR("This scene cannot be read by this function, use a newer version");
             return;
         }
-        if (version < GKC_VERSION_SCENE) {
+        if (version > GKC_VERSION_SCENE) {
             GKC_ENGINE_ERROR("This scene cannot be read by this function, use an older version");
             return;
         }
@@ -115,5 +115,5 @@ void Filesystem::FileReader::ReadScene(const path& path, Core::Managers::ECS_Man
     }
 
     file.close();
-    GKC_ENGINE_INFO("'{}' scene was read successfully!", sceneName);
+    GKC_ENGINE_INFO("'{}' scene was read successfully!", scene.m_sceneInfo.scene_name_);
 }

@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,7 @@
 #include <iostream>
 #include <filesystem>
 #include <typeindex>
+#include <any>
 
 // Operating System Detection
 
@@ -56,6 +57,15 @@
 #define GKC_ARCH "x64"
 #endif
 
+
+#define GKC_RELEASE_ASSERT(_Expression, msg)        \
+    do {                                            \
+        if (!(_Expression)) {                       \
+            GKC_ENGINE_FATAL("Assertion '{0}' | {1}", #_Expression, msg); \
+            std::abort();                           \
+        }                                           \
+    } while (0)
+
 // Compile definitions
 #ifdef GKC_ENABLE_ASSERTS
     /**
@@ -74,6 +84,7 @@
         } while (0)
 #else
     #define GKC_ASSERT(_Expression, msg) ((void)0)
+
 #endif
 
 #define GKC_MAJOR_VERSION 0
@@ -92,11 +103,13 @@ using std::type_index, std::any, std::array;
 const string GKC_SUFFIX = "Earthy";
 const Uint32 GKC_BUILD_VERSION = 252;
 inline const string GKC_VERSION_STR = to_string(GKC_MAJOR_VERSION) + "."
-    + "." + to_string(GKC_MINOR_VERSION) + to_string(GKC_PATCH_VERSION);
+    + to_string(GKC_MINOR_VERSION) + "." + to_string(GKC_PATCH_VERSION);
 
 typedef Uint32 EntityID;
 typedef Uint32 AudioID;
 typedef Uint32 GKC_WindowID;
+typedef Uint32 ComponentTypeID;
+typedef Uint32 TextureID;
 
 inline constexpr Uint32 MAX_WINDOW_QUANTITY = 256;
 inline constexpr EntityID InvalidEntity = 0;
@@ -308,16 +321,14 @@ namespace Galaktic::Filesystem {
     constexpr unsigned int GKC_VERSION_SCENE = 1;
 }
 
-    #if GKC_DEBUG
-        #define GKC_ENSURE_FILE_OPEN(file, ex)                          \
-            do {                                                        \
-                if (!(file).is_open()) {                                \
-                    GKC_THROW_EXCEPTION(ex, "file is not open!");       \
-                }                                                       \
-            } while (0)
-    #else
-        #define GKC_ENSURE_FILE_OPEN(file, ex) (void(0))
-    #endif
 
-    #define GKC_WRITE_BINARY(var) reinterpret_cast<const char*>(&var)
-    #define GKC_READ_BINARY(var) reinterpret_cast<char*>(&var)
+
+#define GKC_ENSURE_FILE_OPEN(file, ex)                          \
+    do {                                                        \
+        if (!(file).is_open()) {                                \
+            GKC_THROW_EXCEPTION(ex, "file is not open!");       \
+            }                                                   \
+    } while (0)        
+
+#define GKC_WRITE_BINARY(var) reinterpret_cast<const char*>(&var)
+#define GKC_READ_BINARY(var) reinterpret_cast<char*>(&var)

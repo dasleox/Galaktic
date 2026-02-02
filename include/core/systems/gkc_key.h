@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,10 @@
 #include "gkc_system.h"
 
 namespace Galaktic::Core::Systems {
+    /**
+     * @enum Key
+     * @brief Enum class representing keyboard keys
+     */
     enum class Key : uint32_t {
         // =============================
         // Unknown / Control
@@ -164,6 +168,10 @@ namespace Galaktic::Core::Systems {
     /**
      * @class KeySystem
      * @brief Maps the keys depending on the type of key event
+     * 
+     * Handles key press and release events to maintain the current state of each key.
+     * Provides functionality for other systems like the \c MovementSystem to check if a 
+     * specific key is currently pressed to execute actions accordingly.
      */
     class KeySystem final : public BaseSystem {
         public:

@@ -1,10 +1,7 @@
 #include <core/gkc_scene.h>
-#include <filesys/gkc_filesys.h>
 #include <render/gkc_window.h>
-
 #include "core/gkc_clock.h"
 #include "core/gkc_debugger.h"
-#include "core/gkc_exception.h"
 #include "core/gkc_logger.h"
 #include "core/events/gkc_event.h"
 #include "core/helpers/gkc_ecs_helper.h"
@@ -20,9 +17,9 @@
 #include "core/systems/gkc_system.h"
 #include "core/systems/gkc_ui_system.h"
 #include "core/systems/gkc_window_system.h"
+#include "core/systems/gkc_ecs_event_system.h"
 #include "filesys/gkc_writer.h"
 #include "render/gkc_drawer.h"
-#include "render/gkc_texture.h"
 
 using namespace Galaktic::Core;
 using namespace Galaktic::Filesystem;
@@ -72,6 +69,7 @@ Scene::Scene(const string& name, const DeviceInformation& device_information, co
     auto ui_system = make_shared<Systems::UISystem>(*key_system);
     auto window_system = make_shared<Systems::WindowSystem>();
     auto camera_system = make_shared<Systems::CameraSystem>(camera);
+    auto entity_event_system = make_shared<Systems::ECS_EventSystem>(*m_ecsManager);
     camera_system->SetFollowEntity(2);
 
 
@@ -83,13 +81,15 @@ Scene::Scene(const string& name, const DeviceInformation& device_information, co
     m_systemList.emplace("UISystem", ui_system);                // 4
     m_systemList.emplace("WindowSystem",window_system);         // 5
     m_systemList.emplace("CameraSystem", camera_system);        // 6
+    m_systemList.emplace("EntityEventSystem", entity_event_system);  // 7
     m_appPath = path.filename();
 
     GKC_ENGINE_INFO("Loading textures from... {0}", texturePath.string());
     GKC_ASSERT(m_registry != nullptr, "Failed to create entity manager!");
     GKC_ASSERT(m_ecsManager != nullptr, "Entity manager is NULL!");
     GKC_ASSERT(m_ecsHelper != nullptr, "Entity manager helper is NULL!");
-    GKC_ASSERT(m_systemList.size() >= GKC_SYSTEMS_COUNTER, "system manager is NULL!");
+    GKC_ASSERT(m_systemList.size() >= GKC_SYSTEMS_COUNTER
+        || !m_systemList.empty(), "system manager is NULL!");
     GKC_ASSERT(m_textureManager != nullptr, "Texture manager is NULL!");
     GKC_ASSERT(m_audioManager != nullptr, "Audio manager is NULL!");
 }
@@ -109,6 +109,7 @@ void Scene::Run()  {
     auto physics_system = m_systemList.find("PhysicsSystem")->second;
     auto movement_system = m_systemList.find("MovementSystem")->second;
     auto camera_system = m_systemList.find("CameraSystem")->second;
+    auto ecsEventSystem = m_systemList.find("EntityEventSystem")->second;
 
     // Used only in rendering
     auto camera_systemPtr = std::dynamic_pointer_cast<Systems::CameraSystem>(camera_system);
@@ -116,6 +117,7 @@ void Scene::Run()  {
     GKC_ASSERT(camera_systemPtr != nullptr || camera_system != nullptr, "CameraSystem is NULL!");
     GKC_ASSERT(physics_system != nullptr, "physics_system is NULL!");
     GKC_ASSERT(movement_system != nullptr, "movement_system is NULL!");
+    GKC_ASSERT(ecsEventSystem != nullptr, "entity_event_system is NULL!");
 
     // @TODO Add a modifiable function to edit
     // Add Debug Information
@@ -146,7 +148,7 @@ void Scene::Run()  {
         if (m_window->ShouldClose()) {
             Save();
             // @TODO Add something to tell if you really want to close the program
-            Close(m_isRunning);
+            Close();
         }
 
         // Engine Physics management
@@ -212,18 +214,22 @@ void Scene::CreateLightEntity(const string& name) {
     m_ecsHelper->CreateLightEntity(name);
 }
 
+void Scene::CopyEntityList(ECS::Entity_List list) {
+    m_ecsManager->GetEntityList() = list;
+}
+
 void Scene::CreatePlayer() {
     m_ecsHelper->CreatePlayer("Player");
 }
 
 void Scene::CreateCamera(const string& name) {
     auto cameraComponent = ECS::CameraComponent();
-    cameraComponent.active_ = true;
+    cameraComponent.isActive_ = true;
     m_ecsHelper->CreateCameraEntity(name);
     m_ecsHelper->ModifyEntity(name, cameraComponent);
 }
-void Scene::Close(bool& is_running) const {
+void Scene::Close() {
     Free();
-    is_running = false;
+    m_isRunning = false;
     exit(0);
 }

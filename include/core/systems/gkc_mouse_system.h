@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,10 @@
 // ### Enums
 // ###################################
 namespace Galaktic::Core::Systems {
+    /**
+     * @enum MouseClick
+     * @brief Enum class representing mouse button clicks
+     */
     enum class MouseClick : uint32_t {
         LeftClick = SDL_BUTTON_LEFT,
         RightClick = SDL_BUTTON_RIGHT,
@@ -40,6 +44,9 @@ namespace Galaktic::Core::Systems {
     /**
      * @class MouseSystem
      * @brief Maps mouse buttons if they were pressed or not
+     * 
+     * Handles mouse button events and maintains the state of each button
+     * (pressed or not pressed) using an unordered map.
      */
     class MouseSystem final : public BaseSystem {
         public:

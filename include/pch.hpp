@@ -25,7 +25,7 @@
 #include <filesystem>
 #include <nlohmann/json.hpp>
 #include <core/gkc_main.h>
-#include <../libs/luacpp-0.3.0/Source/LuaCpp.hpp>
+// #include <../libs/luacpp-0.3.0/SS/LuaCpp.hpp>
 #include <typeindex>
 #include <cxxabi.h>
 

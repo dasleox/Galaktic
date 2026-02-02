@@ -1,6 +1,6 @@
 /*
   Galaktic Engine
-  Copyright (C) 2025 SummerChip
+  Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@
 #include <pch.hpp>
 #include <ecs/gkc_registry.h>
 
-typedef Uint32 EntityID;
 namespace Galaktic::Core {
     class Scene;
 }
@@ -90,5 +89,5 @@ namespace Galaktic::ECS {
     typedef unordered_map<EntityID, Entity> Entity_List;
 
     // Searching by name helper list
-    typedef unordered_multimap<string, EntityID> NameToEntity_List;
+    typedef std::multimap<string, EntityID> NameToEntity_List;
 }

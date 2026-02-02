@@ -24,7 +24,7 @@ void Systems::CameraSystem::Update(const ECS::Entity_List& list, float dt,
         auto& cameraComp = m_activeCamera.Get<ECS::CameraComponent>();
 
         if (entity.Has<ECS::TransformComponent>() && cameraComp.entityToFollowID_ == id
-            && cameraComp.active_) {
+            && cameraComp.isActive_) {
             auto& transform = entity.Get<ECS::TransformComponent>();
             Render::Vec2 desiredLocation;
             desiredLocation.x = transform.location_.x - static_cast<float>(width)  * 0.5f;
@@ -48,7 +48,7 @@ void Systems::CameraSystem::FindPrimaryCamera(const ECS::Entity_List& list) {
 
         if (entity.Has<ECS::CameraComponent>()) {
             auto& cameraComp = entity.Get<ECS::CameraComponent>();
-            if (cameraComp.active_) {
+            if (cameraComp.isActive_) {
                 m_activeCamera = entity;
                 break;
             }
