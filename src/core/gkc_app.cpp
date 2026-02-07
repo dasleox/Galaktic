@@ -5,6 +5,9 @@
 #include <core/gkc_scene.h>
 #include "core/gkc_exception.h"
 #include <core/managers/gkc_scene_man.h>
+#include <core/managers/gkc_audio_man.h>
+#include <core/managers/gkc_texture_man.h>
+#include <core/managers/gkc_script_man.h>
 
 using namespace Galaktic::Core;
 
@@ -17,8 +20,12 @@ void App::ScreenStartup() {
     SDL_DisplayID display_id = SDL_GetPrimaryDisplay();
     const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(display_id);
 
-    GKC_ASSERT(display_id >= 1, "Failed to get the primary display!");
-    GKC_ASSERT(mode != nullptr, "Failed to get the display mode!");
+    if(display_id < 1) {
+        GKC_ENGINE_ERROR("Failed to get the primary display!");
+    } 
+    if (mode == nullptr) {
+        GKC_ENGINE_ERROR("Failed to get the display mode!");
+    }
 
     #if GKC_DEBUG
         GKC_ENGINE_INFO("Display ID: {0}", display_id);
@@ -27,6 +34,7 @@ void App::ScreenStartup() {
 
     m_deviceInfo.width_ = mode->w;
     m_deviceInfo.height_ = mode->h;
+
 }
 
 App::App(const path& project_path, const string &title)
@@ -37,12 +45,13 @@ App::App(const path& project_path, const string &title)
     Filesystem::CreateFolder(title);
     Filesystem::CreateAppDirectoryStructure(project_path / title);
     ScreenStartup();
+    
+    m_managersWrapper = make_unique<ManagersWrapper>();
+    GKC_RELEASE_ASSERT(m_managersWrapper != nullptr, "CRITICAL ERROR CREATING MANAGER WRAPPER!");
+    m_managersWrapper->m_audioManager = new Managers::AudioManager(project_path / title /GKC_SOUND_PATH);
+    m_managersWrapper->m_textureManager = new Managers::TextureManager(project_path / title / GKC_TEXTURE_PATH);
+    m_managersWrapper->m_scriptManager = new Managers::ScriptManager(project_path / title / GKC_SCRIPT_PATH);
 
-    m_sceneManager = new Managers::SceneManager(project_path / title, m_deviceInfo);
-
-    if (m_sceneManager == nullptr) {
-        GKC_ENGINE_FATAL("SCENE MANAGER IS NULL, CRITICAL ERROR D:");
-        abort();
-    }
+    m_sceneManager = new Managers::SceneManager(project_path / title, m_managersWrapper.get(), m_deviceInfo);
 }
 

@@ -89,7 +89,7 @@
 
 #define GKC_MAJOR_VERSION 0
 #define GKC_MINOR_VERSION 2
-#define GKC_PATCH_VERSION 0
+#define GKC_PATCH_VERSION 1
 #define GKC_SET_COLOR(color) color.r, color.g, color.b, color.a
 
 // 'using' declarations
@@ -101,7 +101,7 @@ using std::filesystem::path, std::unordered_multimap;
 using std::type_index, std::any, std::array;
 
 const string GKC_SUFFIX = "Earthy";
-const Uint32 GKC_BUILD_VERSION = 252;
+const Uint32 GKC_BUILD_VERSION = 368;
 inline const string GKC_VERSION_STR = to_string(GKC_MAJOR_VERSION) + "."
     + to_string(GKC_MINOR_VERSION) + "." + to_string(GKC_PATCH_VERSION);
 
@@ -110,8 +110,9 @@ typedef Uint32 AudioID;
 typedef Uint32 GKC_WindowID;
 typedef Uint32 ComponentTypeID;
 typedef Uint32 TextureID;
+typedef Uint32 ScriptID;
 
-inline constexpr Uint32 MAX_WINDOW_QUANTITY = 256;
+inline constexpr Uint32 MAX_WINDOW_QUANTITY = 64;
 inline constexpr EntityID InvalidEntity = 0;
 inline constexpr double FIXED_DELTA_TIME = 1.0 / 60;
 
@@ -119,10 +120,12 @@ inline constexpr double FIXED_DELTA_TIME = 1.0 / 60;
     inline const path GKC_TEXTURE_PATH = "assets\\textures";
     inline const path GKC_SOUND_PATH = "assets\\sounds";
     inline const path GKC_SCENE_PATH = "scenes";
+    inline const path GKC_SCRIPT_PATH = "scripts";
 #else
     inline const path GKC_TEXTURE_PATH = "assets/textures";
     inline const path GKC_SOUND_PATH = "assets/sounds";
     inline const path GKC_SCENE_PATH = "assets/scenes"
+    inline const path GKC_SCRIPT_PATH = "scripts";
 #endif
 
 inline constexpr SDL_Color WHITE_COLOR = {255, 255, 255, 255};
@@ -133,7 +136,7 @@ inline constexpr SDL_Color BLUE_COLOR = {0, 0, 255, 255};
 inline constexpr SDL_Color YELLOW_COLOR = {255, 255, 0, 255};
 inline constexpr SDL_Color MAGENTA_COLOR = {255, 0, 255, 255};
 inline constexpr SDL_Color CYAN_COLOR = {0, 255, 255, 255};
-inline constexpr SDL_Color GREY_COLOR = {128, 128, 128, 255};
+inline constexpr SDL_Color GREY_COLOR = {128, 128, 128, 255}; 
 
 namespace Galaktic::Render {
     /**
@@ -253,7 +256,7 @@ namespace Galaktic::Core {
     inline string Vec2ToString(const Render::Vec2& vec) {
         return "X: " + std::to_string(vec.x) + "," + " Y: " + std::to_string(vec.y);
     }
-
+    
     inline std::string StripExtension(const std::string& filename) {
         size_t pos = filename.find_last_of(".");
         if (pos == std::string::npos)

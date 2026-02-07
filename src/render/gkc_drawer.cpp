@@ -40,22 +40,21 @@ void Drawer::DrawEntities(const ECS::Entity_List& list, SDL_Renderer *renderer,
         rect.y = transform.location_.y - camera.location_.y;
 
         // Render texture if it has texture
-        // @TODO make a class to automatically assign the entities a texture by ID
         if (entity.second.Has<ECS::TextureComponent>()) {
-            auto& texture = entity.second.Get<ECS::TextureComponent>();
-            auto sdlTexture = TextureManager::GetTexture(texture.id_)->GetSDLTexture();
-            auto& textureName = TextureManager::GetIDTextureList().find(texture.id_)->second;
-
-            // If the texture doesn't exist, log an error and display color instead
-            if (sdlTexture == nullptr) {
-                if (!checkedEntities.contains(entity.first) ) {
-                    GKC_ENGINE_ERROR("('{0}' ID: {1}) has an invalid texture: '{2}'",
-                    name, entity.first, textureName);
-                    SDL_RenderTexture(renderer, NULL, NULL ,&rect);
-                    continue;
+            auto& textureComp = entity.second.Get<ECS::TextureComponent>();
+            Render::Texture* texture = TextureManager::GetTexture(textureComp.id_);
+            SDL_Texture* sdlTexture = nullptr;
+            
+            if(texture == nullptr) {
+                sdlTexture = TextureManager::GetMissingTexture();
+            } else {
+                sdlTexture = texture->GetSDLTexture();
+                if(sdlTexture == nullptr) {
+                    sdlTexture = TextureManager::GetMissingTexture();
                 }
             }
 
+            auto& textureName = TextureManager::GetIDTextureList().find(textureComp.id_)->second;
             SDL_RenderTexture(renderer, sdlTexture, NULL ,&rect);
         }
 

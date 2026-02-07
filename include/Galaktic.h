@@ -6,12 +6,14 @@
 #include <core/events/gkc_dispatcher.h>
 
 #include <core/helpers/gkc_ecs_helper.h>
+#include <core/helpers/gkc_texture_helper.h>
 
 #include <core/managers/gkc_ecs_man.h>
 #include <core/managers/gkc_texture_man.h>
 #include <core/managers/gkc_audio_man.h>
 #include <core/managers/gkc_scene_man.h>
 #include <core/managers/gkc_window_man.h>
+#include <core/managers/gkc_script_man.h>
 
 #include <core/systems/gkc_system.h>
 #include <core/systems/gkc_key.h>
@@ -21,6 +23,7 @@
 #include <core/systems/gkc_ui_system.h>
 #include <core/systems/gkc_camera_system.h>
 #include <core/systems/gkc_movement_system.h>
+#include <core/systems/gkc_script_system.h>
 #include <core/systems/gkc_ecs_event_system.h>
 
 #include <core/gkc_app.h>
@@ -34,6 +37,7 @@
 #include <ecs/gkc_entity.h>
 #include <ecs/gkc_registry.h>
 #include <ecs/gkc_component_registry.h>
+#include <ecs/gkc_template_traits.h>
 
 #include <filesys/gkc_reader.h>
 #include <filesys/gkc_writer.h>
@@ -42,3 +46,5 @@
 #include <render/gkc_window.h>
 #include <render/gkc_drawer.h>
 #include <render/gkc_texture.h>
+
+#include <script/gkc_script.h>

@@ -8,6 +8,7 @@
 #include "core/managers/gkc_audio_man.h"
 #include "core/managers/gkc_ecs_man.h"
 #include "core/managers/gkc_texture_man.h"
+#include "core/managers/gkc_script_man.h"
 #include "core/managers/gkc_window_man.h"
 #include "core/systems/gkc_camera_system.h"
 #include "core/systems/gkc_key.h"
@@ -18,14 +19,17 @@
 #include "core/systems/gkc_ui_system.h"
 #include "core/systems/gkc_window_system.h"
 #include "core/systems/gkc_ecs_event_system.h"
+#include "core/systems/gkc_script_system.h"
 #include "filesys/gkc_writer.h"
 #include "render/gkc_drawer.h"
+#include "script/gkc_script.h"
+#include "core/helpers/gkc_texture_helper.h"
 
 using namespace Galaktic::Core;
 using namespace Galaktic::Filesystem;
 
-Scene::Scene(const string& name, const DeviceInformation& device_information, const path& path)
-    : m_sceneInfo({name, sizeof(Scene)} ) {
+Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformation& device_information, const path& path)
+    : m_sceneInfo({name, sizeof(Scene)}), m_managerWrapper(wrapper) {
 
     GKC_ASSERT(!device_information.IsCorrupted(), "information from app is corrupted!");
     m_windowManager = new Managers::WindowManager();
@@ -43,15 +47,11 @@ Scene::Scene(const string& name, const DeviceInformation& device_information, co
     // Managers Initialization
     m_registry = new ECS::Registry();
     m_systemList.reserve(GKC_SYSTEMS_COUNTER);
-
-    const auto texturePath = path.filename() / GKC_TEXTURE_PATH;
-    const auto soundPath = path.filename() / GKC_SOUND_PATH;
-
     m_ecsManager = new Managers::ECS_Manager(m_registry);
-    m_textureManager = new Managers::TextureManager(texturePath, GKC_GET_RENDERER(m_window));
-    m_audioManager = new Managers::AudioManager(soundPath);
     m_ecsHelper = new Helpers::ECS_Helper(*m_ecsManager);
-
+    m_textureHelper = new Helpers::TextureHelper(*m_ecsManager);
+    m_managerWrapper->m_textureManager->CreateMissingTexture(GKC_GET_RENDERER(m_window));
+    
     /* @todo Make a function to reset these defaults and change them when the file is read or
      *       change the full structure of these systems (use 1 please :v)
      */
@@ -74,24 +74,21 @@ Scene::Scene(const string& name, const DeviceInformation& device_information, co
 
 
     // Systems added to manage events
-    m_systemList.emplace("KeySystem", key_system);              // 0
-    m_systemList.emplace("MouseSystem", mouse_system);          // 1
-    m_systemList.emplace("MovementSystem",movement_system);     // 2
-    m_systemList.emplace("PhysicsSystem", physics_system);      // 3
-    m_systemList.emplace("UISystem", ui_system);                // 4
-    m_systemList.emplace("WindowSystem",window_system);         // 5
-    m_systemList.emplace("CameraSystem", camera_system);        // 6
-    m_systemList.emplace("EntityEventSystem", entity_event_system);  // 7
+    m_systemList.emplace("KeySystem", key_system);                  // 0
+    m_systemList.emplace("MouseSystem", mouse_system);              // 1
+    m_systemList.emplace("MovementSystem",movement_system);         // 2
+    m_systemList.emplace("PhysicsSystem", physics_system);          // 3
+    m_systemList.emplace("UISystem", ui_system);                    // 4
+    m_systemList.emplace("WindowSystem",window_system);             // 5
+    m_systemList.emplace("CameraSystem", camera_system);            // 6
+    m_systemList.emplace("EntityEventSystem", entity_event_system); // 7
     m_appPath = path.filename();
-
-    GKC_ENGINE_INFO("Loading textures from... {0}", texturePath.string());
-    GKC_ASSERT(m_registry != nullptr, "Failed to create entity manager!");
-    GKC_ASSERT(m_ecsManager != nullptr, "Entity manager is NULL!");
-    GKC_ASSERT(m_ecsHelper != nullptr, "Entity manager helper is NULL!");
-    GKC_ASSERT(m_systemList.size() >= GKC_SYSTEMS_COUNTER
+    
+    GKC_RELEASE_ASSERT(m_registry != nullptr, "Failed to create entity manager!");
+    GKC_RELEASE_ASSERT(m_ecsManager != nullptr, "Entity manager is NULL!");
+    GKC_RELEASE_ASSERT(m_ecsHelper != nullptr, "Entity manager helper is NULL!");
+    GKC_RELEASE_ASSERT(m_systemList.size() >= GKC_SYSTEMS_COUNTER
         || !m_systemList.empty(), "system manager is NULL!");
-    GKC_ASSERT(m_textureManager != nullptr, "Texture manager is NULL!");
-    GKC_ASSERT(m_audioManager != nullptr, "Audio manager is NULL!");
 }
 
 void Scene::Run()  {
@@ -114,22 +111,20 @@ void Scene::Run()  {
     // Used only in rendering
     auto camera_systemPtr = std::dynamic_pointer_cast<Systems::CameraSystem>(camera_system);
 
-    GKC_ASSERT(camera_systemPtr != nullptr || camera_system != nullptr, "CameraSystem is NULL!");
-    GKC_ASSERT(physics_system != nullptr, "physics_system is NULL!");
-    GKC_ASSERT(movement_system != nullptr, "movement_system is NULL!");
-    GKC_ASSERT(ecsEventSystem != nullptr, "entity_event_system is NULL!");
+    GKC_RELEASE_ASSERT(camera_systemPtr != nullptr || camera_system != nullptr, "CameraSystem is NULL!");
+    GKC_RELEASE_ASSERT(physics_system != nullptr, "physics_system is NULL!");
+    GKC_RELEASE_ASSERT(movement_system != nullptr, "movement_system is NULL!");
+    GKC_RELEASE_ASSERT(ecsEventSystem != nullptr, "entity_event_system is NULL!");
 
     // @TODO Add a modifiable function to edit
     // Add Debug Information
     Debug::Console::SetRenderer(GKC_GET_RENDERER(m_window));
     strcpy(Debug::Console::GetDebugInformation()->engine_name_, Debug::Logger::GetEngineName().c_str());
 
-    auto& player_transform = m_ecsHelper->GetEntityByName("Player").Get<ECS::TransformComponent>();
-
-    #if GKC_DEBUG
-        m_audioManager->PrintList();
-        m_textureManager->PrintList();
-    #endif
+    m_managerWrapper->m_textureManager->LoadAllTextures(GKC_GET_RENDERER(m_window));
+    auto& player = m_ecsHelper->GetEntityByName("Player");
+    auto& player_transform = player.Get<ECS::TransformComponent>();
+    m_textureHelper->SetTextureToEntity(player.GetID(), "subbing.png");
 
     while (m_isRunning) {
         // Timing

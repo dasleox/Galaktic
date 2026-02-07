@@ -39,8 +39,6 @@ namespace Galaktic::Render {
             Texture(const path& path, SDL_Renderer* renderer);
             [[nodiscard]] SDL_Texture* GetSDLTexture() const { return m_texture; }
             bool IsValid() const { return m_texture != nullptr; }
-
-            TextureID m_ID = 1;
         private:
             SDL_Texture* m_texture = nullptr;
     };

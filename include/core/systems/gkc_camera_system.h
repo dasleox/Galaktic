@@ -1,5 +1,5 @@
 /*
-Galaktic Engine
+  Galaktic Engine
   Copyright (C) 2026 SummerChip
 
   Permission is hereby granted, free of charge, to any person obtaining a copy

@@ -26,6 +26,7 @@
 
 namespace Galaktic::Core {
     class Scene;
+    class ManagersWrapper;
 }
 
 namespace Galaktic::Core::Managers {
@@ -39,7 +40,7 @@ namespace Galaktic::Core::Managers {
      */
     class SceneManager {
         public:
-            SceneManager(const path& folder, const DeviceInformation& info);
+            SceneManager(const path& folder, ManagersWrapper* wrapper, const DeviceInformation& info);
 
             /**
              * Creates a scene with the passed name
@@ -77,5 +78,6 @@ namespace Galaktic::Core::Managers {
             DeviceInformation m_deviceInfo;
             path m_folder;
             unordered_map<string, unique_ptr<Scene>> m_sceneList;
+            ManagersWrapper* m_managersWrapper = nullptr;
     };
 }

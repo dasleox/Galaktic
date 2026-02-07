@@ -103,6 +103,10 @@ namespace Galaktic::ECS {
         TextureID id_;
     };
 
+    struct ScriptComponent {
+        ScriptID id_;
+    };
+
     struct PhysicsObjectTag {};
     struct StaticObjectTag {};
     struct LightTag {};

@@ -26,10 +26,12 @@
 #include <core/gkc_scene.h>
 
 namespace Galaktic::Core::Managers {
-    class SceneManager;
+    class SceneManager; 
 }
 
 namespace Galaktic::Core {
+    class ManagersWrapper;
+
     /**
      * @brief Main application class that initializes and runs the application.
      * @class App
@@ -37,7 +39,7 @@ namespace Galaktic::Core {
      * This class is responsible for setting up the application environment,
      * managing scenes inside the project folder, and handling device information.
      * A SceneManager instance is created to manage scenes within the application,
-     * can be accsessed using \c GetSceneManager()..
+     * can be accsessed using \c GetSceneManager()
      * 
      * @see gkc_scene_man.h for more information about SceneManager.
      */
@@ -51,9 +53,10 @@ namespace Galaktic::Core {
 
             Managers::SceneManager*& GetSceneManager() { return m_sceneManager; }
         private:
-            Managers::SceneManager* m_sceneManager; // Scene Manager
-            DeviceInformation m_deviceInfo;         // Device Info
-            string m_appName;                       // App name
+            Managers::SceneManager* m_sceneManager;         // Scene Manager
+            DeviceInformation m_deviceInfo;                 // Device Info
+            unique_ptr<ManagersWrapper> m_managersWrapper;  // Managers Wrapper Pointer
+            string m_appName;                               // App name
 
             /**
              * @brief Get the screen information and set the width and height of the built window

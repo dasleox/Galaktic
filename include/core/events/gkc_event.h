@@ -67,7 +67,12 @@ namespace Galaktic::Core::Events {
         WindowResize,
         WindowClose,
         WindowMinimized,
-        ObjectCreated, EntityCreated, EntityDeleted, EntityModified
+        ObjectCreated, 
+        EntityCreated, 
+        EntityDeleted, 
+        EntityModified,
+        ScriptCalledFromEntity,
+        ScriptCalled
     };
 
     /**
@@ -254,6 +259,31 @@ namespace Galaktic::Core::Events {
             [[nodiscard]] EntityID GetEntityID() { return m_id; }
         private:
             EntityID m_id;
+    };
+}
+
+// ###################################
+// ### Script Events
+// ###################################
+//@todo end this shit :(
+
+namespace Galaktic::Core::Events {
+    class ScriptCalledFromEntity final : public GKC_Event {
+        public:
+            explicit ScriptCalledFromEntity(EntityID id) : m_id(id) {}
+            GKC_WRITE_EVENT_FUNCS(ScriptCalledFromEntity, "ScriptCalledFromEntity", Application);
+            [[nodiscard]] EntityID GetEntityID() { return m_id; }
+        private:
+            EntityID m_id;
+    };
+
+    class ScriptCalled final : public GKC_Event {
+        public:
+            explicit ScriptCalled(ScriptID id) : m_id(id) {}
+            GKC_WRITE_EVENT_FUNCS(ScriptCalled, "ScriptCalled", Application);
+            [[nodiscard]] ScriptID GetScriptID() { return m_id; }
+        private:
+            ScriptID m_id;
     };
 }
 

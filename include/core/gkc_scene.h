@@ -28,6 +28,7 @@
 
 namespace Galaktic::Core::Helpers {
     class ECS_Helper;
+    class TextureHelper;
 }
 namespace Galaktic::Core::Events {
     class GKC_Event;
@@ -47,6 +48,7 @@ namespace Galaktic::Core::Managers {
     class ECS_Manager;
     class TextureManager;
     class AudioManager;
+    class ScriptManager;
 }
 
 namespace Galaktic::Core {
@@ -60,6 +62,13 @@ namespace Galaktic::Core {
         size_t scene_size_ = 0;
     };
 
+    class ManagersWrapper {
+        public:
+            Managers::TextureManager* m_textureManager = nullptr;
+            Managers::AudioManager* m_audioManager = nullptr;
+            Managers::ScriptManager* m_scriptManager = nullptr;
+    };
+
     /**
      * @class Scene
      * @brief Scene containing objects, texts, etc...
@@ -71,7 +80,7 @@ namespace Galaktic::Core {
              * @param device_information DeviceInformation instance
              * @param path Path of the app
              */
-            Scene(const string& name, const DeviceInformation& device_information, const path& path);
+            Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformation& device_information, const path& path);
 
             /**
              * @brief Runs the Scene.
@@ -142,8 +151,8 @@ namespace Galaktic::Core {
             Managers::WindowManager* m_windowManager = nullptr;
             Managers::ECS_Manager* m_ecsManager = nullptr;
             Helpers::ECS_Helper* m_ecsHelper = nullptr;
-            Managers::TextureManager* m_textureManager = nullptr;
-            Managers::AudioManager* m_audioManager = nullptr;
+            Helpers::TextureHelper* m_textureHelper = nullptr;
+            ManagersWrapper* m_managerWrapper = nullptr;
             path m_appPath;
             
     };

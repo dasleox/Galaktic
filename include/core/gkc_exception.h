@@ -80,6 +80,10 @@ namespace Galaktic::Debug {
     class ReadingException : public GalakticException {
         using GalakticException::GalakticException;
     };
+
+    class ScriptException : public GalakticException {
+        using GalakticException::GalakticException;
+    };
 }
 
 /**

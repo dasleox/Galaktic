@@ -6,11 +6,11 @@
 
 using namespace Galaktic::Core;
 
-Managers::SceneManager::SceneManager(const path &folder, const DeviceInformation &info)
-    : m_deviceInfo(info), m_folder(folder) {}
+Managers::SceneManager::SceneManager(const path &folder, ManagersWrapper* wrapper, const DeviceInformation &info)
+    : m_deviceInfo(info), m_folder(folder), m_managersWrapper(wrapper) {}
 
 void Managers::SceneManager::CreateScene(const string &name) {
-    m_sceneList.emplace(name, make_unique<Scene>(name, m_deviceInfo, m_folder));
+    m_sceneList.emplace(name, make_unique<Scene>(name, m_managersWrapper, m_deviceInfo, m_folder));
 }
 
 void Managers::SceneManager::DeleteScene(const string &name) {
@@ -35,7 +35,7 @@ void Managers::SceneManager::LoadSpecificSceneFromFile(const path &filepath) {
         return;
     }
     string sceneName = StripExtension(filepath.filename().string());
-    auto m_scene = make_unique<Scene>(sceneName, m_deviceInfo, m_folder);
+    auto m_scene = make_unique<Scene>(sceneName, m_managersWrapper, m_deviceInfo, m_folder);
     Filesystem::FileReader::ReadScene(filepath, *m_scene.get()->GetECSManager(),
         m_scene.get()->GetRegistry(), *m_scene);
     m_sceneList.emplace(sceneName, std::move(m_scene));

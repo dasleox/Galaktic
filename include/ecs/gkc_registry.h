@@ -37,7 +37,7 @@ namespace Galaktic::ECS {
     class Registry {
         public:
             /**
-             * @brief Adds a component to the specified entity by its id
+             * @brief Adds a component to the specified entity by its ID
              * @tparam T Component Type
              * @tparam Args Argument/s Type/s of the Component
              * @param id Entity's ID that gets added the component
@@ -131,6 +131,7 @@ namespace Galaktic::ECS {
                     func(info, it->second);
                 }
             }
+            
             void ForEachRegisteredComponent(const std::function<void(const ComponentTypeInfo&)>& fn) const {
                 for (const auto& [type, info] : ComponentRegistry::GetComponentTypes()) {
                     fn(info);
@@ -154,7 +155,7 @@ namespace Galaktic::ECS {
 
             template<typename T>
             bool IsComponentType(const type_index& type) {
-                return type == std::type_index(typeid(T));
+                return type == type_index(typeid(T));
             }
         private:
             unordered_map<type_index,unordered_map<EntityID, any>> m_componentPools;

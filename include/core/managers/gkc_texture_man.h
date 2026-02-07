@@ -44,6 +44,10 @@ namespace Galaktic::Core::Managers {
     * the texture list an can be accessed statically from anywhere in the engine.
     * However, a previous initialization of this manager is required.
     * 
+    * When this manager is initialized textures need to be loaded afterwards
+    * using \c LoadAllTextures() , individual textures can also be loaded, if they
+    * don't exist they will be automatically added to the texture list
+    * 
     * Textures are stored in the list with their filename (extension included: e.g. texture.png)
     * as a key and the value stored inside a TextureInfo struct.
     */
@@ -51,9 +55,8 @@ namespace Galaktic::Core::Managers {
         public:
             /**
              * @param path folder path
-             * @param renderer SDL_Renderer
              */
-            TextureManager(const path& path, SDL_Renderer* renderer);
+            TextureManager(const path& path);
 
             /**
              * @brief Adds a texture to this instance's list
@@ -62,6 +65,27 @@ namespace Galaktic::Core::Managers {
              */
             static void AddTexture(const path &path, SDL_Renderer *renderer);
 
+            /**
+             * @brief Adds a texture but only the path is added to the list
+             * @param path path to the texture (relative or full)
+             */
+            static void AddTexturePath(const path& path);
+
+            /**
+             * Loads a texture with a SDL_Renderer, texture key has to already
+             * exist in the list with \c AddTexturePath() , if the texture key wasn't
+             * in the list it will be automatically added.
+             * @param path Texture's path
+             * @param renderer SDL_Renderer
+             */
+            static void LoadTexture(const path& path, SDL_Renderer* renderer);
+
+            /**
+             * @brief Loads all textures that need to be loaded, all texture's paths
+             * were automatically added inside \c m_texturePathList
+             */
+            static void LoadAllTextures(SDL_Renderer* renderer);
+            
             /**
              * @brief Deletes the texture on the list
              * @param name The name of the texture
@@ -88,6 +112,23 @@ namespace Galaktic::Core::Managers {
             static Render::Texture* GetTexture(TextureID id);
 
             /**
+             * Gets a pointer to the texture info, this function is used to retrieve
+             * the info (ID + Texture's instance), this function is used by the
+             * texture helper which automatically assigns textures to entities
+             * that have a texture component.
+             * 
+             * @see gkc_texture_helper.h for more information
+             * @param textureName The name of the texture
+             * @return Render::TextureInfo* 
+             */
+            static Render::TextureInfo* GetTextureInfo(const string& textureName);
+
+
+            static SDL_Texture* GetMissingTexture();
+
+            static void CreateMissingTexture(SDL_Renderer* renderer);
+
+            /**
              * Prints the list of all texture files with their filenames,
              * ID's and address in memory
              */
@@ -95,8 +136,13 @@ namespace Galaktic::Core::Managers {
 
             static Render::Texture_List& GetTextureList() { return m_textureList; }
             static Render::TextureID_List& GetIDTextureList() { return m_IDToNameList; } 
+            static vector<path>& GetTexturePathList() { return m_texturePathList; }
         private:
             static Render::Texture_List m_textureList;
+            static vector<path> m_texturePathList;
             static Render::TextureID_List m_IDToNameList;
+            static SDL_Texture* m_missingTexture;
+        private:
+            static const void* TakeAdressOfTexture(const Render::TextureInfo* textureInfo);
     };
 }

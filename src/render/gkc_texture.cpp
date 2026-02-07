@@ -9,6 +9,7 @@ Texture::Texture(const path &path, SDL_Renderer* renderer) {
     GKC_ENGINE_INFO("Loading {0}...", path.string());
     if (path.empty() || !Filesystem::CheckFile(path)) {
         GKC_ENGINE_ERROR( "given path doesn't exists!");
+        return;
     }
 
     m_texture = IMG_LoadTexture(renderer, path.string().c_str());

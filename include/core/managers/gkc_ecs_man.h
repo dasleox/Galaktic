@@ -30,6 +30,21 @@
 #include "core/systems/gkc_key.h"
 #include "ecs/gkc_template_traits.h"
 
+namespace Galaktic::ECS {
+    /**
+     * Checks if a component exists inside an entity, if it does executes
+     * a custom void function
+     * @tparam T Component Type
+     * @param entity Entity
+     * @param func function to execute
+     */
+    template <typename T>
+    inline void IfComponentExists(ECS::Entity& entity, function<void()> func) {
+        if (entity.Has<T>()) {
+            func();
+        }
+    }
+}
 namespace Galaktic::Core::Managers {
 
     // I thought this class was going to be small but hell naw man, this thing
@@ -244,13 +259,30 @@ namespace Galaktic::Core::Managers {
              * @brief Returns a pointer to the specified entity by name
              * @param name Entity's name
              * @return A pointer if the entity exists and nullptr otherwise
-             * @note This function returns the first entity created with the same name
+             * @note This function returns the first entity created with the same name,
+             *       use \c GetEntitiesByName() for multiple entities with the same name
              */
             ECS::Entity* GetEntityByName(const string& name) {
                 auto it = m_nameToEntityList.find(name);
-                if (it == m_nameToEntityList.end())
-                    return nullptr;
-                return &m_entityList[it->second];
+                if (it != m_nameToEntityList.end()) {
+                    return &m_entityList[it->second];
+                }
+                GKC_ENGINE_WARNING("Entity retrieved doesn't exist!");
+                return nullptr;
+            }
+            
+            /**
+             * @brief Returns a pointer to the specified entity by ID
+             * @param id Entity's ID
+             * @return A pointer if the entity exists and nullptr otherwise
+             */
+            ECS::Entity* GetEntityByID(EntityID id) {
+                auto it = m_entityList.find(id);
+                if (it != m_entityList.end()) {
+                    return &it->second;
+                }
+                GKC_ENGINE_WARNING("Entity retrieved doesn't exist!");
+                return nullptr;
             }
 
             /**
@@ -327,6 +359,18 @@ namespace Galaktic::Core::Managers {
                     it->second.Remove<T>(id);
             }
 
+            string GetEntityNameByID(EntityID id) {
+                auto it = m_entityList.find(id);
+                if (it != m_entityList.end()) {
+                    ECS::IfComponentExists<ECS::NameComponent>(it->second, [&]() {
+                        auto& nameComp = it->second.Get<ECS::NameComponent>();
+                        return nameComp.name_;
+                    });
+                    return "UnknownName";
+                }
+                return "UnknownName";
+            } 
+
             /**
              * @brief Deletes the entity by its ID
              * @param id Entity's ID
@@ -344,3 +388,4 @@ namespace Galaktic::Core::Managers {
             ECS::Registry* m_registry;
     };
 }
+

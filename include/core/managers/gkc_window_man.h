@@ -37,7 +37,7 @@ namespace Galaktic::Core::Managers {
      * All of the functions and list are static, an instance of this class is not needed.
      * 
      * When a window is registered, is assigned a unique GKC_WindowID that is increased by
-     * 1 for each new window created. However a limit of 256 windows is set, after which
+     * 1 for each new window created. However a limit of 64 windows is set, after which
      * the manager will not allow any new windows to be created. 
      * When a window is unregistered, its ID is freed along with its Window instance and the
      * ID can be reused for a new window.

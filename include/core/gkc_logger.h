@@ -126,4 +126,3 @@ spdlog::level::critical, __VA_ARGS__)
 #else
     #define GKC_PRINT_ADDRESS (void(0))
 #endif
-
