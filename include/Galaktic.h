@@ -7,6 +7,7 @@
 
 #include <core/helpers/gkc_ecs_helper.h>
 #include <core/helpers/gkc_texture_helper.h>
+#include <core/helpers/gkc_animation_helper.h>
 
 #include <core/managers/gkc_ecs_man.h>
 #include <core/managers/gkc_texture_man.h>
@@ -14,6 +15,7 @@
 #include <core/managers/gkc_scene_man.h>
 #include <core/managers/gkc_window_man.h>
 #include <core/managers/gkc_script_man.h>
+#include <core/managers/gkc_animation_man.h>
 
 #include <core/systems/gkc_system.h>
 #include <core/systems/gkc_key.h>
@@ -46,5 +48,6 @@
 #include <render/gkc_window.h>
 #include <render/gkc_drawer.h>
 #include <render/gkc_texture.h>
+#include <render/gkc_animation.h>
 
 #include <script/gkc_script.h>

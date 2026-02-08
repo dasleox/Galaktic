@@ -8,6 +8,7 @@
 #include <core/managers/gkc_audio_man.h>
 #include <core/managers/gkc_texture_man.h>
 #include <core/managers/gkc_script_man.h>
+#include <core/managers/gkc_animation_man.h>
 
 using namespace Galaktic::Core;
 
@@ -51,6 +52,7 @@ App::App(const path& project_path, const string &title)
     m_managersWrapper->m_audioManager = new Managers::AudioManager(project_path / title /GKC_SOUND_PATH);
     m_managersWrapper->m_textureManager = new Managers::TextureManager(project_path / title / GKC_TEXTURE_PATH);
     m_managersWrapper->m_scriptManager = new Managers::ScriptManager(project_path / title / GKC_SCRIPT_PATH);
+    m_managersWrapper->m_animationManager = new Managers::AnimationManager(project_path / title / GKC_ANIMATION_PATH);
 
     m_sceneManager = new Managers::SceneManager(project_path / title, m_managersWrapper.get(), m_deviceInfo);
 }

@@ -13,6 +13,7 @@ Texture::Texture(const path &path, SDL_Renderer* renderer) {
     }
 
     m_texture = IMG_LoadTexture(renderer, path.string().c_str());
+    
     if (m_texture == nullptr) {
         GKC_ENGINE_ERROR("failed to load texture!");
     }

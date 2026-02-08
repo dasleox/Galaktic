@@ -131,7 +131,7 @@ namespace Galaktic::Filesystem {
 	extern path GetFullPath();
 
 	const inline vector<path> APP_DIRECTORY_STRUCTURE = {
-		"assets", "assets/textures", "assets/sounds",
+		"assets", "assets/textures", "assets/sounds", "assets/animations",
 		"scenes", "scripts"
 	};
 }

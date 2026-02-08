@@ -88,8 +88,8 @@
 #endif
 
 #define GKC_MAJOR_VERSION 0
-#define GKC_MINOR_VERSION 2
-#define GKC_PATCH_VERSION 1
+#define GKC_MINOR_VERSION 3
+#define GKC_PATCH_VERSION 0
 #define GKC_SET_COLOR(color) color.r, color.g, color.b, color.a
 
 // 'using' declarations
@@ -101,7 +101,7 @@ using std::filesystem::path, std::unordered_multimap;
 using std::type_index, std::any, std::array;
 
 const string GKC_SUFFIX = "Earthy";
-const Uint32 GKC_BUILD_VERSION = 368;
+const Uint32 GKC_BUILD_VERSION = 396;
 inline const string GKC_VERSION_STR = to_string(GKC_MAJOR_VERSION) + "."
     + to_string(GKC_MINOR_VERSION) + "." + to_string(GKC_PATCH_VERSION);
 
@@ -111,6 +111,7 @@ typedef Uint32 GKC_WindowID;
 typedef Uint32 ComponentTypeID;
 typedef Uint32 TextureID;
 typedef Uint32 ScriptID;
+typedef Uint32 AnimationID;
 
 inline constexpr Uint32 MAX_WINDOW_QUANTITY = 64;
 inline constexpr EntityID InvalidEntity = 0;
@@ -119,11 +120,13 @@ inline constexpr double FIXED_DELTA_TIME = 1.0 / 60;
 #if GKC_OS_INT == 0
     inline const path GKC_TEXTURE_PATH = "assets\\textures";
     inline const path GKC_SOUND_PATH = "assets\\sounds";
+    inline const path GKC_ANIMATION_PATH = "assets\\animations";
     inline const path GKC_SCENE_PATH = "scenes";
     inline const path GKC_SCRIPT_PATH = "scripts";
 #else
     inline const path GKC_TEXTURE_PATH = "assets/textures";
     inline const path GKC_SOUND_PATH = "assets/sounds";
+    inline const path GKC_ANIMATION_PATH = "assets/animations"
     inline const path GKC_SCENE_PATH = "assets/scenes"
     inline const path GKC_SCRIPT_PATH = "scripts";
 #endif
@@ -182,7 +185,7 @@ namespace Galaktic::Core {
     };
 
     /**
-     * @brief Checks if the weak_ptr passed has/is expired
+     * @brief Checks if the weak_ptr passed has expired
      * @tparam T typename of weak_ptr
      * @param ptr Weak pointer of type T
      * @return true if the pointer expired, false otherwise

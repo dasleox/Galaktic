@@ -1,10 +1,12 @@
 #include <render/gkc_drawer.h>
 #include "core/gkc_logger.h"
 #include "core/managers/gkc_texture_man.h"
+#include "core/managers/gkc_animation_man.h"
 #include "core/systems/gkc_camera_system.h"
 #include "ecs/gkc_components.h"
 #include "ecs/gkc_entity.h"
 #include "render/gkc_texture.h"
+#include "render/gkc_animation.h"
 
 using namespace Galaktic::Render;
 
@@ -56,10 +58,22 @@ void Drawer::DrawEntities(const ECS::Entity_List& list, SDL_Renderer *renderer,
 
             auto& textureName = TextureManager::GetIDTextureList().find(textureComp.id_)->second;
             SDL_RenderTexture(renderer, sdlTexture, NULL ,&rect);
+        } 
+        
+        else if (entity.second.Has<ECS::AnimationComponent>()) {
+            auto& animationComp = entity.second.Get<ECS::AnimationComponent>();
+            Render::Animation* animation = AnimationManager::GetAnimation(animationComp.id_);
+            if(animation == nullptr) {
+                // Programming Warcrime
+                goto color_rendering;
+            }
+            
+            animation->Render(renderer, rect);
         }
 
         // Color Rendering
         else {
+            color_rendering:
             auto& color = entity.second.Get<ECS::ColorComponent>().color_;
             SDL_SetRenderDrawColor(renderer, GKC_SET_COLOR(color));
             SDL_RenderFillRect(renderer, &rect);

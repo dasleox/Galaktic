@@ -29,6 +29,7 @@
 namespace Galaktic::Core::Helpers {
     class ECS_Helper;
     class TextureHelper;
+    class AnimationHelper;
 }
 namespace Galaktic::Core::Events {
     class GKC_Event;
@@ -49,6 +50,7 @@ namespace Galaktic::Core::Managers {
     class TextureManager;
     class AudioManager;
     class ScriptManager;
+    class AnimationManager;
 }
 
 namespace Galaktic::Core {
@@ -67,6 +69,7 @@ namespace Galaktic::Core {
             Managers::TextureManager* m_textureManager = nullptr;
             Managers::AudioManager* m_audioManager = nullptr;
             Managers::ScriptManager* m_scriptManager = nullptr;
+            Managers::AnimationManager* m_animationManager = nullptr;
     };
 
     /**
@@ -152,6 +155,7 @@ namespace Galaktic::Core {
             Managers::ECS_Manager* m_ecsManager = nullptr;
             Helpers::ECS_Helper* m_ecsHelper = nullptr;
             Helpers::TextureHelper* m_textureHelper = nullptr;
+            Helpers::AnimationHelper* m_animationHelper = nullptr;
             ManagersWrapper* m_managerWrapper = nullptr;
             path m_appPath;
             

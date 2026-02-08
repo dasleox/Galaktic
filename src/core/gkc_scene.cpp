@@ -24,6 +24,8 @@
 #include "render/gkc_drawer.h"
 #include "script/gkc_script.h"
 #include "core/helpers/gkc_texture_helper.h"
+#include "core/helpers/gkc_animation_helper.h" 
+#include "core/managers/gkc_animation_man.h"
 
 using namespace Galaktic::Core;
 using namespace Galaktic::Filesystem;
@@ -50,6 +52,7 @@ Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformati
     m_ecsManager = new Managers::ECS_Manager(m_registry);
     m_ecsHelper = new Helpers::ECS_Helper(*m_ecsManager);
     m_textureHelper = new Helpers::TextureHelper(*m_ecsManager);
+    m_animationHelper = new Helpers::AnimationHelper(*m_ecsManager);
     m_managerWrapper->m_textureManager->CreateMissingTexture(GKC_GET_RENDERER(m_window));
     
     /* @todo Make a function to reset these defaults and change them when the file is read or
@@ -122,9 +125,15 @@ void Scene::Run()  {
     strcpy(Debug::Console::GetDebugInformation()->engine_name_, Debug::Logger::GetEngineName().c_str());
 
     m_managerWrapper->m_textureManager->LoadAllTextures(GKC_GET_RENDERER(m_window));
+    m_managerWrapper->m_animationManager->LoadAllAnimations(GKC_GET_RENDERER(m_window));
+    
     auto& player = m_ecsHelper->GetEntityByName("Player");
     auto& player_transform = player.Get<ECS::TransformComponent>();
-    m_textureHelper->SetTextureToEntity(player.GetID(), "subbing.png");
+    m_textureHelper->SetTextureToEntity(player.GetID(), "musiala.jpeg");
+
+    m_ecsHelper->CreateStaticObject("boykisser");
+    auto& object = m_ecsHelper->GetEntityByName("boykisser");
+    m_animationHelper->SetAnimationToEntity(object.GetID(), "boykisser.gif");
 
     while (m_isRunning) {
         // Timing
@@ -160,6 +169,7 @@ void Scene::Run()  {
         m_window->Draw(GKC_GET_RENDERER(m_window));
         Render::Drawer::DrawEntities(m_ecsManager->GetEntityList(), GKC_GET_RENDERER(m_window),
             *camera_systemPtr);
+        m_managerWrapper->m_animationManager->UpdateAll(delta_time);
 
         if (Debug::Console::GetIsActive()) {
             Debug::Console::CallConsole();
