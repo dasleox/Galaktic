@@ -1,5 +1,5 @@
 #THIS README IS A PLACEHOLDER
-![Galaktic Title Logo](URL docs/images/title_logo.png)
+![Galaktic Title Logo](docs/images/title_logo.png)
 ***
 
 Galaktic is a 2D Game Engine specialized in making pixel art games with ease and runable with very limited resources.
