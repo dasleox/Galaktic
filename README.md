@@ -1,4 +1,3 @@
-#THIS README IS A PLACEHOLDER
 ![Galaktic Title Logo](docs/images/title_logo.png.jpeg)
 ***
 
