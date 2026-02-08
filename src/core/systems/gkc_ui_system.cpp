@@ -1,6 +1,7 @@
 #include <core/systems/gkc_ui_system.h>
 #include "core/gkc_debugger.h"
 #include "core/events/gkc_dispatcher.h"
+#include "core/managers/gkc_script_man.h"
 #include "render/gkc_window.h"
 
 using namespace Galaktic::Core::Systems;

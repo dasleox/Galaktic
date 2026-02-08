@@ -129,11 +129,6 @@ void Scene::Run()  {
     
     auto& player = m_ecsHelper->GetEntityByName("Player");
     auto& player_transform = player.Get<ECS::TransformComponent>();
-    m_textureHelper->SetTextureToEntity(player.GetID(), "musiala.jpeg");
-
-    m_ecsHelper->CreateStaticObject("boykisser");
-    auto& object = m_ecsHelper->GetEntityByName("boykisser");
-    m_animationHelper->SetAnimationToEntity(object.GetID(), "boykisser.gif");
 
     while (m_isRunning) {
         // Timing
@@ -151,7 +146,6 @@ void Scene::Run()  {
         m_window->PollEvents();
         if (m_window->ShouldClose()) {
             Save();
-            // @TODO Add something to tell if you really want to close the program
             Close();
         }
 
