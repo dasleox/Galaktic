@@ -16,72 +16,45 @@ find_package(SDL3_ttf CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(SDL3_Mixer CONFIG REQUIRED)
+find_package(Lua REQUIRED)
 
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS src/*.cpp)
 if(NOT ENGINE_SOURCES)
     message(FATAL_ERROR "No sources were found for Galaktic!")
 endif()
 
+add_library(LuaBridge INTERFACE)
+
+target_include_directories(LuaBridge INTERFACE
+    ${PROJECT_SOURCE_DIR}/libs/LuaBridge/Source
+    ${LUA_INCLUDE_DIR}
+)
+
+target_link_libraries(LuaBridge INTERFACE
+    ${LUA_LIBRARIES}
+)
+
 add_library(Galaktic SHARED ${ENGINE_SOURCES})
-add_library(luacpp SHARED)
-
-set(LUACPP_MODULES
-    libs/luacpp/Source/LuaCpp.cppm
-)
-
-file(GLOB_RECURSE LUACPP_CPP CONFIGURE_DEPENDS
-    libs/luacpp/Source/LuaContext.cpp
-    libs/luacpp/Source/LuaMetaObject.cpp
-    libs/luacpp/Source/LuaVersion.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/luacpp/Source/Engine/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/luacpp/Source/Registry/*.cpp
-)
-
-file(GLOB_RECURSE LUACPP_HEADERS CONFIGURE_DEPENDS
-    libs/luacpp/Source/Lua.hpp
-    libs/luacpp/Source/LuaCpp.hpp
-    libs/luacpp/Source/LuaContext.hpp
-    libs/luacpp/Source/LuaMetaObject.hpp
-    libs/luacpp/Source/LuaVersion.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/luacpp/Source/Engine/*.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/luacpp/Source/Registry/*.hpp
-)
-
-target_sources(luacpp
-    PRIVATE
-        ${LUACPP_CPP}
-        ${LUACPP_HEADERS}
-
-    PRIVATE FILE_SET CXX_MODULES
-        BASE_DIRS libs/luacpp/Source
-        FILES ${LUACPP_MODULES}
-)
-
-target_include_directories(luacpp PUBLIC include)
-target_link_libraries(luacpp PUBLIC lua)
-
-# ===================== Galaktic =====================
 
 target_include_directories(Galaktic PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libs/LuaBridge/Source>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-target_compile_definitions(Galaktic
-    PUBLIC
-        GKC_ENABLE_ASSERTS=$<CONFIG:DEBUG>
-        GKC_DEBUG=$<CONFIG:DEBUG>
-        GKC_EVENT_DEBUG=$<CONFIG:DEBUG>
-        GKC_PRINT_ADDRESSES=$<CONFIG:DEBUG>
-        GKC_PRINT_TEXTURE_ADDED=$<CONFIG:DEBUG>
+target_compile_definitions(Galaktic PUBLIC
+    GKC_ENABLE_ASSERTS=$<CONFIG:DEBUG>
+    GKC_DEBUG=$<CONFIG:DEBUG>
+    GKC_EVENT_DEBUG=$<CONFIG:DEBUG>
+    GKC_PRINT_ADDRESSES=$<CONFIG:DEBUG>
+    GKC_PRINT_TEXTURE_ADDED=$<CONFIG:DEBUG>
 )
 
 target_compile_options(Galaktic PUBLIC -Wextra)
-
 target_precompile_headers(Galaktic PRIVATE include/pch.hpp)
 
 target_link_libraries(Galaktic
-    PUBLIC
+    PRIVATE
         SDL3::SDL3
         SDL3_image::SDL3_image
         SDL3_ttf::SDL3_ttf
@@ -89,22 +62,19 @@ target_link_libraries(Galaktic
         fmt::fmt
         nlohmann_json::nlohmann_json
         SDL3_mixer::SDL3_mixer
-        luacpp
-        lua
+    PUBLIC
+        LuaBridge
 )
 
 if(UNIX AND NOT APPLE AND NOT MINGW)
     target_link_libraries(Galaktic PUBLIC x11 dl pthread)
 endif()
 
-# ===================== Sandbox =====================
-
 file(GLOB_RECURSE SANDBOX_SOURCES CONFIGURE_DEPENDS examples/sandbox/*.cpp)
 
 if(SANDBOX_SOURCES)
     add_executable(GalakticSandbox ${SANDBOX_SOURCES})
-    target_link_libraries(GalakticSandbox PRIVATE Galaktic)
-
+    target_link_libraries(GalakticSandbox PRIVATE Galaktic LuaBridge)
     set_target_properties(GalakticSandbox PROPERTIES
         RUNTIME_OUTPUT_DIR ${CMAKE_SOURCE_DIR}/bin
     )

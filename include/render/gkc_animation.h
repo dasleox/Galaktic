@@ -60,10 +60,10 @@ namespace Galaktic::Render {
 
     struct AnimationInfo {
         AnimationID id_;
-        unique_ptr<Animation> animation_;
+        shared_ptr<Animation> animation_;
     };
 
-    typedef unordered_map<string, unique_ptr<Render::AnimationInfo>> Animation_List;
+    typedef unordered_map<string, shared_ptr<Render::AnimationInfo>> Animation_List;
     typedef unordered_map<AnimationID, string> AnimationID_List;
 
     bool CheckAnimationExtension(const path& path);

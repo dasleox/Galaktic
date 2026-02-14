@@ -36,10 +36,10 @@ void Filesystem::FileWriter::WriteEntity(ofstream &file, const ECS::Entity &enti
 
     // Write all the components for the entity
     registry->ForEachComponentDo(id, [&](const ComponentTypeInfo& info, const any& comp) {
-        if (info.isTag_)
+        if (info.m_isTag)
             return;
 
-        info.serialize(comp, file);
+        info.m_serialize(comp, file);
     });
 
     #if GKC_DEBUG

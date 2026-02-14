@@ -27,7 +27,7 @@
 namespace Galaktic::Audio {
     class AudioFile;
     struct AudioInfo;
-    typedef unordered_map<string, unique_ptr<AudioInfo>> Audio_List;
+    typedef unordered_map<string, shared_ptr<AudioInfo>> Audio_List;
 }
 
 namespace Galaktic::Core::Managers {
@@ -56,21 +56,21 @@ namespace Galaktic::Core::Managers {
             /**
              * @param folder folder path (audio folder)
              */
-            explicit AudioManager(const path& folder);
+            explicit AudioManager(const string& folder);
 
             /**
              * Adds an audio file to the list, an ID for the file
              * its assigned automatically,
              * @param filepath audio filepath
              */
-            void AddAudioFile(const path& filepath);
+            static void AddAudioFile(const string& filepath);
 
             /**
              * Removes an audio file from the list, all tracks referring
              * to the file will be stopped
              * @param name audio filename
              */
-            void RemoveAudioFile(const string& name);
+            static void RemoveAudioFile(const string& name);
 
             /**
              * Plays a track from an audio file depending on the times
@@ -80,14 +80,14 @@ namespace Galaktic::Core::Managers {
              * @param name audio filename
              * @param loops times to loop
              */
-            void PlayAudioFile(const string& name, int loops = 0);
+            static void PlayAudioFile(const string& name, int loops = 0);
 
             /**
              * Plays a track indefinitely until stopped or dereferenced
              * , the audio file should exist in the list in order to play
              * @param name music filename
              */
-            void PlayMusicFile(const string& name);
+            static void PlayMusicFile(const string& name);
 
             /**
              * Stops a track using the audio file's name, a fade time in
@@ -98,7 +98,7 @@ namespace Galaktic::Core::Managers {
              * @note Only the first track played will be stopped, if there are
              * more tracks you would like to stop use \c StopAllTracksFromSound
              */
-            void StopSound(const string& name, Sint64 fadeOutMs = 0);
+            static void StopSound(const string& name, Sint64 fadeOutMs = 0);
 
             /**
              * Stops all tracks related to the audio file's name, a fade time in
@@ -106,14 +106,14 @@ namespace Galaktic::Core::Managers {
              * @param name audio filename
              * @param fadeOutMs fade ms
              */
-            void StopAllTracksFromSound(const string& name, Sint64 fadeOutMs = 0);
+            static void StopAllTracksFromSound(const string& name, Sint64 fadeOutMs = 0);
 
             /**
              * Stops \b ALL tracks inside the audio list, a fade time in
              * milliseconds can be added as parameter
              * @param fadeOutMs fade ms
              */
-            void StopAllSounds(Sint64 fadeOutMs = 0) const;
+            static void StopAllSounds(Sint64 fadeOutMs = 0);
 
             /**
              * @brief Returns a pointer of an audio file inside the list
@@ -122,27 +122,31 @@ namespace Galaktic::Core::Managers {
              * @param name audio filename
              * @return A pointer to the audio file, nullptr if no file was found
              */
-            Audio::AudioFile* GetAudioFile(const string& name);
+            static shared_ptr<Audio::AudioFile> GetAudioFile(const string& name);
 
-            Audio::Audio_List& GetAudioList() { return m_audioFiles; }
+            static shared_ptr<Audio::AudioFile> GetAudioFile(AudioID id);
+
+            static shared_ptr<Audio::AudioInfo> GetAudioInfo(const string& name);
+
+            static Audio::Audio_List& GetAudioList() { return m_audioFiles; }
 
             /**
              * Prints the list of all audio files with their filenames,
              * ID's and address in memory
              */
-            void PrintList() const;
+            static void PrintList();
         private:
-            Audio::Audio_List m_audioFiles;
-            std::multimap<AudioID, MIX_Track*> m_activeTracks;
-            SDL_AudioSpec m_audioSpec{};
-            SDL_AudioDeviceID m_deviceID;
-            MIX_Mixer* m_mixer = nullptr;
+            static Audio::Audio_List m_audioFiles;
+            static std::multimap<AudioID, MIX_Track*> m_activeTracks;
+            static SDL_AudioSpec m_audioSpec;
+            static SDL_AudioDeviceID m_deviceID;
+            static MIX_Mixer* m_mixer;
 
             /**
              * Helper to register a track inside the track list
              * @param id AudioInfo's id
              * @param track Track created from an AudioFile
              */
-            void RegisterTrack(AudioID id, MIX_Track* track);
+            static void RegisterTrack(AudioID id, MIX_Track* track);
     };
 }

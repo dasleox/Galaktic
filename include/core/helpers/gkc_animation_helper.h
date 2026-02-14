@@ -27,13 +27,10 @@
 namespace Galaktic::Core::Managers {
     class ECS_Manager;
 }
-
-
 namespace Galaktic::Core::Helpers {
     class AnimationHelper {
         public:
             AnimationHelper(Managers::ECS_Manager& ecsManager);
-
             void SetAnimationToEntity(EntityID id, const string& animationName);
         private:
             Managers::ECS_Manager& m_ecsManager;

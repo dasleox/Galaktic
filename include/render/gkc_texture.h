@@ -37,6 +37,7 @@ namespace Galaktic::Render {
     class Texture {
         public:
             Texture(const path& path, SDL_Renderer* renderer);
+            ~Texture();
             [[nodiscard]] SDL_Texture* GetSDLTexture() const { return m_texture; }
             bool IsValid() const { return m_texture != nullptr; }
         private:
@@ -48,10 +49,10 @@ namespace Galaktic::Render {
      */
     struct TextureInfo {
         TextureID id_;
-        unique_ptr<Texture> texture_;
+        shared_ptr<Texture> texture_;
     };
 
-    typedef unordered_map<string, unique_ptr<TextureInfo>> Texture_List;
+    typedef unordered_map<string, shared_ptr<TextureInfo>> Texture_List;
 
     /**
      * @brief Checks if the file is an image file

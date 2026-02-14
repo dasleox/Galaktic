@@ -25,16 +25,26 @@
 #include <pch.hpp>
 
 namespace Galaktic::Script {
-
     class GKC_Script {
         public:
-            explicit GKC_Script(const path& scriptPath);
-            explicit GKC_Script(const string& scriptName, const string& scriptString);
+            explicit GKC_Script(const path& scriptPath, lua_State* luaState);
+            explicit GKC_Script(const string& scriptName, const string& scriptString, lua_State* luaState);
 
             void RunScript();
-            LuaCpp::LuaContext& GetContext() { return m_context; }
+            lua_State* GetLuaState() { return m_luaState; }
+            
+            template<typename T>
+            T GetGlobal(const string& name) {
+                return luabridge::getGlobal(m_luaState, name.c_str());
+            }
+
+            template<typename T>
+            void SetGlobal(const string& name, const T& value) {
+                luabridge::setGlobal(m_luaState, value, name.c_str());
+            }
+            
         private:
-            LuaCpp::LuaContext m_context;
+            lua_State* m_luaState;
             string m_scriptName;
     };
 
@@ -45,11 +55,11 @@ namespace Galaktic::Script {
 
     struct ScriptInfo {
         ScriptID scriptID_;
-        GKC_Script script_;
+        shared_ptr<Script::GKC_Script> script_;
         ScriptType scriptType_;
     };
     
-    typedef map<string, ScriptInfo> Script_List;
+    typedef unordered_map<string, ScriptInfo> Script_List;
 
     extern bool CheckScriptExtension(const path& path);
 }

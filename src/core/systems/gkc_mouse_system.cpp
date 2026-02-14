@@ -6,6 +6,12 @@
 using namespace Galaktic::Core::Systems;
 using namespace Galaktic::Core;
 
+MouseSystem* Mouse::m_mouseSystem = nullptr;
+unordered_map<string, MouseClick> Mouse::m_clickMap = {
+    {"LeftClick", MouseClick::LeftClick},
+    {"RightClick", MouseClick::RightClick},
+    {"MiddleClick", MouseClick::MiddleClick}
+};
 
 void MouseSystem::OnEvent(Events::GKC_Event &e) {
     Events::GKC_EventDispatcher dispatcher(e);
@@ -36,4 +42,20 @@ void MouseSystem::OnEvent(Events::GKC_Event &e) {
             return false;
         }
     );
+}
+
+
+Mouse::Mouse(MouseSystem* mouseSystem) {
+    m_mouseSystem = mouseSystem;
+}
+
+bool Mouse::IsMouseDown(MouseClick click) {
+    return m_mouseSystem->IsMouseClick(click);
+}
+
+MouseClick Mouse::StringToMouseClick(const string& type) {
+    auto it = m_clickMap.find(type);
+    if(it != m_clickMap.end())
+        return it->second;
+    return MouseClick::LeftClick;
 }

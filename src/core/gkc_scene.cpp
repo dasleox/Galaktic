@@ -26,9 +26,15 @@
 #include "core/helpers/gkc_texture_helper.h"
 #include "core/helpers/gkc_animation_helper.h" 
 #include "core/managers/gkc_animation_man.h"
+#include "script/gkc_library.h"
+#include "ecs/gkc_component_registry.h"
 
 using namespace Galaktic::Core;
 using namespace Galaktic::Filesystem;
+
+void DummyFunction() {
+    GKC_ENGINE_INFO("Im so bi :D");
+}
 
 Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformation& device_information, const path& path)
     : m_sceneInfo({name, sizeof(Scene)}), m_managerWrapper(wrapper) {
@@ -50,7 +56,7 @@ Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformati
     m_registry = new ECS::Registry();
     m_systemList.reserve(GKC_SYSTEMS_COUNTER);
     m_ecsManager = new Managers::ECS_Manager(m_registry);
-    m_ecsHelper = new Helpers::ECS_Helper(*m_ecsManager);
+    m_ecsHelper = new Helpers::ECS_Helper(m_ecsManager);
     m_textureHelper = new Helpers::TextureHelper(*m_ecsManager);
     m_animationHelper = new Helpers::AnimationHelper(*m_ecsManager);
     m_managerWrapper->m_textureManager->CreateMissingTexture(GKC_GET_RENDERER(m_window));
@@ -73,6 +79,8 @@ Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformati
     auto window_system = make_shared<Systems::WindowSystem>();
     auto camera_system = make_shared<Systems::CameraSystem>(camera);
     auto entity_event_system = make_shared<Systems::ECS_EventSystem>(*m_ecsManager);
+
+    //@FIX ME use following only a camera
     camera_system->SetFollowEntity(2);
 
 
@@ -92,6 +100,38 @@ Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformati
     GKC_RELEASE_ASSERT(m_ecsHelper != nullptr, "Entity manager helper is NULL!");
     GKC_RELEASE_ASSERT(m_systemList.size() >= GKC_SYSTEMS_COUNTER
         || !m_systemList.empty(), "system manager is NULL!");
+}
+
+Scene::~Scene() {
+    // CRITICAL FIX: Properly destroy all allocated resources
+    GKC_ENGINE_INFO("Cleaning up scene resources...");
+    
+    // Clear all entities and their components first
+    auto& entityList = m_ecsManager->GetEntityList();
+    vector<EntityID> entityIds;
+    for (auto& [id, entity] : entityList) {
+        entityIds.push_back(id);
+    }
+    for (auto id : entityIds) {
+        m_ecsManager->DeleteEntity(id);
+    }
+    
+    // Clear component registry
+    ECS::ComponentRegistry::Clear();
+    
+    // Delete helper objects
+    delete m_textureHelper;
+    delete m_animationHelper;
+    delete m_ecsHelper;
+    
+    // Delete ECS Manager and Registry
+    delete m_ecsManager;
+    delete m_registry;
+    
+    // Delete Window Manager
+    delete m_windowManager;
+    
+    GKC_ENGINE_INFO("Scene resources cleaned up successfully!");
 }
 
 void Scene::Run()  {
@@ -130,6 +170,9 @@ void Scene::Run()  {
     auto& player = m_ecsHelper->GetEntityByName("Player");
     auto& player_transform = player.Get<ECS::TransformComponent>();
 
+    auto script = m_managerWrapper->m_scriptManager->GetScriptFromName("PlayMusic.lua");
+    script->RunScript();
+
     while (m_isRunning) {
         // Timing
         Clock::Update();
@@ -138,10 +181,13 @@ void Scene::Run()  {
         accumulator += delta_time;
 
         // Event Handling
+
         Debug::Console::GetDebugInformation()->ram_usage_ = Debug::GetGalakticRAMUsage();
-        Debug::Console::GetDebugInformation()->fps_ = static_cast<float>(1 / delta_time);
-        Debug::Console::GetDebugInformation()->x_coordinate_ = player_transform.location_.x;
-        Debug::Console::GetDebugInformation()->y_coordinate_ = player_transform.location_.y;
+        if(delta_time > 0) {
+            Debug::Console::GetDebugInformation()->fps_ = static_cast<float>(1 / delta_time);
+        }
+        Debug::Console::GetDebugInformation()->x_coordinate_ = player_transform.m_location.x;
+        Debug::Console::GetDebugInformation()->y_coordinate_ = player_transform.m_location.y;
 
         m_window->PollEvents();
         if (m_window->ShouldClose()) {
@@ -152,7 +198,8 @@ void Scene::Run()  {
         // Engine Physics management
         while (accumulator >= FIXED_DELTA_TIME) {
             // Physics System
-            physics_system->Update(m_ecsManager->GetEntityList(), static_cast<float>(delta_time));
+            // @todo Remake this class and how NOW it behaves to new entities types
+            ///physics_system->Update(m_ecsManager->GetEntityList(), static_cast<float>(delta_time));
             movement_system->Update(m_ecsManager->GetEntityList(), static_cast<float>(delta_time));
             camera_system->Update(m_ecsManager->GetEntityList(), static_cast<float>(delta_time)
                 , m_window->GetWidth(), m_window->GetHeight());
@@ -223,7 +270,7 @@ void Scene::CreatePlayer() {
 
 void Scene::CreateCamera(const string& name) {
     auto cameraComponent = ECS::CameraComponent();
-    cameraComponent.isActive_ = true;
+    cameraComponent.m_isActive = true;
     m_ecsHelper->CreateCameraEntity(name);
     m_ecsHelper->ModifyEntity(name, cameraComponent);
 }

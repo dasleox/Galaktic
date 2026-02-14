@@ -6,7 +6,6 @@
 using namespace Galaktic;
 
 Audio::AudioFile::AudioFile(const path &filepath, MIX_Mixer* mixer) {
-    GKC_ENGINE_INFO("Loading {0}...", filepath.string());
     if (filepath.empty() || !Filesystem::CheckFile(filepath)) {
         GKC_ENGINE_ERROR("given path doesn't exists!");
         return;

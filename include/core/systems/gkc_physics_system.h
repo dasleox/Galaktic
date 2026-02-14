@@ -43,9 +43,10 @@ namespace Galaktic::Core::Systems {
         public:
             /**
              * @param gravity Gravity applied to the scene
+             * @param floorHeight Height of the floor
              */
-             explicit PhysicsSystem(float gravity = -9.81f)
-                    : m_gravity(gravity) {}
+             explicit PhysicsSystem(float gravity = -9.81f, float floorHeight = 0.f, bool useFloor = true)
+                    : m_gravity(gravity), m_floorHeight(floorHeight), m_useFloor(useFloor) {}
 
             /**
              * @brief Applies physics to entities
@@ -75,17 +76,12 @@ namespace Galaktic::Core::Systems {
             void CleanForces(const unordered_map<EntityID, ECS::Entity>& list);
 
             /**
-             * @brief Apply jump force to the player entity
-             * @param entity Player entity
-             */
-            void ApplyJump(ECS::Entity& entity);
-            // void CollideEntities(const vector<ECS::Entity>& list, float dt);
-
-            /**
              * @brief Applies collision if the entities touch the floor of the scene (y = 0.0f)
              * @param list List of entities
              */
             void ResolveGroundCollision(const unordered_map<EntityID, ECS::Entity>& list);
             float m_gravity;
+            float m_floorHeight;
+            bool m_useFloor;
     };
 }

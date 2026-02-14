@@ -123,12 +123,14 @@ inline constexpr double FIXED_DELTA_TIME = 1.0 / 60;
     inline const path GKC_ANIMATION_PATH = "assets\\animations";
     inline const path GKC_SCENE_PATH = "scenes";
     inline const path GKC_SCRIPT_PATH = "scripts";
+    inline const path GKC_CONFIG_PATH = "config";
 #else
     inline const path GKC_TEXTURE_PATH = "assets/textures";
     inline const path GKC_SOUND_PATH = "assets/sounds";
     inline const path GKC_ANIMATION_PATH = "assets/animations"
     inline const path GKC_SCENE_PATH = "assets/scenes"
     inline const path GKC_SCRIPT_PATH = "scripts";
+    inline const path GKC_CONFIG_PATH = "config";
 #endif
 
 inline constexpr SDL_Color WHITE_COLOR = {255, 255, 255, 255};
@@ -265,6 +267,17 @@ namespace Galaktic::Core {
         if (pos == std::string::npos)
             return filename;
         return filename.substr(0, pos);
+    }
+
+    template<typename Key, typename Value>
+    inline string GenerateUniqueName(const unordered_map<Key, Value>& map, const string& baseName) {
+        string uniqueName = baseName;
+        int counter = 2;
+        while (map.find(uniqueName) != map.end()) {
+            uniqueName = baseName + std::to_string(counter);
+            counter++;
+        }
+        return uniqueName;
     }
 }
 

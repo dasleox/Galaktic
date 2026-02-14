@@ -26,7 +26,7 @@ void Helpers::TextureHelper::SetTextureToEntity(EntityID id, const string& textu
     
     if(entity->Has<ECS::TextureComponent>()) {
         auto& textureComp = entity->Get<ECS::TextureComponent>();
-        textureComp.id_ = textureID;
+        textureComp.m_id = textureID;
     } else {
         m_ecsManager.AddComponentToEntity<ECS::TextureComponent>(id, textureID);
     }   

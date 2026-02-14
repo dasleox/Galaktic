@@ -135,10 +135,25 @@ namespace Galaktic::ECS {
             static void RegisterComponentByType(const type_index& type, EntityID id, bool isTag) {
                 auto it = m_compTypes.find(type);
                 if (it == m_compTypes.end())
-                    GKC_ASSERT(false, "Attempted to deserialize unregistered component type");
+                    GKC_RELEASE_ASSERT(false, "Attempted to deserialize unregistered component type");
             }
+            
+            static void UnregisterComponentByType(const type_index& type) {
+                if(m_compTypes.contains(type)) {
+                    m_compTypes.erase(type);
+                }
+            }
+
             static bool IsRegistered(const type_index& type) {
                 return m_compTypes.contains(type);
+            }
+
+            /**
+             * @brief Clears all registered component types
+             * @note Useful for cleanup between scenes
+             */
+            static void Clear() {
+                m_compTypes.clear();
             }
 
             static unordered_map<type_index, ComponentTypeInfo>& GetComponentTypes() {

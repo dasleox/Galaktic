@@ -2,6 +2,8 @@
 
 #include <audio/gkc_audio.h>
 
+#include <config/gkc_config.h>
+
 #include <core/events/gkc_event.h>
 #include <core/events/gkc_dispatcher.h>
 
@@ -51,3 +53,4 @@
 #include <render/gkc_animation.h>
 
 #include <script/gkc_script.h>
+#include <script/gkc_library.h>

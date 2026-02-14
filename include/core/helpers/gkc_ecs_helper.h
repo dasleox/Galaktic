@@ -30,7 +30,6 @@ namespace Galaktic::ECS {
     class Entity;
 }
 
-
 namespace Galaktic::Core::Helpers {
     /**
      * @class ECS_Helper
@@ -44,19 +43,19 @@ namespace Galaktic::Core::Helpers {
             /**
              * @param escManager ECSManager instance
              */
-            explicit ECS_Helper(Managers::ECS_Manager& escManager);
+            explicit ECS_Helper(Managers::ECS_Manager* escManager);
 
             /**
              * @brief Creates a player entity with default properties
              * @param name Name of the player
              */
-            void CreatePlayer(const string& name);
+            static ECS::Entity CreatePlayer(const string& name);
 
             /**
              * @brief Creates a static object with default properties
              * @param name Name of the object
              */
-            void CreateStaticObject(const string& name);
+            static ECS::Entity CreateStaticObject(const string& name);
 
             /**
              * @brief Creates a physics object with default properties
@@ -64,19 +63,19 @@ namespace Galaktic::Core::Helpers {
              *
              * This creates an object with simple collision properties
              */
-            void CreatePhysicsObject(const string& name);
+            static ECS::Entity CreatePhysicsObject(const string& name);
 
             /**
              * @brief Creates a light entity
              * @param name Name of the light entity
              */
-            void CreateLightEntity(const string& name);
+            static ECS::Entity CreateLightEntity(const string& name);
 
             /**
              * @brief Creates a camera entity
              * @param name Name of the camera
              */
-            void CreateCameraEntity(const string& name);
+            static ECS::Entity CreateCameraEntity(const string& name);
 
             /**
              * @brief Modifies a component based on the type, if the component doesn't exist in
@@ -86,28 +85,47 @@ namespace Galaktic::Core::Helpers {
              * @param component Component instance to change
              */
             template<typename Component>
-            void ModifyEntity(const string& name, Component& component) {
-                auto id = m_ecsManager.GetNameToEntityList().find(name)->second;
-                if (m_ecsManager.GetEntityByName(name)->Has<Component>()) {
-                    auto& oldComponent = m_ecsManager.GetComponentOfEntity<Component>(id);
+            static void ModifyEntity(const string& name, Component& component) {
+                auto id = m_ecsManager->GetNameToEntityList().find(name)->second;
+                if (m_ecsManager->GetEntityByName(name)->Has<Component>()) {
+                    auto& oldComponent = m_ecsManager->GetComponentOfEntity<Component>(id);
                     oldComponent = component;
                 }
                 else {
                     GKC_ENGINE_INFO("Component {0} added to '{1}'",
                         Debug::Logger::DemangleTypename(typeid(Component).name())
                         , name);
-                    m_ecsManager.AddComponentToEntity<Component>(id, component);
+                    m_ecsManager->AddComponentToEntity<Component>(id, component);
                 }
             }
 
+            static void DeleteEntity(const string& name);
+
+            static void AddComponentToEntity(const string& name, const type_index& type, any& component);
+            static void RemoveComponentFromEntity(const string& name, const type_index& type);
             /**
              * @brief Gets an entity by name
              * @param name Entity's name
              * @return A reference to the entity given
              */
-            [[nodiscard]] ECS::Entity& GetEntityByName(const string& name) const;
+            [[nodiscard]] static ECS::Entity& GetEntityByName(const string& name);
         private:
-            Managers::ECS_Manager& m_ecsManager;
-            EntityID m_id = InvalidEntity;
+            static Galaktic::Core::Managers::ECS_Manager* m_ecsManager;
+            static EntityID m_id;
+
+            static bool IsLightEntity(const string& name);
+            static bool IsCameraEntity(const string& name);
+            static bool IsPlayerEntity(const string& name);
+            static bool IsStaticObjectEntity(const string& name);
+            static bool IsPhysicsObjectEntity(const string& name);
+            static bool HasNameComponent(const type_index& type);
+
+            static bool IsLightComponent(const type_index& type);
+            static bool IsCameraComponent(const type_index& type);
+            static bool IsPlayerComponent(const type_index& type);
+            static bool IsStaticObjectComponent(const type_index& type);
+            static bool IsPhysicsObjectComponent(const type_index& type);
+
+            static bool ValidateComponentCompatibility(const string& name, const type_index& type);
     };
 }

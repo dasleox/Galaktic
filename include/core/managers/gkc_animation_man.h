@@ -27,26 +27,25 @@
 namespace Galaktic::Render {
     class Animation;
     struct AnimationInfo;
-    typedef unordered_map<string, unique_ptr<Render::AnimationInfo>> Animation_List;
+    typedef unordered_map<string, shared_ptr<Render::AnimationInfo>> Animation_List;
     typedef unordered_map<AnimationID, string> AnimationID_List;
 }
 
 namespace Galaktic::Core::Managers {
     class AnimationManager {
         public:
-            explicit AnimationManager(const path& folderPath);
-            static void AddAnimationPath(const path& filePath);
-            static void AddAnimation(const path& filePath, SDL_Renderer* renderer);
+            explicit AnimationManager(const string& folderPath);
+            static void AddAnimationPath(const string& filePath);
+            static void AddAnimation(const string& filePath, SDL_Renderer* renderer);
             
-            static void LoadAnimation(const path& filePath, SDL_Renderer* renderer);
+            static void LoadAnimation(const string& filePath, SDL_Renderer* renderer);
             static void LoadAllAnimations(SDL_Renderer* renderer);
             
             static void DeleteAnimation(const string& name);
             
-            static Render::Animation* GetAnimation(const string& name);
-            static Render::Animation* GetAnimation(AnimationID id);
-            
-            static Render::AnimationInfo* GetAnimationInfo(const string& name);
+            static shared_ptr<Render::Animation> GetAnimation(const string& name);
+            static shared_ptr<Render::Animation> GetAnimation(AnimationID id);
+            static shared_ptr<Render::AnimationInfo> GetAnimationInfo(const string& name);
             
             static void UpdateAll(float deltaTime);
             static void PrintList();

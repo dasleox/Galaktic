@@ -103,6 +103,15 @@ namespace Galaktic::Filesystem {
 	extern vector<string> GetFilenamesInFolder(const path& folder);
 
 	/**
+	 * @brief Get the folder's paths in a folder path
+	 * 
+	 * @param folder folder's path
+	 * @return vector with the folder's path, empty vector if no folders were found
+	 * 		   inside the specified folder
+	 */
+	extern vector<string> GetFoldersInFolder(const path& folder);
+
+	/**
 	 * @brief Extracts the filename from a full file path.
 	 * @param fullPath Full file path.
 	 * @return Filename as a string.
@@ -132,7 +141,8 @@ namespace Galaktic::Filesystem {
 
 	const inline vector<path> APP_DIRECTORY_STRUCTURE = {
 		"assets", "assets/textures", "assets/sounds", "assets/animations",
-		"scenes", "scripts"
+		"scenes", "scripts", "scripts/local", "scripts/modules",
+		"scripts/modules/Galaktic", "config"
 	};
 }
 

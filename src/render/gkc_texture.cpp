@@ -19,6 +19,14 @@ Texture::Texture(const path &path, SDL_Renderer* renderer) {
     }
 }
 
+Texture::~Texture() {
+    // CRITICAL FIX: Destroy the SDL_Texture when Texture is destroyed
+    if (m_texture != nullptr) {
+        SDL_DestroyTexture(m_texture);
+        m_texture = nullptr;
+    }
+}
+
 bool Galaktic::Render::CheckTextureExtension(const path &path) {
     if (path.empty() || !Filesystem::CheckFile(path)) {
         return false;

@@ -25,7 +25,7 @@ void AnimationHelper::SetAnimationToEntity(EntityID id, const string& animationN
     
     if(entity->Has<ECS::AnimationComponent>()) {
         auto& animationComp = entity->Get<ECS::AnimationComponent>();
-        animationComp.id_ = animationID;
+        animationComp.m_id = animationID;
     } else {
         m_ecsManager.AddComponentToEntity<ECS::AnimationComponent>(id, animationID);
     }   

@@ -77,6 +77,19 @@ namespace Galaktic::Core::Systems {
     inline MouseClick SDL_MouseButtonToClickEnum(SDL_MouseButtonFlags button) {
         return static_cast<MouseClick>(button);
     }
+
+    class Mouse {
+        public:
+            Mouse(MouseSystem* mouseSystem);
+
+            static bool IsMouseDown(MouseClick type);
+        private:
+            static MouseSystem* m_mouseSystem ;
+            static unordered_map<string, MouseClick> m_clickMap;
+            static MouseClick StringToMouseClick(const string& type);
+    };
+
+    
 }
 
 /**

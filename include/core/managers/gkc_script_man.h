@@ -28,19 +28,22 @@
 namespace Galaktic::Core::Managers {
     class ScriptManager {
         public:
-            ScriptManager(const path& folder);
+            ScriptManager(const string& folder, lua_State* luaState);
 
             static void AddInlineScript(const string& scriptName, const string& script);
-            static void AddScriptFromFile(const path& scriptPath);
+            static void AddScriptFromFile(const string& scriptPath);
 
+            static void RunScript(const string& scriptName);
             static void DeleteScriptFromList(const string& scriptName);
 
-            static Script::GKC_Script* GetScriptFromName(const string& scriptName);
-            static Script::GKC_Script* GetScriptFromID(ScriptID id);
+            static shared_ptr<Script::GKC_Script> GetScriptFromName(const string& scriptName);
+            static shared_ptr<Script::GKC_Script> GetScriptFromID(ScriptID id);
 
             static Script::Script_List& GetScriptList() { return m_scriptList; }
         private:
             static Script::Script_List m_scriptList;
-            static std::multimap<ScriptID, string> m_IDToNameList;
+            static unordered_map<ScriptID, string> m_IDToNameList;
+            static lua_State* m_luaState;
+            static void ExecuteGalakticModule();
     };
 }

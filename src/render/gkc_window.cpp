@@ -1,6 +1,7 @@
 #include <render/gkc_window.h>
 #include <core/gkc_logger.h>
 #include <core/events/gkc_event.h>
+#include <filesys/gkc_filesys.h>
 
 using namespace Galaktic::Render;
 bool Window::m_isFullscreen = false;
@@ -22,7 +23,6 @@ Window::Window(const string& title, Uint32 width, Uint32 height, Window_Type typ
 
     SDL_SyncWindow(m_window);
     m_ID = SDL_GetWindowID(m_window);
-    GKC_ENGINE_INFO("'{0}' window built successfully!", title);
 }
 
 Window::~Window() {
@@ -75,6 +75,8 @@ SDL_WindowFlags Window::TranslateSDLType(const Window_Type& type) {
 
 void Window::SDL_KeyboardEventCheck(SDL_Event &e) {
     using namespace Galaktic::Core::Events;
+    GKC_RELEASE_ASSERT(m_callback != nullptr,"Event callbacks are not registered, please register a callback function from the scene");
+
     switch (e.type) {
         case SDL_EVENT_KEY_DOWN: {
             KeyPressedEvent event(e.key.key);
@@ -89,6 +91,7 @@ void Window::SDL_KeyboardEventCheck(SDL_Event &e) {
 
 void Window::SDL_WindowEventCheck(SDL_Event &e) {
     using namespace Galaktic::Core::Events;
+    GKC_RELEASE_ASSERT(m_callback != nullptr,"Event callbacks are not registered, please register a callback function from the scene");
     switch (e.type) {
         case SDL_EVENT_WINDOW_RESIZED: {
             WindowResizeEvent event(e.window.data1, e.window.data2, m_windowID);
@@ -103,10 +106,24 @@ void Window::SDL_WindowEventCheck(SDL_Event &e) {
 
 void Window::SDL_MouseEventCheck(SDL_Event &e) {
     using namespace Galaktic::Core::Events;
+    GKC_RELEASE_ASSERT(m_callback != nullptr,"Event callbacks are not registered, please register a callback function from the scene");
     switch (e.type) {
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
             MouseClickEvent event(e.motion.x, e.motion.y, e.button.button);
             m_callback(event); break;
         }
     }
+}
+
+void Galaktic::Render::Window::SetIcon(const path &iconPath) {
+    if(!Filesystem::CheckFile(iconPath)) {
+        GKC_ENGINE_ERROR("Icon path doesn't exist");
+        return;
+    }
+    SDL_Surface* surface = IMG_Load(iconPath.string().c_str());
+    if(surface == nullptr) {
+        GKC_ENGINE_ERROR("Failed to create icon!");
+        return;
+    }
+    SDL_SetWindowIcon(m_window, surface);
 }

@@ -57,14 +57,14 @@ namespace Galaktic::Audio {
      */
     struct AudioInfo {
         AudioID id_;
-        unique_ptr<AudioFile> audioFile_;
+        shared_ptr<AudioFile> audioFile_;
     };
 
     /**
-     * @brief Type for saving the filename <b>(includes extension, e.g: file.mp3) </b> and
-     *        a unique_ptr to an \c AudioInfo struct
+     * @brief Type for saving the filename (includes extension, e.g: file.mp3)  and
+     *        a shared_ptr to an \c AudioInfo struct
      */
-    typedef unordered_map<string, unique_ptr<AudioInfo>> Audio_List;
+    typedef unordered_map<string, shared_ptr<AudioInfo>> Audio_List;
 
     /**
      * @brief Checks if the file is an audio file

@@ -45,6 +45,6 @@ shared_ptr<Galaktic::Render::Window> Managers::WindowManager::GetWindow(GKC_Wind
     if (m_windowList.contains(id)) {
         return m_windowList[id];
     }
-    GKC_ENGINE_WARNING("Window with ID: {0} not found!", id);
+    GKC_ENGINE_WARNING("Window with ID: {0} to retrieve doesn't exist!", id);
     return nullptr;
 }

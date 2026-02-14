@@ -139,6 +139,18 @@ namespace Galaktic::Core::Managers {
                 }
             }
 
+            void DeleteRawComponentFromEntity(EntityID id, const type_index& type) {
+                auto it = m_entityList.find(id);
+                if (it == m_entityList.end())
+                    return;
+
+                auto& componentPool = m_registry->GetComponentPools()[type];
+                if(ECS::ComponentRegistry::IsRegistered(type) && componentPool.contains(id)) {
+                    ECS::ComponentRegistry::UnregisterComponentByType(type);
+                    componentPool.erase(id);
+                }
+            }
+
             /**
              * @brief Adds a raw tag to an entity by specifying its type
              *
@@ -168,14 +180,15 @@ namespace Galaktic::Core::Managers {
              * @param name Name of the entity
              */
             template<typename T>
-            void CreateEntity(const string& name) {
+            ECS::Entity CreateEntity(const string& name) {
                 EntityID id = m_entityList.size() + 1;
                 ECS::Entity entity = ECS::Entity(id, m_registry);
                 m_entityList.emplace(id, entity);
-
-                AddComponentToEntity<ECS::NameComponent>(id, name);
+                string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, name);
+                AddComponentToEntity<ECS::NameComponent>(id, uniqueName);
                 AddTagToEntity<T>(id);
-                m_nameToEntityList.emplace(name, id);
+                m_nameToEntityList.emplace(uniqueName, id);
+                return entity;
             }
 
             /**
@@ -192,9 +205,10 @@ namespace Galaktic::Core::Managers {
                 ECS::Entity entity = ECS::Entity(id, m_registry);
                 m_entityList.emplace(id, entity);
 
-                AddComponentToEntity<ECS::NameComponent>(id, name);
+                string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, name);
+                AddComponentToEntity<ECS::NameComponent>(id, uniqueName);
                 AddTagByType(id, type);
-                m_nameToEntityList.emplace(name, id);
+                m_nameToEntityList.emplace(uniqueName, id);
             }
 
             /**
@@ -249,12 +263,10 @@ namespace Galaktic::Core::Managers {
                     return;
 
                 ECS::NameComponent& nameComp = m_entityList[id].Get<ECS::NameComponent>();
-                m_nameToEntityList.erase(nameComp.name_);
-
-                nameComp.name_ = newName;
-                m_nameToEntityList.emplace(newName, id);
+                string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, newName);
+                nameComp.m_name = uniqueName;
+                m_nameToEntityList.insert_or_assign(nameComp.m_name, id);
             }
-
             /**
              * @brief Returns a pointer to the specified entity by name
              * @param name Entity's name
@@ -286,37 +298,16 @@ namespace Galaktic::Core::Managers {
             }
 
             /**
-             * @brief Returns a vector of entity pointers which have the same names
-             * @param name Entity's name
-             * @return A vector of entity pointers, an empty vector if no entities were found
-             */
-            vector<ECS::Entity*> GetEntitiesByName(const string& name) {
-                vector<ECS::Entity*> entities;
-                auto [first, last] = m_nameToEntityList.equal_range(name);
-                for (auto it = first; it != last; ++it) {
-                    entities.push_back(GetEntityByName(it->first));
-                }
-
-                if (entities.empty()) {
-                    GKC_ENGINE_INFO("No entities were found");
-                    return {};
-                }
-
-                PrintEntitiesIntegrity(entities);
-                return entities;
-            }
-
-            /**
              * @brief Prints a list of which entities are valid or invalid,
              *        if the ID is 0 that means the entity is invalid, valid otherwise
-             * @param entities Vector of entity pointers
+             * @param entities Vector of entity references
              */
-            void PrintEntitiesIntegrity(const vector<ECS::Entity*>& entities) {
+            void PrintEntitiesIntegrity(const vector<ECS::Entity>& entities) {
                 for (auto& entity : entities) {
-                    bool isValid = entity != nullptr;
+                    bool isValid = entity.IsValid();
                     EntityID id = InvalidEntity;
                     if (isValid) {
-                        id = entity->GetID();
+                        id = entity.GetID();
                     }
 
                     // Helper to print "INVALID" or "VALID"
@@ -329,18 +320,6 @@ namespace Galaktic::Core::Managers {
                         }
                     }();
                     GKC_ENGINE_INFO("Entity (ID: {0}) -> {1}", id, InvalidOrValidString);
-                }
-            }
-
-            /**
-             * @brief Prints a list with all the entities that share the same name (key)
-             *        along with their ID's
-             * @param name Entity's name
-             */
-            void PrintEntitiesByName(const string& name) {
-                auto [first, last] = m_nameToEntityList.equal_range(name);
-                for (auto it = first; it != last; ++it) {
-                    GKC_ENGINE_INFO("{0} (ID: )", name, it->second);
                 }
             }
 
@@ -364,7 +343,7 @@ namespace Galaktic::Core::Managers {
                 if (it != m_entityList.end()) {
                     ECS::IfComponentExists<ECS::NameComponent>(it->second, [&]() {
                         auto& nameComp = it->second.Get<ECS::NameComponent>();
-                        return nameComp.name_;
+                        return nameComp.m_name;
                     });
                     return "UnknownName";
                 }
@@ -376,7 +355,41 @@ namespace Galaktic::Core::Managers {
              * @param id Entity's ID
              */
             void DeleteEntity(EntityID id) {
-                m_entityList.erase(id);
+                if(m_entityList.contains(id)) {
+                    // CRITICAL FIX: Remove all components from the registry before deleting entity
+                    // Get all component types and remove them
+                    auto& componentPools = m_registry->GetComponentPools();
+                    for(auto& [type, pool] : componentPools) {
+                        if(pool.contains(id)) {
+                            pool.erase(id);
+                        }
+                    }
+                    // Also remove from name index
+                    auto it = m_entityList.find(id);
+                    if(it != m_entityList.end()) {
+                        if(it->second.Has<ECS::NameComponent>()) {
+                            auto& nameComp = it->second.Get<ECS::NameComponent>();
+                            m_nameToEntityList.erase(nameComp.m_name);
+                        }
+                    }
+                    m_entityList.erase(id);
+                }
+            }
+
+            void DeleteEntityByName(const string& name) {
+                auto it = m_nameToEntityList.find(name);
+                if (it != m_nameToEntityList.end()) {
+                    DeleteEntity(it->second);
+                    m_nameToEntityList.erase(it);
+                }
+            }
+
+            size_t GetEntityCount() {
+                return m_entityList.size();
+            }
+
+            size_t GetComponentsCount() {
+                return m_registry->GetComponentPools().size();
             }
 
             ECS::Entity_List& GetEntityList() { return m_entityList; }

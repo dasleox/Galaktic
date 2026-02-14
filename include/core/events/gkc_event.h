@@ -63,6 +63,7 @@ namespace Galaktic::Core::Events {
         None = 0,
         KeyPressed,
         KeyHold,
+        KeyUp,
         MouseClick,
         WindowResize,
         WindowClose,
@@ -140,6 +141,20 @@ namespace Galaktic::Core::Events {
         public:
             explicit KeyHoldEvent(Uint32 keycode) : m_keycode(keycode) {}
             GKC_WRITE_EVENT_FUNCS(KeyHold, "KeyHold", Input);
+
+            [[nodiscard]] Uint32 GetKeyCode() const { return m_keycode; }
+        private:
+            Uint32 m_keycode;
+    };
+
+    /**
+     * @class KeyHoldEvent
+     * @brief A key hold event
+     */
+    class KeyUpEvent final : public GKC_Event {
+        public:
+            explicit KeyUpEvent(Uint32 keycode) : m_keycode(keycode) {}
+            GKC_WRITE_EVENT_FUNCS(KeyUp, "KeyUp", Input);
 
             [[nodiscard]] Uint32 GetKeyCode() const { return m_keycode; }
         private:
@@ -265,7 +280,6 @@ namespace Galaktic::Core::Events {
 // ###################################
 // ### Script Events
 // ###################################
-//@todo end this shit :(
 
 namespace Galaktic::Core::Events {
     class ScriptCalledFromEntity final : public GKC_Event {

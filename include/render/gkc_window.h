@@ -110,6 +110,7 @@ namespace Galaktic::Render {
              */
             bool IsValid();
 
+            void SetIcon(const path& iconPath);
         private:
             string m_title;
             SDL_WindowID m_ID = 0;

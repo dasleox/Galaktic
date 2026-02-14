@@ -25,10 +25,11 @@
 #include <filesystem>
 #include <nlohmann/json.hpp>
 #include <core/gkc_main.h>
-#include <../libs/luacpp/Source/LuaCpp.hpp>
+extern "C" {
+    #include <lua.h>
+    #include <lauxlib.h>
+    #include <lualib.h>
+}
+#include <LuaBridge/LuaBridge.h>
 #include <typeindex>
 #include <cxxabi.h>
-
-#if _WIN64
-    #include <windows.h>
-#endif

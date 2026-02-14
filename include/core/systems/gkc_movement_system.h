@@ -56,5 +56,7 @@ namespace Galaktic::Core::Systems {
             void Update(const ECS::Entity_List& list, float dt) override;
         private:
             KeySystem& m_keySystem;
+
+            void ApplyJump(ECS::Entity& entity);
     };
 }

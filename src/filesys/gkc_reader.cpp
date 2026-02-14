@@ -36,14 +36,14 @@ void Filesystem::FileReader::ReadEntity(ifstream &file, Core::Managers::ECS_Mana
     Entity entity(id, registry); entity.SetID(id);
     manager.AddEmptyEntity(id, entity);
     registry->ForEachRegisteredComponent([&](const ComponentTypeInfo& info) {
-        if (info.isTag_) {
-            manager.AddTagByType(id, info.type_);
+        if (info.m_isTag) {
+            manager.AddTagByType(id, info.m_type);
             return;
         }
 
         any component;
-        info.deserialize(component, file);
-        manager.AddRawComponentToEntity(id, info.type_, std::move(component));
+        info.m_deserialize(component, file);
+        manager.AddRawComponentToEntity(id, info.m_type, std::move(component));
     });
 
     #if GKC_DEBUG

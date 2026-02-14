@@ -5,29 +5,63 @@
 
 using namespace Galaktic;
 
-Script::GKC_Script::GKC_Script(const path& scriptPath) 
-    : m_scriptName(Core::StripExtension(scriptPath.filename().string()))
-{
+Script::GKC_Script::GKC_Script(const path& scriptPath, lua_State* luaState) 
+    : m_scriptName(Core::StripExtension(scriptPath.filename().string())) {
+
+    m_luaState = luaState;
     try {
-        m_context.CompileFile(m_scriptName, scriptPath.string());
+        if (luaL_loadfile(m_luaState, scriptPath.string().c_str()) != LUA_OK) {
+            string error = lua_tostring(m_luaState, -1);
+            lua_pop(m_luaState, 1);
+            GKC_THROW_EXCEPTION(Debug::ScriptException, "Failed to compile script file: " + scriptPath.string() + " - " + error);
+        }
+
+        if (lua_pcall(m_luaState, 0, 0, 0) != LUA_OK) {
+            string error = lua_tostring(m_luaState, -1);
+            lua_pop(m_luaState, 1);
+            GKC_THROW_EXCEPTION(Debug::ScriptException, "Failed to execute script file: " + scriptPath.string() + " - " + error);
+        }
     } catch (const Debug::ScriptException& e) {
-        GKC_THROW_EXCEPTION(Debug::ScriptException, "Failed to compile script file: " + scriptPath.string());
+        throw;
     }
 }
 
-Script::GKC_Script::GKC_Script(const string& scriptName, const string& scriptString) {
+Script::GKC_Script::GKC_Script(const string& scriptName, const string& scriptString, lua_State* luaState) 
+    : m_scriptName(scriptName) {
+    m_luaState = luaState;
     try {
-        m_context.CompileString(scriptName, scriptString);
+        if (luaL_loadbuffer(m_luaState, scriptString.c_str(), scriptString.size(), 
+                           scriptName.c_str()) != LUA_OK) {
+            string error = lua_tostring(m_luaState, -1);
+            lua_pop(m_luaState, 1);
+            GKC_THROW_EXCEPTION(Debug::ScriptException, "Failed to compile script string: " + scriptName + " - " + error);
+        }
+        
+        if (lua_pcall(m_luaState, 0, 0, 0) != LUA_OK) {
+            string error = lua_tostring(m_luaState, -1);
+            lua_pop(m_luaState, 1);
+            GKC_THROW_EXCEPTION(Debug::ScriptException, "Failed to execute script string: " + scriptName + " - " + error);
+        }
+    } catch (const Debug::ScriptException& e) {
+        throw;
     }
-    catch(const Debug::ScriptException& e) {
-        GKC_THROW_EXCEPTION(Debug::ScriptException, "Failed to compile script file!: " + scriptName);
-    }
-    
 }
 
 void Script::GKC_Script::RunScript() {
     GKC_ENGINE_INFO("Running script '{}'...", m_scriptName + ".lua");
-    m_context.Run(m_scriptName);
+    
+    lua_getglobal(m_luaState, m_scriptName.c_str());
+    
+    if (lua_isfunction(m_luaState, -1)) {
+        if (lua_pcall(m_luaState, 0, 0, 0) != LUA_OK) {
+            string error = lua_tostring(m_luaState, -1);
+            lua_pop(m_luaState, 1);
+            GKC_THROW_EXCEPTION(Debug::ScriptException, 
+                "Failed to run script: " + m_scriptName + " - " + error);
+        }
+    } else {
+        lua_pop(m_luaState, 1);
+    }
 }
 
 bool Script::CheckScriptExtension(const path& path) {

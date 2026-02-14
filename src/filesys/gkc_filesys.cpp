@@ -105,6 +105,17 @@ vector<string> Filesystem::GetFilenamesInFolder(const path &folder) {
     return fileNames;
 }
 
+vector<string> Filesystem::GetFoldersInFolder(const path& folder) {
+    vector<string> folders;
+
+    for (const auto& entry : directory_iterator(folder)) {
+        if (entry.is_directory())
+            folders.push_back(entry.path().filename().string());
+    }
+
+    return folders;
+}
+
 string Filesystem::GetFilename(const path &fullPath) {
     return path(fullPath).filename().generic_string();
 }

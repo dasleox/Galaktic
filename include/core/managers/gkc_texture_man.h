@@ -27,7 +27,7 @@
 namespace Galaktic::Render {
     struct TextureInfo;
     class Texture;
-    typedef unordered_map<string, unique_ptr<TextureInfo>> Texture_List;
+    typedef unordered_map<string, shared_ptr<TextureInfo>> Texture_List;
     typedef unordered_map<TextureID, string> TextureID_List;
 }
 
@@ -56,20 +56,20 @@ namespace Galaktic::Core::Managers {
             /**
              * @param path folder path
              */
-            TextureManager(const path& path);
+            TextureManager(const string& path);
 
             /**
              * @brief Adds a texture to this instance's list
              * @param path path to the texture (relative or full)
              * @param renderer SDL_Renderer
              */
-            static void AddTexture(const path &path, SDL_Renderer *renderer);
+            static void AddTexture(const string &path, SDL_Renderer *renderer);
 
             /**
              * @brief Adds a texture but only the path is added to the list
              * @param path path to the texture (relative or full)
              */
-            static void AddTexturePath(const path& path);
+            static void AddTexturePath(const string& path);
 
             /**
              * Loads a texture with a SDL_Renderer, texture key has to already
@@ -78,7 +78,7 @@ namespace Galaktic::Core::Managers {
              * @param path Texture's path
              * @param renderer SDL_Renderer
              */
-            static void LoadTexture(const path& path, SDL_Renderer* renderer);
+            static void LoadTexture(const string& path, SDL_Renderer* renderer);
 
             /**
              * @brief Loads all textures that need to be loaded, all texture's paths
@@ -101,7 +101,7 @@ namespace Galaktic::Core::Managers {
              * @note The input SHOULD be the key of the list, not the path as seen here
              *       this is a string not a path ;)
              */
-            static Render::Texture* GetTexture(const string &name);
+            static shared_ptr<Render::Texture> GetTextureByName(const string &name);
 
             /**
              * Gets a pointer to the texture in the list, if the texture doesn't
@@ -109,7 +109,7 @@ namespace Galaktic::Core::Managers {
              * @param id The ID of the texture
              * @return Pointer to the Texture if it exists, nullptr otherwise
              */
-            static Render::Texture* GetTexture(TextureID id);
+            static shared_ptr<Render::Texture> GetTextureByID(TextureID id);
 
             /**
              * Gets a pointer to the texture info, this function is used to retrieve
@@ -121,12 +121,17 @@ namespace Galaktic::Core::Managers {
              * @param textureName The name of the texture
              * @return Render::TextureInfo* 
              */
-            static Render::TextureInfo* GetTextureInfo(const string& textureName);
+            static shared_ptr<Render::TextureInfo> GetTextureInfo(const string& textureName);
 
 
             static SDL_Texture* GetMissingTexture();
 
             static void CreateMissingTexture(SDL_Renderer* renderer);
+
+            /**
+             * @brief Destroys the missing texture to free memory
+             */
+            static void DestroyMissingTexture();
 
             /**
              * Prints the list of all texture files with their filenames,

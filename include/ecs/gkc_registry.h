@@ -86,6 +86,14 @@ namespace Galaktic::ECS {
                 return it->second.contains(id);
             }
 
+            bool HasByType(EntityID id, const type_index& type) const {
+                auto it = m_componentPools.find(type);
+                if (it == m_componentPools.end())
+                    return false;
+
+                return it->second.contains(id);
+            }
+
             /**
              * @brief Removes a component from the entity's ID
              * @tparam T Component Type
@@ -148,7 +156,7 @@ namespace Galaktic::ECS {
 
                     const any& componentAny = it->second;
                     const ComponentTypeInfo& info = ComponentRegistry::Get(type);
-                    size += info.size_func(componentAny);
+                    size += info.m_sizeFunc(componentAny);
                 }
                 return size;
             }

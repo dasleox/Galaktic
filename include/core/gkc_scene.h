@@ -86,6 +86,11 @@ namespace Galaktic::Core {
             Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformation& device_information, const path& path);
 
             /**
+             * @brief Destructor - properly cleans up all allocated resources
+             */
+            ~Scene();
+
+            /**
              * @brief Runs the Scene.
              */
             void Run();

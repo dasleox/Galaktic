@@ -193,6 +193,15 @@ namespace Galaktic::Core::Systems {
         private:
             unordered_map<Key, bool> m_keyState;
     };
+
+    class Keyboard {
+        public:
+            Keyboard(KeySystem* keySystem) { m_keySystem = keySystem; }
+            static bool IsKeyDown(Key type);
+        private:
+           static KeySystem* m_keySystem;
+           static Key StringToKey(const string& type);
+    };
 }
 
 /**

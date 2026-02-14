@@ -89,5 +89,5 @@ namespace Galaktic::ECS {
     typedef unordered_map<EntityID, Entity> Entity_List;
 
     // Searching by name helper list
-    typedef std::multimap<string, EntityID> NameToEntity_List;
+    typedef unordered_map<string, EntityID> NameToEntity_List;
 }

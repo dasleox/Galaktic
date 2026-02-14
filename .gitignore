@@ -3,5 +3,6 @@ build/
 .vscode/
 libs/
 .cache/
+out/
 tokei.toml
 runSandbox.bat

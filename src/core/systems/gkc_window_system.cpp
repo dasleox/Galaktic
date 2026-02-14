@@ -30,7 +30,6 @@ void WindowSystem::OnEvent(Events::GKC_Event &e) {
 
             // This is unsafe as fuck if a clown decides to put the window size more than the
             // 32-bit signed integer limit
-            // @todo Add a function to resize the lightness buffer
             SDL_SetWindowSize(sdlWindow, e.GetWidth(), e.GetHeight());
             SDL_Rect dimensions = {0, 0, (int) e.GetWidth(), (int) e.GetHeight()};
             SDL_SetRenderViewport(renderer, &dimensions);

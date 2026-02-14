@@ -9,6 +9,8 @@
 #include <core/managers/gkc_texture_man.h>
 #include <core/managers/gkc_script_man.h>
 #include <core/managers/gkc_animation_man.h>
+#include <script/gkc_library.h>
+#include <config/gkc_config.h>
 
 using namespace Galaktic::Core;
 
@@ -47,12 +49,17 @@ App::App(const path& project_path, const string &title)
     Filesystem::CreateAppDirectoryStructure(project_path / title);
     ScreenStartup();
     
+    GKC_RELEASE_ASSERT(Script::LuaGalaktic::Initialize(), "Failed to initialize Lua!");
+    Script::LuaGalaktic::BindGalaktic();
+
     m_managersWrapper = make_unique<ManagersWrapper>();
     GKC_RELEASE_ASSERT(m_managersWrapper != nullptr, "CRITICAL ERROR CREATING MANAGER WRAPPER!");
-    m_managersWrapper->m_audioManager = new Managers::AudioManager(project_path / title /GKC_SOUND_PATH);
-    m_managersWrapper->m_textureManager = new Managers::TextureManager(project_path / title / GKC_TEXTURE_PATH);
-    m_managersWrapper->m_scriptManager = new Managers::ScriptManager(project_path / title / GKC_SCRIPT_PATH);
-    m_managersWrapper->m_animationManager = new Managers::AnimationManager(project_path / title / GKC_ANIMATION_PATH);
+    m_managersWrapper->m_audioManager = new Managers::AudioManager(path(project_path / title /GKC_SOUND_PATH).string());
+    m_managersWrapper->m_textureManager = new Managers::TextureManager(path(project_path / title / GKC_TEXTURE_PATH).string());
+    m_managersWrapper->m_scriptManager = new Managers::ScriptManager(path(project_path / title / GKC_SCRIPT_PATH).string(), Script::LuaGalaktic::GetLuaState());
+    m_managersWrapper->m_animationManager = new Managers::AnimationManager(path(project_path / title / GKC_ANIMATION_PATH).string());
+
+    // Execute scripts to init managers
 
     m_sceneManager = new Managers::SceneManager(project_path / title, m_managersWrapper.get(), m_deviceInfo);
 }
