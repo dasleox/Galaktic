@@ -12,10 +12,7 @@ void UISystem::OnEvent(Events::GKC_Event &e) {
     dispatcher.DispatchEvent<Events::KeyPressedEvent>(
         [this](Events::KeyPressedEvent &e) {
             if (GKC_SDLK_TO_ENUM(e) == Key::F3) {
-                if (Debug::Console::GetIsActive() == true)
-                    Debug::Console::GetIsActive() = false;
-                else
-                    Debug::Console::GetIsActive() = true;
+                
             }
             return false;
         });

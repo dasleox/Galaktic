@@ -1,6 +1,8 @@
 build/
 .idea/
 .vscode/
+.kilo/
+.VSCodeCounter/
 libs/
 .cache/
 out/

@@ -11,8 +11,6 @@ void Systems::CameraSystem::Update(const ECS::Entity_List& list, float dt,
     Uint32 width, Uint32 height) {
     FindPrimaryCamera(list);
 
-    GKC_ASSERT(m_activeCamera.IsValid(), "No cameras exist!");
-
     for (auto pair : list) {
         auto& entity = pair.second;
         auto& id = pair.first;
@@ -23,23 +21,23 @@ void Systems::CameraSystem::Update(const ECS::Entity_List& list, float dt,
 
         auto& cameraComp = m_activeCamera.Get<ECS::CameraComponent>();
 
-        if (entity.Has<ECS::TransformComponent>() && cameraComp.m_entityToFollowID == id
-            && cameraComp.m_isActive) {
+        if (entity.Has<ECS::TransformComponent>() && cameraComp.entityToFollowID == id
+            && cameraComp.isActive) {
             auto& transform = entity.Get<ECS::TransformComponent>();
             Render::Vec2 desiredLocation;
-            desiredLocation.x = transform.m_location.x - static_cast<float>(width)  * 0.5f;
-            desiredLocation.y = transform.m_location.y - static_cast<float>(height) * 0.5f;
+            desiredLocation.x = transform.location.x - static_cast<float>(width)  * 0.5f;
+            desiredLocation.y = transform.location.y - static_cast<float>(height) * 0.5f;
 
-            cameraComp.m_location.x = std::lerp(cameraComp.m_location.x, desiredLocation.x,
-                cameraComp.m_smoothing * dt);
-            cameraComp.m_location.y = std::lerp(cameraComp.m_location.y, desiredLocation.y,
-                cameraComp.m_smoothing * dt);
+            cameraComp.location.x = std::lerp(cameraComp.location.x, desiredLocation.x,
+                cameraComp.smoothing * dt);
+            cameraComp.location.y = std::lerp(cameraComp.location.y, desiredLocation.y,
+                cameraComp.smoothing * dt);
         }
     }
 }
 
 void Systems::CameraSystem::SetFollowEntity(EntityID id) {
-    m_activeCamera.Get<ECS::CameraComponent>().m_entityToFollowID = id;
+    m_activeCamera.Get<ECS::CameraComponent>().entityToFollowID = id;
 }
 
 void Systems::CameraSystem::FindPrimaryCamera(const ECS::Entity_List& list) {
@@ -48,7 +46,7 @@ void Systems::CameraSystem::FindPrimaryCamera(const ECS::Entity_List& list) {
 
         if (entity.Has<ECS::CameraComponent>()) {
             auto& cameraComp = entity.Get<ECS::CameraComponent>();
-            if (cameraComp.m_isActive) {
+            if (cameraComp.isActive) {
                 m_activeCamera = entity;
                 break;
             }

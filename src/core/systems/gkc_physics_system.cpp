@@ -18,7 +18,7 @@ void PhysicsSystem::ApplyForces(const ECS::Entity_List &list) const {
 
         auto& rigid_comp = entity.second.Get<ECS::RigidBody>();
 
-        rigid_comp.m_force.y += m_gravity * rigid_comp.m_mass;
+        rigid_comp.force.y += m_gravity * rigid_comp.mass;
     }
 }
 
@@ -30,9 +30,9 @@ void PhysicsSystem::IntegrateMotion(const ECS::Entity_List& list, float dt) {
         auto& transform_comp = entity.second.Get<ECS::TransformComponent>();
         auto& rigid_comp = entity.second.Get<ECS::RigidBody>();
 
-        Render::Vec2 acceleration = rigid_comp.m_force / rigid_comp.m_mass;
-        rigid_comp.m_velocity += acceleration * dt;
-        transform_comp.m_location += rigid_comp.m_velocity * dt;
+        Render::Vec2 acceleration = rigid_comp.force / rigid_comp.mass;
+        rigid_comp.velocity += acceleration * dt;
+        transform_comp.location += rigid_comp.velocity * dt;
     }
 }
 
@@ -44,9 +44,9 @@ void PhysicsSystem::ResolveGroundCollision(const ECS::Entity_List &list) {
         auto& transform_comp = entity.second.Get<ECS::TransformComponent>();
         auto& rigid_comp = entity.second.Get<ECS::RigidBody>();
 
-        if (transform_comp.m_location.y <= m_floorHeight && m_useFloor) {
-            transform_comp.m_location.y = m_floorHeight;
-            rigid_comp.m_velocity.y = 0.f;
+        if (transform_comp.location.y <= m_floorHeight && m_useFloor) {
+            transform_comp.location.y = m_floorHeight;
+            rigid_comp.velocity.y = 0.f;
         }
     }
 }
@@ -56,7 +56,7 @@ void PhysicsSystem::CleanForces(const ECS::Entity_List& list) {
         if (!entity.second.Has<ECS::RigidBody>() || !entity.second.Has<ECS::TransformComponent>())
             continue;
 
-        entity.second.Get<ECS::RigidBody>().m_force = {0.f, 0.f};
+        entity.second.Get<ECS::RigidBody>().force = {0.f, 0.f};
     }
 }
 

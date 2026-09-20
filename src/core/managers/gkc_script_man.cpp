@@ -5,6 +5,7 @@
 
 using namespace Galaktic;
 using namespace Galaktic::Core;
+using namespace Galaktic::Script;
 using namespace Galaktic::Core::Managers;
 
 Script::Script_List ScriptManager::m_scriptList;
@@ -17,14 +18,16 @@ ScriptManager::ScriptManager(const string& folder, lua_State* luaState) {
     for (auto& file : files) {
         if (Script::CheckScriptExtension(file))
             AddScriptFromFile(file);
-    }
-
-    //ExecuteGalakticModule();
+    }   
 }
 
 void ScriptManager::AddInlineScript(const string& scriptName, const string& script) {
-    using namespace Script;
-    ScriptID id = m_scriptList.size() + 1;
+    if(m_scriptList.size() >= MAX_SCRIPT_QUANTITY)
+        return;
+        
+    static std::atomic<ScriptID> s_nextScriptID{1};
+    ScriptID id = s_nextScriptID.fetch_add(1);
+    
     auto scriptInfo = ScriptInfo(id, make_shared<Script::GKC_Script>(scriptName, script, m_luaState), ScriptType::InlineScript);
 
     m_scriptList.emplace(scriptName, scriptInfo);
@@ -33,8 +36,11 @@ void ScriptManager::AddInlineScript(const string& scriptName, const string& scri
 }
 
 void ScriptManager::AddScriptFromFile(const string& scriptPath) {
-    using namespace Script;
-    ScriptID id = m_scriptList.size() + 1;
+    if(m_scriptList.size() >= MAX_SCRIPT_QUANTITY)
+        return;
+
+    static std::atomic<ScriptID> s_nextScriptID{1};
+    ScriptID id = s_nextScriptID.fetch_add(1);
     auto scriptInfo = ScriptInfo(id, make_shared<Script::GKC_Script>(scriptPath, m_luaState), ScriptType::FileScript);
     string scriptName = Filesystem::GetFilename(scriptPath);
 

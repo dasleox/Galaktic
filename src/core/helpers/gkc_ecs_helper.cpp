@@ -19,7 +19,7 @@ ECS::Entity Helpers::ECS_Helper::CreatePlayer(const string &name) {
     ECS::SpeedComponent speed;                                  // 1000.f max speed by default
     ECS::HealthComponent health;                                // 100.f max health, can take damage by default
     ECS::ColorComponent color(GREY_COLOR);                      // Grey color by default
-    ECS::CollisionComponent collision(transform.m_size , true); // Collisions true by default
+    ECS::CollisionComponent collision(transform.size , true); // Collisions true by default
     ECS::JumpComponent jump;                                    // 100.f jump height, can jump by default
     ECS::RigidBody rigidBody;                                   
 
@@ -37,7 +37,7 @@ ECS::Entity Helpers::ECS_Helper::CreateStaticObject(const string &name) {
     ECS::Entity staticObject = m_ecsManager->CreateEntity<ECS::StaticObjectTag>(name);
     ECS::TransformComponent transform;      
     ECS::ColorComponent color;              
-    ECS::CollisionComponent collision(transform.m_size , true);        // Collision box same as size of the object, collidable by default
+    ECS::CollisionComponent collision(transform.size , true);        // Collision box same as size of the object, collidable by default
     ECS::VisibilityComponent visibility(true);                        // Visible by default
 
     m_ecsManager->AddComponentToEntity<ECS::TransformComponent>(staticObject.GetID(), transform);
@@ -47,11 +47,14 @@ ECS::Entity Helpers::ECS_Helper::CreateStaticObject(const string &name) {
     return staticObject;
 }
 
+ECS::Entity Helpers::ECS_Helper::GetPlayer() {
+    return *m_ecsManager->GetEntityByName("Player");
+}
 ECS::Entity Helpers::ECS_Helper::CreatePhysicsObject(const string &name) {
     ECS::Entity physicsObject = m_ecsManager->CreateEntity<ECS::PhysicsObjectTag>(name);
     ECS::TransformComponent transform;     
     ECS::ColorComponent color;            
-    ECS::CollisionComponent collision(transform.m_size, true); 
+    ECS::CollisionComponent collision(transform.size, true); 
     ECS::RigidBody rigidBody;                                   // 0 velocity and force by default, mass of 1.f
     ECS::VisibilityComponent visibility;        
 
@@ -92,7 +95,7 @@ void Helpers::ECS_Helper::AddComponentToEntity(const string &name, const type_in
     EntityID id = it->second;
     if(m_ecsManager->GetRegistry()->HasByType(id, type)) {
         GKC_ENGINE_INFO("Entity '{}' already has component of type '{}'", 
-            name, Debug::Logger::DemangleTypename(type.name()));
+            name, Debug::DemangleTypename(type.name()));
         return;
     }
 

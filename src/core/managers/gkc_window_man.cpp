@@ -16,11 +16,14 @@ void Managers::WindowManager::CreateGKCWindow(const string& title, Uint32 width,
 
     GKC_WindowID id = m_windowList.size() + 1;
     window->SetWindowID(id);
-    m_windowList.emplace(m_windowList.size() + 1, window);
+    m_windowList.emplace(id, window);
 }
 
 void Managers::WindowManager::RegisterWindow(shared_ptr<Render::Window> window) {
     GKC_WindowID id = m_windowList.size() + 1;
+
+    GKC_PASSED_PARAM_NULL(window, "Window");
+    
     if (!window->IsValid()) {
         GKC_ENGINE_ERROR("Window passed is not valid!");
         return;

@@ -23,37 +23,19 @@
 
 #pragma once
 #include <pch.hpp>
-
-namespace Galaktic::Render {
-    class Animation;
-    struct AnimationInfo;
-    typedef unordered_map<string, shared_ptr<Render::AnimationInfo>> Animation_List;
-    typedef unordered_map<AnimationID, string> AnimationID_List;
-}
+#include <core/managers/gkc_manager.h>
+#include <render/gkc_animation.h>
 
 namespace Galaktic::Core::Managers {
-    class AnimationManager {
+    class AnimationManager : public BaseManager<Render::Animation, Render::AnimationInfo,
+        Render::Animation_List, MAX_ANIMATION_QUANTITY, true>
+    {
         public:
-            explicit AnimationManager(const string& folderPath);
-            static void AddAnimationPath(const string& filePath);
-            static void AddAnimation(const string& filePath, SDL_Renderer* renderer);
-            
-            static void LoadAnimation(const string& filePath, SDL_Renderer* renderer);
-            static void LoadAllAnimations(SDL_Renderer* renderer);
-            
-            static void DeleteAnimation(const string& name);
-            
-            static shared_ptr<Render::Animation> GetAnimation(const string& name);
-            static shared_ptr<Render::Animation> GetAnimation(AnimationID id);
-            static shared_ptr<Render::AnimationInfo> GetAnimationInfo(const string& name);
-            
+            explicit AnimationManager(const string& folderPath);      
+            static void PlayAnimation(const string& name);
+            static void PauseAnimation(const string& name);
+            static void StopAnimation(const string& name); 
+            static void SetLoopToAnimation(const string& name);     
             static void UpdateAll(float deltaTime);
-            static void PrintList();
-            
-        private:
-            static Render::Animation_List m_animationList;
-            static Render::AnimationID_List m_IDToNameList;
-            static vector<path> m_animationPathList;
-            static const void* TakeAddressOfAnimation(const Render::AnimationInfo* animInfo);
     };
 }

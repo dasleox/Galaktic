@@ -3,16 +3,19 @@
 #include <filesys/gkc_filesys.h>
 #include <core/gkc_debugger.h>
 #include <core/gkc_scene.h>
-#include "core/gkc_exception.h"
 #include <core/managers/gkc_scene_man.h>
 #include <core/managers/gkc_audio_man.h>
 #include <core/managers/gkc_texture_man.h>
 #include <core/managers/gkc_script_man.h>
+#include <core/gkc_console.h>
 #include <core/managers/gkc_animation_man.h>
 #include <script/gkc_library.h>
 #include <config/gkc_config.h>
+#include <core/gkc_console.h>
 
 using namespace Galaktic::Core;
+
+unique_ptr<Console> App::m_console = nullptr;
 
 void App::ScreenStartup() {
     m_deviceInfo.os_ = GKC_OS;
@@ -28,6 +31,7 @@ void App::ScreenStartup() {
     } 
     if (mode == nullptr) {
         GKC_ENGINE_ERROR("Failed to get the display mode!");
+        return;
     }
 
     #if GKC_DEBUG
@@ -43,24 +47,29 @@ void App::ScreenStartup() {
 App::App(const path& project_path, const string &title)
     : m_appName(title) {
 
-    Debug::Logger::PrintEngineInformation();
     Debug::StartLibraries();
+
+    m_console = make_unique<Console>(Debug::Logger::GetConsoleMutex());
     Filesystem::CreateFolder(title);
     Filesystem::CreateAppDirectoryStructure(project_path / title);
     ScreenStartup();
     
-    GKC_RELEASE_ASSERT(Script::LuaGalaktic::Initialize(), "Failed to initialize Lua!");
-    Script::LuaGalaktic::BindGalaktic();
+ 
 
     m_managersWrapper = make_unique<ManagersWrapper>();
     GKC_RELEASE_ASSERT(m_managersWrapper != nullptr, "CRITICAL ERROR CREATING MANAGER WRAPPER!");
     m_managersWrapper->m_audioManager = new Managers::AudioManager(path(project_path / title /GKC_SOUND_PATH).string());
     m_managersWrapper->m_textureManager = new Managers::TextureManager(path(project_path / title / GKC_TEXTURE_PATH).string());
-    m_managersWrapper->m_scriptManager = new Managers::ScriptManager(path(project_path / title / GKC_SCRIPT_PATH).string(), Script::LuaGalaktic::GetLuaState());
     m_managersWrapper->m_animationManager = new Managers::AnimationManager(path(project_path / title / GKC_ANIMATION_PATH).string());
+    
+    GKC_RELEASE_ASSERT(Script::LuaGalaktic::Initialize(), "Failed to initialize Lua!");
+    Script::LuaGalaktic::SetupModules(project_path / title / GKC_SCRIPT_PATH);
+    Script::LuaGalaktic::BindGalaktic();
+    m_managersWrapper->m_scriptManager = new Managers::ScriptManager(path(project_path / title / GKC_SCRIPT_PATH).string(), Script::LuaGalaktic::GetLuaState());
 
     // Execute scripts to init managers
 
     m_sceneManager = new Managers::SceneManager(project_path / title, m_managersWrapper.get(), m_deviceInfo);
+    
 }
 

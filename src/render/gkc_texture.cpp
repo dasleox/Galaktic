@@ -1,5 +1,4 @@
 #include <render/gkc_texture.h>
-#include "core/gkc_exception.h"
 #include "core/gkc_logger.h"
 #include "filesys/gkc_filesys.h"
 
@@ -12,29 +11,38 @@ Texture::Texture(const path &path, SDL_Renderer* renderer) {
         return;
     }
 
-    m_texture = IMG_LoadTexture(renderer, path.string().c_str());
+    m_surface = IMG_Load(path.string().c_str());
+    if(m_surface == nullptr) {
+        GKC_ENGINE_ERROR("Failed to create m_surface for texture: {}", Filesystem::GetFilename(path));
+        return;
+    }
+    
+    m_texture = SDL_CreateTexture(renderer, m_surface->format, 
+        SDL_TEXTUREACCESS_STREAMING,
+        m_surface->w, m_surface->h
+    );
     
     if (m_texture == nullptr) {
         GKC_ENGINE_ERROR("failed to load texture!");
+        return;
     }
+
+    void* pixels;
+    int pitch;
+    SDL_LockTexture(m_texture, NULL, &pixels, &pitch);
+    SDL_ConvertPixels(m_surface->w, m_surface->h,
+        m_surface->format,
+        m_surface->pixels, m_surface->pitch,
+        m_surface->format,
+        pixels, pitch
+    );
+    
+    SDL_UnlockTexture(m_texture);
 }
 
 Texture::~Texture() {
-    // CRITICAL FIX: Destroy the SDL_Texture when Texture is destroyed
     if (m_texture != nullptr) {
         SDL_DestroyTexture(m_texture);
         m_texture = nullptr;
     }
-}
-
-bool Galaktic::Render::CheckTextureExtension(const path &path) {
-    if (path.empty() || !Filesystem::CheckFile(path)) {
-        return false;
-    }
-    auto pathStr = path.extension().string();
-
-    if (pathStr == ".png" || pathStr == ".jpg" || pathStr == ".jpeg" || pathStr == ".webp"
-        || pathStr == ".bmp" || pathStr == ".gif") { return true; }
-
-    return false;
 }

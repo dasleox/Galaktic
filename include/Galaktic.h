@@ -9,13 +9,17 @@
 
 #include <core/helpers/gkc_ecs_helper.h>
 #include <core/helpers/gkc_texture_helper.h>
+#include <core/helpers/gkc_rpixels_helper.h>
 #include <core/helpers/gkc_animation_helper.h>
 
 #include <core/managers/gkc_ecs_man.h>
 #include <core/managers/gkc_texture_man.h>
 #include <core/managers/gkc_audio_man.h>
+#include <core/managers/gkc_font_man.h>
+#include <core/managers/gkc_text_man.h>
 #include <core/managers/gkc_scene_man.h>
 #include <core/managers/gkc_window_man.h>
+#include <core/managers/gkc_manager.h>
 #include <core/managers/gkc_script_man.h>
 #include <core/managers/gkc_animation_man.h>
 
@@ -32,9 +36,10 @@
 
 #include <core/gkc_app.h>
 #include <core/gkc_debugger.h>
-#include <core/gkc_exception.h>
 #include <core/gkc_logger.h>
 #include <core/gkc_clock.h>
+#include <core/gkc_console.h>
+#include <core/gkc_main.h>
 #include <core/gkc_scene.h>
 
 #include <ecs/gkc_components.h>
@@ -42,6 +47,7 @@
 #include <ecs/gkc_registry.h>
 #include <ecs/gkc_component_registry.h>
 #include <ecs/gkc_template_traits.h>
+#include <ecs/gkc_component_pool.h>
 
 #include <filesys/gkc_reader.h>
 #include <filesys/gkc_writer.h>
@@ -50,6 +56,9 @@
 #include <render/gkc_window.h>
 #include <render/gkc_drawer.h>
 #include <render/gkc_texture.h>
+#include <render/gkc_rpixels.h>
+#include <render/gkc_font.h>
+#include <render/gkc_text.h>
 #include <render/gkc_animation.h>
 
 #include <script/gkc_script.h>

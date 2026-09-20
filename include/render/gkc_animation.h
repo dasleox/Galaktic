@@ -58,13 +58,10 @@ namespace Galaktic::Render {
             bool m_isLooping = true;
     };
 
-    struct AnimationInfo {
-        AnimationID id_;
-        shared_ptr<Animation> animation_;
+    struct AnimationInfo : public AssetInfo<Animation>
+    {
+        using AssetInfo<Animation>::AssetInfo;
     };
 
-    typedef unordered_map<string, shared_ptr<Render::AnimationInfo>> Animation_List;
-    typedef unordered_map<AnimationID, string> AnimationID_List;
-
-    bool CheckAnimationExtension(const path& path);
+    typedef unordered_map<uint32_t, unique_ptr<Render::AnimationInfo>> Animation_List;
 }

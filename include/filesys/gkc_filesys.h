@@ -32,8 +32,6 @@ namespace Galaktic::Core {
 /**
  * @brief Checks if the file exists, if it is returns(exits) the function using this macro
  * @param path file's path
- * @warning This macro only works if the function is of type void\n
- *          USING THIS IN A RETURN TYPE FUNCTION WILL CAUSE A COMPILER ERROR
  */
 #define GKC_FILE_CHECK_RETURN(path) if (!Filesystem::CheckFile(path)) { GKC_CLIENT_ERROR("File doesn't exist!"); return; }
 
@@ -134,14 +132,24 @@ namespace Galaktic::Filesystem {
 	extern void RefreshFolderContents(vector<string> &content, const path &folder);
 
 	/**
+	 * Get the size in bytes, if the file doesn't exist it will return 0
+	 * 
+	 * @param path filepath
+	 * @return The size of the file in bytes if it exists, 0 otherwise 
+	 */
+	extern uintmax_t GetFileSize(const path& filepath);
+
+	/**
 	 * @brief Gets the full path of the application. (.exe location)
 	 * @return Full application path
 	 */
 	extern path GetFullPath();
 
+	extern bool CheckExtension(const path& filepath, const vector<string>& allowedExtensions);
+
 	const inline vector<path> APP_DIRECTORY_STRUCTURE = {
 		"assets", "assets/textures", "assets/sounds", "assets/animations",
-		"scenes", "scripts", "scripts/local", "scripts/modules",
+		"scenes", "scripts", "scripts/local", "scripts/local/shared", "scripts/modules",
 		"scripts/modules/Galaktic", "config"
 	};
 }

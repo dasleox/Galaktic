@@ -29,7 +29,6 @@
 #include "core/gkc_logger.h"
 #include "core/systems/gkc_key.h"
 #include "ecs/gkc_template_traits.h"
-
 namespace Galaktic::ECS {
     /**
      * Checks if a component exists inside an entity, if it does executes
@@ -89,12 +88,12 @@ namespace Galaktic::Core::Managers {
              * @param args Arguments of the component
              */
             template<typename T, typename... Args>
-            void AddComponentToEntity(EntityID id, Args&& ... args) {
+            void AddComponentToEntity(EntityID id, Args&&... args) {
                 GKC_RELEASE_ASSERT(!ECS::IsTag<T>, "use AddTagToEntity for tags!");
                 auto it = m_entityList.find(id);
                 if (it == m_entityList.end())
                     return;
-                m_registry->Add<T>(id, std::forward<Args>(args)...);
+                m_registry->Add<T>(id, T(std::forward<Args>(args)...));
                 ECS::ComponentRegistry::RegisterComponent<T>(id, false);
             }
 
@@ -127,13 +126,18 @@ namespace Galaktic::Core::Managers {
              * @param type Component's Type
              * @param comp Component
              */
-            void AddRawComponentToEntity(EntityID id, const type_index& type,
-                                         any&& comp) {
+            void AddRawComponentToEntity(EntityID id, const type_index& type, any&& comp){
+                if(m_registry->GetComponentPools().size() >= MAX_COMPONENT_QUANTITY) {
+                    Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max component quantity reached!");
+                    return;
+                }
+
                 auto it = m_entityList.find(id);
                 if (it == m_entityList.end())
                     return;
 
-                m_registry->GetComponentPools()[type][id] = std::move(comp);
+                GKC_ENGINE_WARNING("AddRawComponentToEntity called - consider using typed Add instead");
+                
                 if (!ECS::ComponentRegistry::IsRegistered(type)) {
                     ECS::ComponentRegistry::RegisterComponentByType(type, id, false);
                 }
@@ -144,10 +148,13 @@ namespace Galaktic::Core::Managers {
                 if (it == m_entityList.end())
                     return;
 
-                auto& componentPool = m_registry->GetComponentPools()[type];
-                if(ECS::ComponentRegistry::IsRegistered(type) && componentPool.contains(id)) {
-                    ECS::ComponentRegistry::UnregisterComponentByType(type);
-                    componentPool.erase(id);
+                auto& pools = m_registry->GetComponentPools();
+                auto poolIt = pools.find(type);
+                if (poolIt != pools.end() && ECS::ComponentRegistry::IsRegistered(type)) {
+                    if (poolIt->second->Contains(id)) {
+                        ECS::ComponentRegistry::UnregisterComponentByType(type);
+                        poolIt->second->Remove(id);
+                    }
                 }
             }
 
@@ -165,9 +172,19 @@ namespace Galaktic::Core::Managers {
                 if (it == m_entityList.end())
                     return;
 
-                m_registry->GetComponentPools()[type][id] = any{};
+                // Get or create tag pool
+                auto& pools = m_registry->GetComponentPools();
+                auto poolIt = pools.find(type);
+                if (poolIt == pools.end()) {
+                    pools.emplace(type, std::make_unique<ECS::TagPool>());
+                    poolIt = pools.find(type);
+                }
+                
+                auto* tagPool = static_cast<ECS::TagPool*>(poolIt->second.get());
+                tagPool->Set(id);
+                
                 if (!ECS::ComponentRegistry::IsRegistered(type)) {
-                    ECS::ComponentRegistry::RegisterComponentByType(type, id, false);
+                    ECS::ComponentRegistry::RegisterComponentByType(type, id, true);
                 }
             }
 
@@ -181,7 +198,12 @@ namespace Galaktic::Core::Managers {
              */
             template<typename T>
             ECS::Entity CreateEntity(const string& name) {
-                EntityID id = m_entityList.size() + 1;
+                if(m_entityList.size() >= MAX_ENTITY_QUANTITY) {
+                    Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max entity quantity reached!");
+                    return ECS::Entity(0, m_registry);
+                }
+
+                EntityID id = s_nextID++;
                 ECS::Entity entity = ECS::Entity(id, m_registry);
                 m_entityList.emplace(id, entity);
                 string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, name);
@@ -201,7 +223,12 @@ namespace Galaktic::Core::Managers {
              * @param type Tag type
              */
             void CreateEntityByTypeIndex(const string& name, const type_index& type) {
-                EntityID id = m_entityList.size() + 1;
+                if(m_entityList.size() >= MAX_ENTITY_QUANTITY) {
+                    Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max entity quantity reached!");
+                    return;
+                }
+                
+                EntityID id = s_nextID++;
                 ECS::Entity entity = ECS::Entity(id, m_registry);
                 m_entityList.emplace(id, entity);
 
@@ -224,6 +251,11 @@ namespace Galaktic::Core::Managers {
              * @param entity Entity
              */
             void AddEmptyEntity(EntityID id, ECS::Entity& entity) {
+                if(m_entityList.size() >= MAX_ENTITY_QUANTITY) {
+                    Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max entity quantity reached!");
+                    return;
+                }
+                    
                 m_entityList.emplace(id, entity);
             }
 
@@ -249,6 +281,12 @@ namespace Galaktic::Core::Managers {
              */
             template<typename T>
             T& GetComponentOfEntity(EntityID id) {
+                auto it = m_entityList.find(id);
+                if(it == m_entityList.end()) {
+                    Debug::Logger::LogErrorWithType(ErrorType::InvalidEntity, "tried to get a component from entity but the entity doesn't exist!");
+                    static T dummy{};
+                    return dummy;
+                }
                 return m_registry->Get<T>(id);
             }
 
@@ -259,13 +297,19 @@ namespace Galaktic::Core::Managers {
              * @param newName New name of the entity
              */
             void RenameEntity(EntityID id, const string& newName) {
+                if(m_entityList.find(id) == m_entityList.end()) 
+                    return;
                 if (!m_entityList.at(id).Has<ECS::NameComponent>())
                     return;
 
                 ECS::NameComponent& nameComp = m_entityList[id].Get<ECS::NameComponent>();
+                if(!nameComp.name.empty()) {
+                    m_nameToEntityList.erase(nameComp.name);
+                }
+                
                 string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, newName);
-                nameComp.m_name = uniqueName;
-                m_nameToEntityList.insert_or_assign(nameComp.m_name, id);
+                nameComp.name = uniqueName;
+                m_nameToEntityList.insert_or_assign(nameComp.name, id);
             }
             /**
              * @brief Returns a pointer to the specified entity by name
@@ -302,13 +346,9 @@ namespace Galaktic::Core::Managers {
              *        if the ID is 0 that means the entity is invalid, valid otherwise
              * @param entities Vector of entity references
              */
-            void PrintEntitiesIntegrity(const vector<ECS::Entity>& entities) {
-                for (auto& entity : entities) {
+            void PrintEntitiesIntegrity(const ECS::Entity_List& entities) {
+                for (auto& [id, entity] : entities) {
                     bool isValid = entity.IsValid();
-                    EntityID id = InvalidEntity;
-                    if (isValid) {
-                        id = entity.GetID();
-                    }
 
                     // Helper to print "INVALID" or "VALID"
                     auto InvalidOrValidString = [&] {
@@ -335,19 +375,19 @@ namespace Galaktic::Core::Managers {
                     return;
 
                 if (it->second.Has<T>())
-                    it->second.Remove<T>(id);
+                    it->second.Remove<T>();
             }
 
             string GetEntityNameByID(EntityID id) {
                 auto it = m_entityList.find(id);
+                string nameFound = "UnknownName";
                 if (it != m_entityList.end()) {
                     ECS::IfComponentExists<ECS::NameComponent>(it->second, [&]() {
                         auto& nameComp = it->second.Get<ECS::NameComponent>();
-                        return nameComp.m_name;
+                        nameFound = nameComp.name;
                     });
-                    return "UnknownName";
                 }
-                return "UnknownName";
+                return nameFound;
             } 
 
             /**
@@ -356,20 +396,15 @@ namespace Galaktic::Core::Managers {
              */
             void DeleteEntity(EntityID id) {
                 if(m_entityList.contains(id)) {
-                    // CRITICAL FIX: Remove all components from the registry before deleting entity
-                    // Get all component types and remove them
-                    auto& componentPools = m_registry->GetComponentPools();
-                    for(auto& [type, pool] : componentPools) {
-                        if(pool.contains(id)) {
-                            pool.erase(id);
-                        }
-                    }
+                    // Remove all components from the registry before deleting entity
+                    m_registry->RemoveAllComponents(id);
+                    
                     // Also remove from name index
                     auto it = m_entityList.find(id);
                     if(it != m_entityList.end()) {
                         if(it->second.Has<ECS::NameComponent>()) {
                             auto& nameComp = it->second.Get<ECS::NameComponent>();
-                            m_nameToEntityList.erase(nameComp.m_name);
+                            m_nameToEntityList.erase(nameComp.name);
                         }
                     }
                     m_entityList.erase(id);
@@ -392,6 +427,70 @@ namespace Galaktic::Core::Managers {
                 return m_registry->GetComponentPools().size();
             }
 
+            bool EntityExists(EntityID id) const {
+                return m_entityList.contains(id);
+            }
+
+            bool EntityExists(const string& name)
+            {
+                auto it = m_nameToEntityList.find(name);
+                if(it != m_nameToEntityList.end())
+                {
+                    return m_entityList.contains(it->second);
+                }
+                return false;
+            }
+
+            void TeleportEntityByName(const string& name, float x, float y)
+            {
+                if(EntityExists(name))
+                {
+                    ECS::Entity* entity = GetEntityByName(name);
+                    ECS::IfComponentExists<ECS::TransformComponent>(*entity, [&](){
+                        auto& transformComp = entity->Get<ECS::TransformComponent>();
+                        transformComp.location.x = x; 
+                        transformComp.location.y = y;
+                    });
+                }
+            }
+
+            void RotateEntityByName(const string& name, float degrees)
+            {
+                if(EntityExists(name))
+                {
+                    ECS::Entity* entity = GetEntityByName(name);
+                    ECS::IfComponentExists<ECS::TransformComponent>(*entity, [&](){
+                        auto& transformComp = entity->Get<ECS::TransformComponent>();
+                        transformComp.rotation = degrees;
+                    });
+                }
+            }
+
+            void DisplayEntityInformation(const string& name)
+            {
+                if(EntityExists(name))
+                {
+                    ECS::Entity* entity = GetEntityByName(name);
+                    GKC_ENGINE_INFO("Entity: {} ID: {}", name, entity->GetID());
+                    ECS::IfComponentExists<ECS::TransformComponent>(*entity, [&](){
+                        auto& transformComp = entity->Get<ECS::TransformComponent>();
+                        GKC_ENGINE_INFO("X: {} Y: {}  {}° | Size: X: {}, Y: {}", 
+                            transformComp.location.x, transformComp.location.y, transformComp.rotation,
+                            transformComp.size.x, transformComp.size.y);
+                    });
+
+                    // Maybe add more information in the future
+                }
+            }
+
+            void PrintEntityList()
+            {
+                for(auto& [name, id] : m_nameToEntityList)
+                {
+                    DisplayEntityInformation(name);
+                }
+            }
+
             ECS::Entity_List& GetEntityList() { return m_entityList; }
             ECS::NameToEntity_List& GetNameToEntityList() { return m_nameToEntityList; }
             ECS::Registry*& GetRegistry() { return m_registry; }
@@ -399,6 +498,7 @@ namespace Galaktic::Core::Managers {
             ECS::Entity_List m_entityList;
             ECS::NameToEntity_List m_nameToEntityList;
             ECS::Registry* m_registry;
+            EntityID s_nextID = 1;
     };
 }
 

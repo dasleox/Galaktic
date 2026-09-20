@@ -52,6 +52,10 @@ Mouse::Mouse(MouseSystem* mouseSystem) {
 bool Mouse::IsMouseDown(MouseClick click) {
     return m_mouseSystem->IsMouseClick(click);
 }
+bool Mouse::IsMouseDownLua(Uint32 click) {
+    auto validClick = static_cast<Uint32>(click);
+    return m_mouseSystem->IsMouseClick(static_cast<MouseClick>(validClick));
+}
 
 MouseClick Mouse::StringToMouseClick(const string& type) {
     auto it = m_clickMap.find(type);

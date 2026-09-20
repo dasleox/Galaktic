@@ -29,8 +29,14 @@ namespace Galaktic::Core::Managers {
     class SceneManager; 
 }
 
+namespace Galaktic::Config {
+    class Bind;
+    class BindConfigurator;
+}
+
 namespace Galaktic::Core {
     class ManagersWrapper;
+    class Console;
 
     /**
      * @brief Main application class that initializes and runs the application.
@@ -52,11 +58,15 @@ namespace Galaktic::Core {
             App(const path& project_path, const string& title);
 
             Managers::SceneManager*& GetSceneManager() { return m_sceneManager; }
+
+            static Console* GetConsole() { return m_console.get(); }
         private:
-            Managers::SceneManager* m_sceneManager;         // Scene Manager
-            DeviceInformation m_deviceInfo;                 // Device Info
-            unique_ptr<ManagersWrapper> m_managersWrapper;  // Managers Wrapper Pointer
-            string m_appName;                               // App name
+            Managers::SceneManager* m_sceneManager;                 // Scene Manager
+            unique_ptr<Config::BindConfigurator> m_bindConfigurator;// Bind Configurator
+            DeviceInformation m_deviceInfo;                         // Device Info
+            unique_ptr<ManagersWrapper> m_managersWrapper;          // Managers Wrapper Pointer
+            string m_appName;                                       // App name
+            static unique_ptr<Console> m_console;
 
             /**
              * @brief Get the screen information and set the width and height of the built window

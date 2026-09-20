@@ -24,7 +24,8 @@
 #pragma once
 #include <pch.hpp>
 
-namespace Galaktic::Render {
+namespace Galaktic::Render 
+{
     /**
      * @class Texture
      * @brief Texture used in objects, UI, etc.
@@ -34,32 +35,38 @@ namespace Galaktic::Render {
      * If the path doesn't exist or the texture fails to load, an error is logged and \b HAS to be checked
      * in a function using a Texture object, to avoid undefined behavior. Use \c IsValid() for that.
      */
-    class Texture {
+    class Texture 
+    {
+        private:
+            SDL_Texture* m_texture = nullptr;
+            SDL_Surface* m_surface = nullptr;
         public:
             Texture(const path& path, SDL_Renderer* renderer);
             ~Texture();
-            [[nodiscard]] SDL_Texture* GetSDLTexture() const { return m_texture; }
+            [[nodiscard]] SDL_Texture* GetSDLTexture() const { 
+                if(IsValid()) 
+                    return m_texture; 
+                return nullptr;
+            }
+            [[nodiscard]] SDL_Surface* GetSDLSurface() const { 
+                if(IsSurfaceValid()) 
+                    return m_surface; 
+                return nullptr; 
+            }
+            
             bool IsValid() const { return m_texture != nullptr; }
-        private:
-            SDL_Texture* m_texture = nullptr;
+            bool IsSurfaceValid() const { return m_surface != nullptr; }
     };
 
     /**
      * A struct containing an unique ID for the texture and a unique pointer to the texture itself.
      */
-    struct TextureInfo {
-        TextureID id_;
-        shared_ptr<Texture> texture_;
+    struct TextureInfo : public AssetInfo<Texture> 
+    {
+        using AssetInfo<Texture>::AssetInfo;
     };
 
-    typedef unordered_map<string, shared_ptr<TextureInfo>> Texture_List;
-
-    /**
-     * @brief Checks if the file is an image file
-     * @param path filepath
-     * @return true if the file is an image file, false otherwise
-     */
-    extern bool CheckTextureExtension(const path& path);
+    typedef unordered_map<uint32_t, unique_ptr<TextureInfo>> Texture_List;
 }
 
 /**

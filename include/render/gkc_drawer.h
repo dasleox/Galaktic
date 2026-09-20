@@ -47,5 +47,15 @@ namespace Galaktic::Render {
              */
             static void DrawEntities(const unordered_map<EntityID, ECS::Entity>& list, SDL_Renderer* renderer,
                 Core::Systems::CameraSystem& cameraSystem);
+
+            static void DrawColliders(const unordered_map<EntityID, ECS::Entity>& list, SDL_Renderer* renderer,
+                Core::Systems::CameraSystem& cameraSystem);
+
+            static void DrawWireframes(const unordered_map<EntityID, ECS::Entity>& list, SDL_Renderer* renderer,
+                Core::Systems::CameraSystem& cameraSystem);
+        private:
+            static void RenderColor(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer);
+            static void RenderTexture(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer);
+            static void RenderAnimation(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer);
     };
 }

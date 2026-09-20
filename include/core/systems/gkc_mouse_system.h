@@ -34,6 +34,7 @@ namespace Galaktic::Core::Systems {
      * @brief Enum class representing mouse button clicks
      */
     enum class MouseClick : uint32_t {
+        Unknown = 0,
         LeftClick = SDL_BUTTON_LEFT,
         RightClick = SDL_BUTTON_RIGHT,
         MiddleClick = SDL_BUTTON_MIDDLE
@@ -82,7 +83,8 @@ namespace Galaktic::Core::Systems {
         public:
             Mouse(MouseSystem* mouseSystem);
 
-            static bool IsMouseDown(MouseClick type);
+            static bool IsMouseDown(MouseClick click);
+            static bool IsMouseDownLua(Uint32 click);
         private:
             static MouseSystem* m_mouseSystem ;
             static unordered_map<string, MouseClick> m_clickMap;

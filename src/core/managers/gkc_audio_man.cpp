@@ -6,7 +6,8 @@
 using namespace Galaktic;
 using namespace Galaktic::Core;
 
-Galaktic::Audio::Audio_List Managers::AudioManager::m_audioFiles;
+static const vector<string> AUDIO_EXTENSIONS = {".wav", ".ogg", ".mp3", ".flac", ".mod", ".mid", ".mp3"};
+
 std::multimap<AudioID, MIX_Track*> Managers::AudioManager::m_activeTracks;
 SDL_AudioSpec Managers::AudioManager::m_audioSpec{};
 SDL_AudioDeviceID Managers::AudioManager::m_deviceID;
@@ -32,44 +33,25 @@ Managers::AudioManager::AudioManager(const string &folder) {
 
     auto files = Filesystem::GetFilenamesInFolder(folder);
     for (auto& file : files) {
-        if (Audio::CheckAudioExtension(file))
-            AddAudioFile(file);
-    }
-}
-
-void Managers::AudioManager::AddAudioFile(const string& path) {
-    AudioID id = m_audioFiles.size() + 1;
-    auto info = make_shared<Audio::AudioInfo>(id, make_shared<Audio::AudioFile>(path, m_mixer));
-
-    if(!info->audioFile_->IsValid() || info->id_ == 0) {
-        GKC_ENGINE_ERROR("Audio file is invalid!: {}", path);
-        return;
-    }
-
-    auto [it, inserted] = m_audioFiles.emplace(Filesystem::GetFilename(path),
-        std::move(info));
-
-    #ifdef GKC_PRINT_TEXTURE_ADDED
-        GKC_ENGINE_INFO("[{0} | ID: {1}] at address {2}", path, id,
-            CastToVoidPtr(it->second->audioFile_));
-    #endif
-}
-
-void Managers::AudioManager::RemoveAudioFile(const string &name) {
-    auto audioFile = m_audioFiles.find(name);
-    if (audioFile != m_audioFiles.end()) {
-        StopAllTracksFromSound(name);
-        m_audioFiles.erase(audioFile);
-        GKC_ENGINE_INFO("Erased audio file {0}", name);
+        if (Filesystem::CheckExtension(file, AUDIO_EXTENSIONS))
+            LoadAndRegisterAsset(file, m_mixer);
     }
 }
 
 void Managers::AudioManager::PlayAudioFile(const string& name, int loops) {
-    auto it = m_audioFiles.find(name);
-    if (it != m_audioFiles.end()) {
-        auto audioFile = it->second->audioFile_->GetAudioSample();
-        auto id = it->second->id_;
+    if(m_activeTracks.size() >= MAX_TRACKS_QUANTITY)
+        return;
 
+    auto* audioInfo = GetAssetInfo(name);
+    if (audioInfo != nullptr) {
+        auto audioFile = audioInfo->GetAsset()->GetAudioSample();
+        auto id = GetAssetIDByName(name);
+
+        if(id == 0)
+        {
+            Debug::Logger::LogErrorWithType(ErrorType::AssetInvalid, "Invalid audio ID!: {}", name);
+            return;
+        }
         MIX_Track* track = MIX_CreateTrack(m_mixer);
         MIX_SetTrackAudio(track, audioFile);
         MIX_SetTrackLoops(track, loops);
@@ -80,11 +62,20 @@ void Managers::AudioManager::PlayAudioFile(const string& name, int loops) {
 }
 
 void Managers::AudioManager::PlayMusicFile(const string &name) {
+    if(m_activeTracks.size() >= MAX_TRACKS_QUANTITY)
+        return;
+        
     GKC_ENGINE_INFO("Playing {}", name);
-    auto it = m_audioFiles.find(name);
-    if (it != m_audioFiles.end()) {
-        auto audioFile = it->second->audioFile_->GetAudioSample();
-        auto id = it->second->id_;
+    auto* audioInfo = GetAssetInfo(name);
+    if (audioInfo != nullptr) {
+        auto audioFile = audioInfo->GetAsset()->GetAudioSample();
+        auto id = GetAssetIDByName(name);
+
+        if(id == 0)
+        {
+            Debug::Logger::LogErrorWithType(ErrorType::AssetInvalid, "Invalid audio ID!: {}", name);
+            return;
+        }
 
         MIX_Track* track = MIX_CreateTrack(m_mixer);
         MIX_SetTrackAudio(track, audioFile);
@@ -99,16 +90,21 @@ void Managers::AudioManager::PlayMusicFile(const string &name) {
 }
 
 void Managers::AudioManager::StopSound(const string &name, Sint64 fadeOutMs) {
-    auto it = m_audioFiles.find(name);
-    if (it != m_audioFiles.end()) {
-        auto id = it->second->id_;
+    auto* audioInfo = GetAssetInfo(name);
+    if (audioInfo != nullptr) {
+        auto id = GetAssetIDByName(name);
+
+        if(id == 0)
+        {
+            Debug::Logger::LogErrorWithType(ErrorType::AssetInvalid, "Invalid audio ID!: {}", name);
+            return;
+        }
 
         auto trackIt = m_activeTracks.find(id);
         if (trackIt != m_activeTracks.end()) {
             MIX_Track* track = trackIt->second;
             if (track != nullptr) {
                 MIX_StopTrack(track, fadeOutMs);
-                // CRITICAL FIX: Destroy the track to free memory
                 MIX_DestroyTrack(track);
             }
             m_activeTracks.erase(trackIt);
@@ -117,16 +113,21 @@ void Managers::AudioManager::StopSound(const string &name, Sint64 fadeOutMs) {
 }
 
 void Managers::AudioManager::StopAllTracksFromSound(const string &name, Sint64 fadeOutMs) {
-    auto it = m_audioFiles.find(name);
-    if (it != m_audioFiles.end()) {
-        auto id = it->second->id_;
+    auto* audioInfo = GetAssetInfo(name);
+    if (audioInfo != nullptr) {
+        auto id = GetAssetIDByName(name);
+
+        if(id == 0)
+        {
+            Debug::Logger::LogErrorWithType(ErrorType::AssetInvalid, "Invalid audio ID!: {}", name);
+            return;
+        }
 
         auto range = m_activeTracks.equal_range(id);
         for (auto iter = range.first; iter != range.second; ) {
             MIX_Track* track = iter->second;
             if (track != nullptr) {
                 MIX_StopTrack(track, fadeOutMs);
-                // CRITICAL FIX: Destroy the track to free memory
                 MIX_DestroyTrack(track);
             }
             iter = m_activeTracks.erase(iter);
@@ -136,29 +137,12 @@ void Managers::AudioManager::StopAllTracksFromSound(const string &name, Sint64 f
 
 void Managers::AudioManager::StopAllSounds(Sint64 fadeOutMs) {
     MIX_StopAllTracks(m_mixer, fadeOutMs);
-    // CRITICAL FIX: Destroy all tracks and clear the map
     for (auto& [id, track] : m_activeTracks) {
         if (track != nullptr) {
             MIX_DestroyTrack(track);
         }
     }
     m_activeTracks.clear();
-}
-
-shared_ptr<Audio::AudioFile> Managers::AudioManager::GetAudioFile(const string &name) {
-    auto audioFile = m_audioFiles.find(name);
-    if (audioFile != m_audioFiles.end()) {
-        return audioFile->second->audioFile_;
-    }
-    GKC_ENGINE_WARNING("Audio file to retrieve doesn't exist");
-    return nullptr;
-}
-
-void Managers::AudioManager::PrintList() {
-    for (auto& pair : m_audioFiles) {
-        GKC_ENGINE_INFO("Key: {0} | {1} &{2}", pair.first, pair.second->id_,
-            CastToVoidPtr(pair.second->audioFile_.operator*()));
-    }
 }
 
 void Managers::AudioManager::RegisterTrack(AudioID id, MIX_Track *track) {

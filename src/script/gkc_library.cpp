@@ -28,20 +28,23 @@ bool LuaGalaktic::Initialize() {
     return true;
 }
 
-void LuaGalaktic::AddLuaModulePath(const path& path) {
+void LuaGalaktic::AddLuaModulePath(const string& path) {
     if(m_luaState == nullptr) {
         GKC_ENGINE_ERROR("Lua state hasn't been initialized!");
         return;
     }
 
+    // Push 'package' table onto Lua's stack, and gets
+    // the path variable to add custom modules inside Lua
     lua_getglobal(m_luaState, "package");
-    lua_getfield(m_luaState, -1, "path");
-    string currentPath = lua_tostring(m_luaState, -1);
-    lua_pop(m_luaState, -1);
+    lua_getfield(m_luaState, -1, "path");   
+    const char* cstr = lua_tostring(m_luaState, -1);
+    string currentPath = (cstr != nullptr) ? cstr : "";
+    lua_pop(m_luaState, 1);
 
-    string newPath = lua_tostring(m_luaState, -1);
-    newPath += ";" + path.string()  += "/?.lua";
-    newPath += ";" + path.string() + "/?/init.lua";
+    string newPath = currentPath;
+    newPath += ";" + path + "/?.lua";
+    newPath += ";" + path + "/?/init.lua";
 
     lua_pushstring(m_luaState, newPath.c_str());
     lua_setfield(m_luaState, -2, "path");
@@ -51,48 +54,49 @@ void LuaGalaktic::AddLuaModulePath(const path& path) {
 void LuaGalaktic::SetupModules(const path& scriptRootFolder) {
     string rootPath = scriptRootFolder.string();
     string modulesPath = rootPath + "/modules";
+    if (rootPath.empty()) {
+        GKC_ENGINE_ERROR("Script root folder path is empty!");
+        return;
+    }
     
+
     std::replace(rootPath.begin(), rootPath.end(), '\\', '/');
+    
     
     GKC_ENGINE_INFO("Setting up Lua module paths with root: {}", rootPath);
 
+    // Add the folders to the list
     AddModuleFolders(modulesPath);
+
+    // Add the scripts folder and scripts/modules as usable paths for modules
     AddLuaModulePath(rootPath);                           
     AddLuaModulePath(modulesPath);    
 
     for(auto& folder : m_modulePathList) {
-        AddLuaModulePath(rootPath + "/modules/" + folder);     
+        if(!folder.empty()) {
+            AddLuaModulePath(rootPath + "/modules/" + folder);  
+            GKC_ENGINE_INFO("Added module '{}'", folder);  
+        }
     }        
 }
 
 void LuaGalaktic::AddModuleFolders(const path& sriptModulesPath) {
     auto folderPaths = Filesystem::GetFoldersInFolder(sriptModulesPath);
     m_modulePathList = folderPaths;
-}
-
-bool LuaGalaktic::CallLuaFunction(const string &functionName) {
-    auto func = luabridge::getGlobal(m_luaState, functionName.c_str());
-    if(func.isFunction()) {
-        func();
-        return true;
-    } else {
-        GKC_ENGINE_ERROR("Function '{}' doesn't exist or is not a function!", functionName);
-        return false;
+    if(m_modulePathList.empty()) {
+        GKC_ENGINE_WARNING("No modules were found!");
     }
 }
 
 void LuaGalaktic::Shutdown() {
-    // CRITICAL FIX: Close the Lua state to free all memory
     if (m_luaState != nullptr) {
         lua_close(m_luaState);
         m_luaState = nullptr;
-        GKC_ENGINE_INFO("Lua state closed successfully!");
     }
 }
 
 void LuaGalaktic::BindGalaktic() {
     BindAudioFunctions();
-    BindTextureFunctions();
     BindAnimationFunctions();
     BindScriptFunctions();
     BindEntityFunctions();
@@ -100,28 +104,13 @@ void LuaGalaktic::BindGalaktic() {
     BindMouseFunctions();
     SetMouseClicksToLua();
     SetKeysToLua();
-}
-
-void LuaGalaktic::BindTextureFunctions() {
-    // Galaktic::Render::TextureManager
-    luabridge::getGlobalNamespace(m_luaState).beginNamespace("Galaktic").beginNamespace("Render")
-        .beginClass<TextureManager>("TextureManager")
-            .addStaticFunction("AddTexture", &TextureManager::AddTexture)
-            .addStaticFunction("AddTexturePath", &TextureManager::AddTexturePath)
-            .addStaticFunction("LoadTexture", &TextureManager::LoadTexture)
-            .addStaticFunction("LoadAllTextures", &TextureManager::LoadAllTextures)
-            .addStaticFunction("DeleteTexture", &TextureManager::DeleteTexture)
-            .addStaticFunction("PrintList", &TextureManager::PrintList)
-        .endClass()
-    .endNamespace();
+    BindLoggingFunctions();
 }
 
 void LuaGalaktic::BindAudioFunctions() {
     // Galaktic::Audio::AudioManager
     luabridge::getGlobalNamespace(m_luaState).beginNamespace("Galaktic").beginNamespace("Audio")
         .beginClass<AudioManager>("AudioManager")
-            .addStaticFunction("AddAudioFile", &AudioManager::AddAudioFile)
-            .addStaticFunction("RemoveAudioFile", &AudioManager::RemoveAudioFile)
             .addStaticFunction("PlayAudioFile", &AudioManager::PlayAudioFile)
             .addStaticFunction("PlayMusicFile", &AudioManager::PlayMusicFile)
             .addStaticFunction("StopSound", &AudioManager::StopSound)
@@ -136,11 +125,10 @@ void LuaGalaktic::BindAnimationFunctions() {
     // Galaktic::Render::AnimationManager
     luabridge::getGlobalNamespace(m_luaState).beginNamespace("Galaktic").beginNamespace("Render")
         .beginClass<AnimationManager>("AnimationManager")
-            .addStaticFunction("AddAnimationPath", &AnimationManager::AddAnimationPath)
-            .addStaticFunction("AddAnimation", &AnimationManager::AddAnimation)
-            .addStaticFunction("LoadAnimation", &AnimationManager::LoadAnimation)
-            .addStaticFunction("LoadAllAnimations", &AnimationManager::LoadAllAnimations)
-            .addStaticFunction("DeleteAnimation", &AnimationManager::DeleteAnimation)
+            .addStaticFunction("PlayAnimation", &AnimationManager::PlayAnimation)
+            .addStaticFunction("AddAnimation", &AnimationManager::PauseAnimation)
+            .addStaticFunction("LoadAnimation", &AnimationManager::StopAnimation)
+            .addStaticFunction("LoadAllAnimations", &AnimationManager::SetLoopToAnimation)
             .addStaticFunction("PrintList", &AnimationManager::PrintList)
         .endClass()
     .endNamespace();
@@ -159,7 +147,7 @@ void LuaGalaktic::BindScriptFunctions() {
 }
 
 
-///@todo Change this to return the actual entity and add non-static functions for THOSE (Static, Physics, Camera, etc.) objects, add barriers to avoid
+///@todo Change this to return the actual entity and add non-static functions for THOSE (Static, Physics, Camera, etc.) objects, add barriers to avoid/
 void LuaGalaktic::BindEntityFunctions() {
     // Galaktic::EntityHelper (doesn't match Galaktic namespace for readability purposes)
     luabridge::getGlobalNamespace(m_luaState).beginNamespace("Galaktic")
@@ -171,6 +159,7 @@ void LuaGalaktic::BindEntityFunctions() {
             .addStaticFunction("DeleteEntity", &Core::Helpers::ECS_Helper::DeleteEntity)
             .addStaticFunction("AddComponentToEntity", &Core::Helpers::ECS_Helper::AddComponentToEntity)
             .addStaticFunction("RemoveComponentFromEntity", &Core::Helpers::ECS_Helper::RemoveComponentFromEntity)
+            .addStaticFunction("GetPlayer", &Core::Helpers::ECS_Helper::GetPlayer)
         .endClass();
 }
 
@@ -178,7 +167,7 @@ void LuaGalaktic::BindKeyboardFunctions() {
     // Galaktic::Keyboard
     luabridge::getGlobalNamespace(m_luaState).beginNamespace("Galaktic")
         .beginClass<Core::Systems::Keyboard>("Keyboard")
-            .addStaticFunction("IsKeyDown", &Core::Systems::Keyboard::IsKeyDown)
+            .addStaticFunction("IsKeyDown", &Core::Systems::Keyboard::IsKeyDownLua)
         .endClass()
     .endNamespace();
 }
@@ -310,3 +299,104 @@ void LuaGalaktic::SetMouseClicksToLua() {
 }
 
 #undef BIND_CLICK
+
+
+void LuaGalaktic::BindLoggingFunctions() {
+    luabridge::getGlobalNamespace(m_luaState).beginNamespace("Galaktic")
+        .beginNamespace("Logger")
+            .addFunction("LogInfo", &Galaktic::Debug::Logger::LogInfoLua)
+            .addFunction("LogWarning", &Galaktic::Debug::Logger::LogWarningLua)
+            .addFunction("LogError", &Galaktic::Debug::Logger::LogErrorLua)
+        .endNamespace()
+    .endNamespace();
+}
+
+string LuaGalaktic::GetLuaCallContext(int level) {
+    lua_Debug ar;
+    if (lua_getstack(m_luaState, level, &ar) && lua_getinfo(m_luaState, "nSl", &ar)) {
+        string source = ar.source ? ar.source : "?";
+        if (source[0] == '@') source = source.substr(1);
+        
+        size_t lastSlash = source.find_last_of("/\\");
+        if (lastSlash != string::npos) {
+            source = source.substr(lastSlash + 1);
+        }
+        
+        string funcName = ar.name ? ar.name : "chunk";
+        int line = ar.currentline > 0 ? ar.currentline : 0;
+        
+        return "[" + source + " -> " + funcName + " || Line: " + 
+               to_string(line) + "]";
+    }
+    return "[? -> ? || Line: 0]";
+}
+
+//@TODO end this plz
+void LuaGalaktic::CreateDefaultUpdateFile(const path& path) {
+    if(Filesystem::CheckFile(path / "Player.lua"))
+        return;
+    
+    ofstream file(path / "Player.lua");
+    GKC_ENSURE_FILE_OPEN(file, WritingError);
+
+    const string PLAYER_LUA_CONTENT = 
+        "-- Player.lua"
+        "local gkc = require(\"Galaktic\")"
+        "Player = gkc.EntityHelper.GetPlayer()"
+        "function Movement(dt)"
+        "   "
+        "end";
+
+    file << PLAYER_LUA_CONTENT;
+    file.close();
+}
+
+void LuaGalaktic::CreateDefaultPlayerFile(const path& path) {
+
+}
+
+void LuaGalaktic::PrintLuaStack()
+{
+    lua_State* L = m_luaState; 
+
+    int top = lua_gettop(L); 
+
+    if (top == 0) 
+    {
+        GKC_ENGINE_INFO("Lua stack is empty!");
+        return;
+    }
+
+    GKC_ENGINE_INFO( "[Lua Stack] ({} elements)", top);
+
+    for (int i = top; i >= 1; i--) 
+    {
+        int type = lua_type(L, i);
+        GKC_ENGINE_INFO("[{}] : " , lua_typename(L, type));
+
+        switch (type) {
+            case LUA_TSTRING:
+                GKC_ENGINE_INFO(lua_tostring(L, i));
+                break;
+            case LUA_TNUMBER:
+                GKC_ENGINE_INFO(lua_tonumber(L, i));
+                break;
+            case LUA_TBOOLEAN:
+                GKC_ENGINE_INFO(lua_toboolean(L, i) ? "true" : "false");
+                break;
+            case LUA_TNIL:
+                GKC_ENGINE_INFO("nil");
+                break;
+            case LUA_TTABLE:
+            case LUA_TFUNCTION:
+            case LUA_TUSERDATA:
+            case LUA_TLIGHTUSERDATA:
+            case LUA_TTHREAD:
+                GKC_ENGINE_INFO(lua_topointer(L, i));
+                break;
+            default:
+                GKC_ENGINE_INFO("? type");
+                break;
+        }
+    }
+}

@@ -19,19 +19,19 @@ void MovementSystem::Update(const Entity_List& list, float dt) {
         auto& transform = entity.second.Get<TransformComponent>();
         auto& player = entity.second.Get<SpeedComponent>();
         // Movement Updates
-        if (player.m_maxSpeed * dt == player.m_maxSpeed) {
+        if (player.maxSpeed * dt == player.maxSpeed) {
             continue;
         }
 
         // Modify this to use the Player.lua file
         if (m_keySystem.IsKeyDown(Key::W))
-            transform.m_location.y -= player.m_maxSpeed * dt;
+            transform.location.y -= player.maxSpeed * dt;
         if (m_keySystem.IsKeyDown(Key::S))
-            transform.m_location.y += player.m_maxSpeed * dt;
+            transform.location.y += player.maxSpeed * dt;
         if (m_keySystem.IsKeyDown(Key::A))
-            transform.m_location.x -= player.m_maxSpeed * dt;
+            transform.location.x -= player.maxSpeed * dt;
         if (m_keySystem.IsKeyDown(Key::D))
-            transform.m_location.x += player.m_maxSpeed   * dt;
+            transform.location.x += player.maxSpeed   * dt;
         if(m_keySystem.IsKeyDown(Key::Space))
             ApplyJump(entity.second);
     }
@@ -40,6 +40,6 @@ void MovementSystem::Update(const Entity_List& list, float dt) {
 void MovementSystem::ApplyJump(ECS::Entity &entity) {
     if (entity.Has<ECS::PlayerTag>() && entity.Has<ECS::JumpComponent>() && entity.Has<ECS::RigidBody>()) {
         auto& jump_comp = entity.Get<ECS::JumpComponent>();
-        entity.Get<ECS::RigidBody>().m_force.y += jump_comp.m_jumpHeight;
+        entity.Get<ECS::RigidBody>().force.y += jump_comp.jumpHeight;
     }
 }

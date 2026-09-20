@@ -23,6 +23,7 @@
 
 #pragma once
 #include <pch.hpp>
+#include <core/managers/gkc_manager.h>
 #include <script/gkc_script.h>
 
 namespace Galaktic::Core::Managers {

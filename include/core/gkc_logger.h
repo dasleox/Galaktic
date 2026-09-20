@@ -23,52 +23,9 @@
 
 #pragma once
 #include <pch.hpp>
-
-namespace Galaktic::Debug {
-    /**
-     * @brief Contains a logger for Client & Engine
-     * @note Init() function has to be called first before using the loggers
-     */
-    class Logger {
-        public:
-            /**
-             * @brief Inits the loggers & sets a pattern for them
-             */
-            static void Init();
-
-            /**
-             * @brief Prints engine information
-             */
-            static void PrintEngineInformation();
-
-            /**
-             * @brief Gets the engine version
-             * @return A string with the engine version
-             */
-            static string GetEngineName();
-
-            /**
-             * @brief Returns a string with the display information
-             * FORMAT: Width x Height @ (Hertz) Hz
-             * @param deviceInfo DeviceInformation instance
-             * @return A string with the display information
-             */
-            static string GetDisplayInfo(const Core::DeviceInformation& deviceInfo);
-
-            /**
-             * @brief Demangle a typename
-             * @param name Typename
-             * @return name of the typename
-             */
-            static string DemangleTypename(const char* name);
-
-            static shared_ptr<spdlog::logger>& GetEngineLogger()   { return engine_logger_; }
-            static shared_ptr<spdlog::logger>& GetClientLogger()   { return client_logger_; }
-        private:
-            static shared_ptr<spdlog::logger> engine_logger_;
-            static shared_ptr<spdlog::logger> client_logger_;
-    };
-}
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/base_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 #define GKC_ENGINE_INFO(...)    \
 ::Galaktic::Debug::Logger::GetEngineLogger()->log( \
@@ -94,35 +51,135 @@ spdlog::level::critical, __VA_ARGS__)
 // Client-level logging macros
 
 #define GKC_CLIENT_INFO(...)    \
-::Galaktic::Debug::Logger::GetClientLogger()->log( \
-spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, \
-spdlog::level::info, __VA_ARGS__)
+::Galaktic::Debug::Logger::GetClientLogger()->info(__VA_ARGS__)
 
 #define GKC_CLIENT_WARNING(...) \
-::Galaktic::Debug::Logger::GetClientLogger()->log( \
-spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, \
-spdlog::level::warn, __VA_ARGS__)
+::Galaktic::Debug::Logger::GetClientLogger()->warn(__VA_ARGS__)
 
 #define GKC_CLIENT_ERROR(...)   \
-::Galaktic::Debug::Logger::GetClientLogger()->log( \
-spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, \
-spdlog::level::err, __VA_ARGS__)
+::Galaktic::Debug::Logger::GetClientLogger()->error(__VA_ARGS__)
 
 #define GKC_CLIENT_FATAL(...)   \
-::Galaktic::Debug::Logger::GetClientLogger()->log( \
-spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, \
-spdlog::level::critical, __VA_ARGS__)
+::Galaktic::Debug::Logger::GetClientLogger()->critical(__VA_ARGS__)
+namespace Galaktic
+{
+    enum class ErrorType;
+    constexpr const char* ErrorTypeToDisplayString(ErrorType error);
+}
 
+namespace Galaktic::Debug {
+    struct ConsoleLine
+    {
+        string m_text;
+        spdlog::level::level_enum m_level;
+    };
 
-#ifdef GKC_PRINT_ADDRESSES
+    template <typename Mutex>
+    class ConsoleMutex : public spdlog::sinks::base_sink<Mutex>
+    {
+        private:
+            vector<ConsoleLine> m_lines;
+        protected:
+            void sink_it_(const spdlog::details::log_msg& msg) override
+            {
+                spdlog::memory_buf_t formatted;
+                spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
+
+                ConsoleLine line;
+                line.m_text  = fmt::to_string(formatted);
+                line.m_level = msg.level;
+
+                m_lines.push_back(line);
+                if (m_lines.size() > m_MAXLINES) 
+                {
+                    m_lines.erase(m_lines.begin());
+                }
+            }
+            void flush_() override {} 
+        public:
+            static constexpr size_t m_MAXLINES = 256;
+            const vector<ConsoleLine>& GetLines() const { return m_lines; }
+            void Clear() { m_lines.clear(); };
+    };
+    using ConsoleMutex_mt = ConsoleMutex<std::mutex>;
+
     /**
-     * @brief Prints the address of the given pointer/variable
-     * @param ptr Pointer/Variable
-     * @param name Name of the variable
-     * @note Sometimes you may need to cast the ptr to a void pointer
-     *       e.g (void*) ptr, in order to print!
+     * Main class to log anything, this class has to be initialized first before using
+     * any macro (e.g. GKC_ENGINE_ERROR)
      */
-    #define GKC_PRINT_ADDRESS(name, ptr) GKC_ENGINE_INFO("Address '{0}': {1}", name, static_cast<void*>(&ptr))
+    class Logger {            
+        private:
+            static shared_ptr<spdlog::logger> m_engineLogger;
+            static shared_ptr<spdlog::logger> m_clientLogger;
+            static shared_ptr<ConsoleMutex_mt> m_mutexSink;
+        public:
+            static shared_ptr<spdlog::logger>& GetEngineLogger()   { return m_engineLogger; }
+            static shared_ptr<spdlog::logger>& GetClientLogger()   { return m_clientLogger; }
+            static shared_ptr<ConsoleMutex_mt>& GetConsoleMutex()     { return m_mutexSink;    }
+
+            /**
+             * @brief Inits the loggers & sets a pattern for them
+             */
+            static void Init();
+
+            /**
+             * @brief Prints engine information using std::cout
+             */
+            static void PrintEngineInformation();
+        
+            static void LogInfoLua(const string& msg);
+            static void LogWarningLua(const string& msg);
+            static void LogErrorLua(const string& msg);
+
+            template <typename ...Args>
+            static void LogErrorWithType(ErrorType type, const string& msg, Args&&... args)
+            {
+                GetEngineLogger()->log(
+                    spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION},
+                    spdlog::level::err,
+                    fmt::runtime(msg + ErrorTypeToDisplayString(type)), 
+                    std::forward<Args>(args)...
+                );
+            }
+            template <typename ...Args>
+            static void LogFatalWithType(ErrorType type, const string& msg, Args&&... args)
+            {
+                GetEngineLogger()->log(
+                    spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION},
+                    spdlog::level::critical,
+                    fmt::runtime(msg + ErrorTypeToDisplayString(type)), 
+                    std::forward<Args>(args)...
+                );
+            }
+
+    };
+}
+
+#if GKC_DEBUG
+#define GKC_ENGINE_DEBUG(...) \
+::Galaktic::Debug::Logger::GetEngineLogger()->log( \
+spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, \
+spdlog::level::trace, __VA_ARGS__)
 #else
-    #define GKC_PRINT_ADDRESS (void(0))
+    #define GKC_ENGINE_DEBUG() ((void)0)
 #endif
+
+#define GKC_CHECK_PATH_INTEGRITY(path)                                \
+    do {                                                               \
+        if ((path).empty() ||                                          \
+            !Galaktic::Filesystem::CheckFile((path))) {                \
+            GKC_ENGINE_ERROR("Path: {} doesn't exist! {}",                \
+                              (path).string(), (Galaktic::ErrorTypeToDisplayString(Galaktic::ErrorType::FileNotFound)));                        \
+            return;                                                    \
+        }                                                              \
+    } while (0)
+
+#define GKC_CHECK_PATH_INTEGRITY_BOOL(path)                                \
+    do {                                                               \
+        if ((path).empty() ||                                          \
+            !Galaktic::Filesystem::CheckFile((path))) {                \
+            GKC_ENGINE_ERROR("Path: {} doesn't exist! {}",                \
+                              (path).string(), (Galaktic::ErrorTypeToDisplayString(Galaktic::ErrorType::FileNotFound)));                        \
+            return false;                                                    \
+        }                                                              \
+    } while (0)

@@ -9,13 +9,7 @@
 #include "render/gkc_animation.h"
 
 using namespace Galaktic::Render;
-
-namespace {
-    unordered_map<EntityID, bool> checkedEntities;
-    void ClearCheckedEntities() {
-        checkedEntities.clear();
-    }
-}
+using namespace Galaktic;
 
 void Drawer::DrawEntities(const ECS::Entity_List& list, SDL_Renderer *renderer,
     Core::Systems::CameraSystem& cameraSystem)
@@ -23,65 +17,114 @@ void Drawer::DrawEntities(const ECS::Entity_List& list, SDL_Renderer *renderer,
     using namespace Core::Managers;
     auto& camera = cameraSystem.GetActiveCamera().Get<ECS::CameraComponent>();
 
-    ClearCheckedEntities();
+    for (auto [id, entity] : list) {
+        auto& name = entity.Get<ECS::NameComponent>().name;
 
-    for (auto entity : list) {
-        auto& name = entity.second.Get<ECS::NameComponent>().m_name;
+        if (entity.Has<ECS::LightTag>() || entity.Has<ECS::CameraComponent>()
+            || id == InvalidEntity) continue;
 
-        if (!checkedEntities.contains(entity.first)) {
-            if (!entity.second.IsValid()) {
-                checkedEntities[entity.first] = true;
-                GKC_ENGINE_WARNING("{0} is not a valid entity", name);
-                continue;
-            }
-            checkedEntities[entity.first] = true;
-        }
-        if (entity.second.Has<ECS::LightTag>() || entity.second.Has<ECS::CameraComponent>()) continue;
-
-        auto& transform = entity.second.Get<ECS::TransformComponent>();
+        auto& transform = entity.Get<ECS::TransformComponent>();
         SDL_FRect rect;
-        rect.w = transform.m_size.x;
-        rect.h = transform.m_size.y;
+        rect.w = transform.size.x;
+        rect.h = transform.size.y;
 
-        rect.x = transform.m_location.x - camera.m_location.x;
-        rect.y = transform.m_location.y - camera.m_location.y;
+        rect.x = transform.location.x - camera.location.x;
+        rect.y = transform.location.y - camera.location.y;
 
-        // Render texture if it has texture
-        if (entity.second.Has<ECS::TextureComponent>()) {
-            auto& textureComp = entity.second.Get<ECS::TextureComponent>();
-            auto texture = TextureManager::GetTextureByID(textureComp.m_id);
-            SDL_Texture* sdlTexture = nullptr;
-            
-            if(texture == nullptr) {
-                sdlTexture = TextureManager::GetMissingTexture();
-            } else {
-                sdlTexture = texture->GetSDLTexture();
-                if(sdlTexture == nullptr) {
-                    sdlTexture = TextureManager::GetMissingTexture();
-                }
-            }
-
-            auto& textureName = TextureManager::GetIDTextureList().find(textureComp.m_id)->second;
-            SDL_RenderTexture(renderer, sdlTexture, NULL ,&rect);
+        if (entity.Has<ECS::AnimationComponent>()) {
+            RenderAnimation(rect, entity, renderer);
         } 
-        
-        else if (entity.second.Has<ECS::AnimationComponent>()) {
-            auto& animationComp = entity.second.Get<ECS::AnimationComponent>();
-            auto animation = AnimationManager::GetAnimation(animationComp.m_id);
-            if(animation == nullptr) {
-                // Programming Warcrime
-                goto color_rendering;
-            }
-            
-            animation->Render(renderer, rect);
+        else if (entity.Has<ECS::TextureComponent>()) {
+            RenderTexture(rect, entity, renderer);
+        } else {
+            RenderColor(rect, entity, renderer);
         }
+    }
+}
 
-        // Color Rendering
-        else {
-            color_rendering:
-            auto& color = entity.second.Get<ECS::ColorComponent>().m_color;
-            SDL_SetRenderDrawColor(renderer, GKC_SET_COLOR(color));
-            SDL_RenderFillRect(renderer, &rect);
+void Drawer::RenderColor(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer) {
+    auto& color = entity.Get<ECS::ColorComponent>().color;
+    SDL_SetRenderDrawColor(renderer, GKC_SET_COLOR(color));
+    SDL_RenderFillRect(renderer, &rect);
+}
+
+void Drawer::RenderTexture(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer) {
+    using namespace Core::Managers;
+    auto& textureComp = entity.Get<ECS::TextureComponent>();
+    auto texture = TextureManager::GetAssetByID(textureComp.id);
+    SDL_Texture* sdlTexture = nullptr;
+            
+    if(texture == nullptr) {
+        sdlTexture = TextureManager::GetMissingTexture();
+    } else {
+        sdlTexture = texture->GetSDLTexture();
+
+        if(sdlTexture == nullptr) {
+            sdlTexture = TextureManager::GetMissingTexture();
         }
+    }
+
+    // FIXED: Add NULL check before dereferencing iterator
+    auto it = TextureManager::GetIDToNameList().find(textureComp.id);
+    if (it == TextureManager::GetIDToNameList().end()) {
+        sdlTexture = TextureManager::GetMissingTexture();
+    }
+    
+    SDL_RenderTexture(renderer, sdlTexture, NULL ,&rect);
+}
+
+void Drawer::RenderAnimation(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer) {
+    auto& animationComp = entity.Get<ECS::AnimationComponent>();
+    auto animation = Core::Managers::AnimationManager::GetAssetByID(animationComp.id);
+    if(animation == nullptr) {
+        RenderColor(rect, entity, renderer);
+    }
+            
+    animation->Render(renderer, rect);
+}
+
+void Drawer::DrawWireframes(const ECS::Entity_List& list, SDL_Renderer* renderer,
+    Core::Systems::CameraSystem& cameraSystem)
+{
+    auto& camera = cameraSystem.GetActiveCamera().Get<ECS::CameraComponent>();
+
+    for (auto [id, entity] : list) {
+        if (entity.Has<ECS::LightTag>() || entity.Has<ECS::CameraComponent>()
+            || id == InvalidEntity) continue;
+
+        auto& transform = entity.Get<ECS::TransformComponent>();
+        SDL_FRect rect;
+        rect.w = transform.size.x;
+        rect.h = transform.size.y;
+        rect.x = transform.location.x - camera.location.x;
+        rect.y = transform.location.y - camera.location.y;
+
+        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Yellow, fully opaque
+        SDL_RenderRect(renderer, &rect);
+    }
+}
+
+void Drawer::DrawColliders(const ECS::Entity_List& list, SDL_Renderer* renderer,
+    Core::Systems::CameraSystem& cameraSystem)
+{
+    auto& camera = cameraSystem.GetActiveCamera().Get<ECS::CameraComponent>();
+
+    for (auto [id, entity] : list) {
+        if (entity.Has<ECS::LightTag>() || entity.Has<ECS::CameraComponent>()
+            || id == InvalidEntity) continue;
+
+        if (!entity.Has<ECS::CollisionComponent>()) continue;
+
+        auto& transform    = entity.Get<ECS::TransformComponent>();
+        auto& collisionBox = entity.Get<ECS::CollisionComponent>().collisionBox;
+
+        SDL_FRect rect;
+        rect.w = collisionBox.x;
+        rect.h = collisionBox.y;
+        rect.x = (transform.location.x + collisionBox.x) - camera.location.x;
+        rect.y = (transform.location.y + collisionBox.y) - camera.location.y;
+
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 191); // Green, 75% alpha (255 * 0.75 = 191)
+        SDL_RenderRect(renderer, &rect);
     }
 }

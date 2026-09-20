@@ -16,17 +16,23 @@ void Helpers::TextureHelper::SetTextureToEntity(EntityID id, const string& textu
         return;
     }
 
-    auto texture = Managers::TextureManager::GetTextureInfo(textureName);
+    auto texture = Managers::TextureManager::GetAssetInfo(textureName);
     if(texture == nullptr) {
         GKC_ENGINE_ERROR("Texture '{}' doesn't exist!", textureName);
         return;
     }
 
-    TextureID textureID = texture->id_;
+    auto textureID = Managers::TextureManager::GetAssetIDByName(textureName);
+
+    if(textureID == 0)
+    {
+        Debug::Logger::LogErrorWithType(ErrorType::AssetInvalid, "Invalid audio ID!: {}", textureName);
+        return;
+    }
     
     if(entity->Has<ECS::TextureComponent>()) {
         auto& textureComp = entity->Get<ECS::TextureComponent>();
-        textureComp.m_id = textureID;
+        textureComp.id = textureID;
     } else {
         m_ecsManager.AddComponentToEntity<ECS::TextureComponent>(id, textureID);
     }   

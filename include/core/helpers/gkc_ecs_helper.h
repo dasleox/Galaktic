@@ -93,7 +93,7 @@ namespace Galaktic::Core::Helpers {
                 }
                 else {
                     GKC_ENGINE_INFO("Component {0} added to '{1}'",
-                        Debug::Logger::DemangleTypename(typeid(Component).name())
+                        Debug::DemangleTypename(typeid(Component).name())
                         , name);
                     m_ecsManager->AddComponentToEntity<Component>(id, component);
                 }
@@ -103,6 +103,9 @@ namespace Galaktic::Core::Helpers {
 
             static void AddComponentToEntity(const string& name, const type_index& type, any& component);
             static void RemoveComponentFromEntity(const string& name, const type_index& type);
+
+            static ECS::Entity GetPlayer();
+
             /**
              * @brief Gets an entity by name
              * @param name Entity's name

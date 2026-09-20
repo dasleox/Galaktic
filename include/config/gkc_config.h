@@ -27,27 +27,66 @@
 #include <core/systems/gkc_mouse_system.h>
 
 namespace Galaktic::Config {
-    union BindType {
-        Core::Systems::Key m_keyBind;
-        Core::Systems::MouseClick m_mouseClick;
+    /**
+     * Holds the type of bind to store, key or mouse input
+     */
+    struct BindType {
+        Core::Systems::Key keyBind = Core::Systems::Key::Unknown;
+        Core::Systems::MouseClick mouseClick = Core::Systems::MouseClick::Unknown;
+    };
+    
+    enum class ActionType : uint32_t
+    {
+        Unknown = 0,
+        MoveForward,
+        MoveBackward,
+        MoveLeft,
+        MoveRight,
+        
+        Jump,
+        Crouch,
+        Duck,
+        
+        // MouseClicks Normally
+        Attack,
+        SecondaryAttack,
+        SpecialAttack,
+        
+        // User Defined Actions (0-9)
+
+        Action0,
+        Action1,
+        Action2,
+        Action3,
+        Action4,
+        Action5,
+        Action6,
+        Action7,
+        Action8,
+        Action9,        
     };
 
+    /**
+     * Binds
+     * 
+     */
     class Bind {  
         public:
             BindType m_bind;
             bool m_isEnabled = true;
+            ActionType m_actionType;
             string m_name;
-            string m_description;
-            luabridge::LuaRef m_callback = nullptr;
+            function<void()> m_functionCallback;    //< Assigned Later
 
-            Bind(const string& bindName, const Core::Systems::Key& key) {
+        public:
+            Bind(const string& bindName, ActionType type, const Core::Systems::Key& key) {
                 m_name = bindName;
-                m_bind.m_keyBind = key;
+                m_bind.keyBind = key;
             }
 
-            Bind(const string& bindName, const Core::Systems::MouseClick& click) {
+            Bind(const string& bindName, ActionType type, const Core::Systems::MouseClick& click) {
                 m_name = bindName;
-                m_bind.m_mouseClick = click;
+                m_bind.mouseClick = click;
             }
     };
 
@@ -55,17 +94,16 @@ namespace Galaktic::Config {
 
     class BindConfigurator {
         public:
-            static void CreateKeyBind(const string& bindName, const Core::Systems::Key& key);
-            static void CreateMouseBind(const string& bindName, const Core::Systems::MouseClick& click);
+            BindConfigurator(const path& filepath);
+            static void DeleteBind(const string &bindName);
 
-            static void DeleteBind(const string& bindName);
-
-            static void BindAction(const string& functionName, const string& bindName);
-
-            static Bind GetBind(const string& bindName);
+            static void BindAction(const string& bindType, const string& actionName);
+            static Bind GetBind(const string &bindName);
         private:
             static BindMap m_bindMap;
         private:
+            static BindType ConvertStringToBindType(const string& str);
+            static ActionType ConvertStringToActionType(const string& str);
             static bool CheckBindExists(const Bind& keyBind);
             static bool CheckBindExists(const string& bindName);
     };

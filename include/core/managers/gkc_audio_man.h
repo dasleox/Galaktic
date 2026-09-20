@@ -23,12 +23,8 @@
 
 #pragma once
 #include <pch.hpp>
-
-namespace Galaktic::Audio {
-    class AudioFile;
-    struct AudioInfo;
-    typedef unordered_map<string, shared_ptr<AudioInfo>> Audio_List;
-}
+#include <core/managers/gkc_manager.h>
+#include <audio/gkc_audio.h>
 
 namespace Galaktic::Core::Managers {
     /**
@@ -51,26 +47,14 @@ namespace Galaktic::Core::Managers {
      * with their full name, <b> (extension included!) </b> don't forget to add the
      * appropriate extension when playing, stopping or pausing tracks!
      */
-    class AudioManager {
+    class AudioManager : public BaseManager<Audio::AudioFile, Audio::AudioInfo, Audio::Audio_List,
+        MAX_SOUNDFILE_QUANTITY, true>
+    {
         public:
             /**
              * @param folder folder path (audio folder)
              */
             explicit AudioManager(const string& folder);
-
-            /**
-             * Adds an audio file to the list, an ID for the file
-             * its assigned automatically,
-             * @param filepath audio filepath
-             */
-            static void AddAudioFile(const string& filepath);
-
-            /**
-             * Removes an audio file from the list, all tracks referring
-             * to the file will be stopped
-             * @param name audio filename
-             */
-            static void RemoveAudioFile(const string& name);
 
             /**
              * Plays a track from an audio file depending on the times
@@ -114,29 +98,7 @@ namespace Galaktic::Core::Managers {
              * @param fadeOutMs fade ms
              */
             static void StopAllSounds(Sint64 fadeOutMs = 0);
-
-            /**
-             * @brief Returns a pointer of an audio file inside the list
-             *        using the associated key, returns nullptr otherwise.
-             *        A warning is emitted that file doesn't exist
-             * @param name audio filename
-             * @return A pointer to the audio file, nullptr if no file was found
-             */
-            static shared_ptr<Audio::AudioFile> GetAudioFile(const string& name);
-
-            static shared_ptr<Audio::AudioFile> GetAudioFile(AudioID id);
-
-            static shared_ptr<Audio::AudioInfo> GetAudioInfo(const string& name);
-
-            static Audio::Audio_List& GetAudioList() { return m_audioFiles; }
-
-            /**
-             * Prints the list of all audio files with their filenames,
-             * ID's and address in memory
-             */
-            static void PrintList();
         private:
-            static Audio::Audio_List m_audioFiles;
             static std::multimap<AudioID, MIX_Track*> m_activeTracks;
             static SDL_AudioSpec m_audioSpec;
             static SDL_AudioDeviceID m_deviceID;

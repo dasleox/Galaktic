@@ -24,6 +24,12 @@
 #pragma once
 #include <pch.hpp>
 #include "gkc_system.h"
+extern "C" {
+    #include <lua.h>
+    #include <lauxlib.h>
+    #include <lualib.h>
+}
+#include <LuaBridge/LuaBridge.h>
 
 namespace Galaktic::Core::Systems {
     /**
@@ -198,9 +204,9 @@ namespace Galaktic::Core::Systems {
         public:
             Keyboard(KeySystem* keySystem) { m_keySystem = keySystem; }
             static bool IsKeyDown(Key type);
+            static bool IsKeyDownLua(lua_Integer key);
         private:
            static KeySystem* m_keySystem;
-           static Key StringToKey(const string& type);
     };
 }
 

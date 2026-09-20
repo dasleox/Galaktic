@@ -24,12 +24,14 @@
 #pragma once
 #include <pch.hpp>
 
-namespace Galaktic::Core {
+namespace Galaktic::Core
+{
     class Scene;
     class ManagersWrapper;
 }
 
-namespace Galaktic::Core::Managers {
+namespace Galaktic::Core::Managers 
+{
     /**
      * @brief Manages all scenes
      *
@@ -38,7 +40,8 @@ namespace Galaktic::Core::Managers {
      * can create, delete, and load scenes from files using a file format
      * with the extension .gkscene
      */
-    class SceneManager {
+    class SceneManager 
+    {
         public:
             SceneManager(const path& folder, ManagersWrapper* wrapper, const DeviceInformation& info);
 
@@ -67,6 +70,17 @@ namespace Galaktic::Core::Managers {
              * @param filepath 
              */
             void LoadSpecificSceneFromFile(const path& filepath);
+
+            /**
+             * Displays all the scenes in the scenes folder
+             */
+            void ShowSceneList();
+
+            /**
+             * Checks if a scene is registered inside the scene list
+             * @return true if the scene exists, false otherwise
+             */
+            bool SceneExists(const string& name);
 
             /**
              * Gets the scene pointer if it exists on the list

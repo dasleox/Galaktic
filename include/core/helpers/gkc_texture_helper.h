@@ -34,7 +34,7 @@ namespace Galaktic::Core::Helpers {
         public:
             TextureHelper(Managers::ECS_Manager& ecsManager);
 
-            void SetTextureToEntity(EntityID id, const string& name);
+            void SetTextureToEntity(EntityID id, const string& textureName);
         private:
             Managers::ECS_Manager& m_ecsManager;
     };

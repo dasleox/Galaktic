@@ -1,5 +1,6 @@
 #include <core/gkc_scene.h>
 #include <render/gkc_window.h>
+#include <core/gkc_app.h>
 #include "core/gkc_clock.h"
 #include "core/gkc_debugger.h"
 #include "core/gkc_logger.h"
@@ -16,7 +17,9 @@
 #include "core/systems/gkc_movement_system.h"
 #include "core/systems/gkc_physics_system.h"
 #include "core/systems/gkc_system.h"
+#include <core/gkc_console.h>
 #include "core/systems/gkc_ui_system.h"
+#include "filesys/gkc_filesys.h"
 #include "core/systems/gkc_window_system.h"
 #include "core/systems/gkc_ecs_event_system.h"
 #include "core/systems/gkc_script_system.h"
@@ -28,13 +31,14 @@
 #include "core/managers/gkc_animation_man.h"
 #include "script/gkc_library.h"
 #include "ecs/gkc_component_registry.h"
+#include "render/gkc_rpixels.h"
+#include <core/helpers/gkc_rpixels_helper.h>
+
+#include <numeric>
+#include <random>
 
 using namespace Galaktic::Core;
 using namespace Galaktic::Filesystem;
-
-void DummyFunction() {
-    GKC_ENGINE_INFO("Im so bi :D");
-}
 
 Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformation& device_information, const path& path)
     : m_sceneInfo({name, sizeof(Scene)}), m_managerWrapper(wrapper) {
@@ -47,8 +51,6 @@ Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformati
 
     m_windowManager->RegisterWindow(m_window);
 
-    strcpy(Debug::Console::GetDebugInformation()->display_info_,
-        Debug::Logger::GetDisplayInfo(device_information).c_str());
 
     GKC_ASSERT(m_window != nullptr, "Failed to create window!");
 
@@ -59,11 +61,10 @@ Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformati
     m_ecsHelper = new Helpers::ECS_Helper(m_ecsManager);
     m_textureHelper = new Helpers::TextureHelper(*m_ecsManager);
     m_animationHelper = new Helpers::AnimationHelper(*m_ecsManager);
+    m_rPixelsHelper = new Helpers::RPixelsHelper(*m_ecsManager);
+
     m_managerWrapper->m_textureManager->CreateMissingTexture(GKC_GET_RENDERER(m_window));
     
-    /* @todo Make a function to reset these defaults and change them when the file is read or
-     *       change the full structure of these systems (use 1 please :v)
-     */
     CreateCamera("Camera");
     CreatePlayer();
     auto& camera = m_ecsHelper->GetEntityByName("Camera");
@@ -83,7 +84,6 @@ Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformati
     //@FIX ME use following only a camera
     camera_system->SetFollowEntity(2);
 
-
     // Systems added to manage events
     m_systemList.emplace("KeySystem", key_system);                  // 0
     m_systemList.emplace("MouseSystem", mouse_system);              // 1
@@ -93,20 +93,22 @@ Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformati
     m_systemList.emplace("WindowSystem",window_system);             // 5
     m_systemList.emplace("CameraSystem", camera_system);            // 6
     m_systemList.emplace("EntityEventSystem", entity_event_system); // 7
-    m_appPath = path.filename();
+    m_appPath = path;
     
     GKC_RELEASE_ASSERT(m_registry != nullptr, "Failed to create entity manager!");
     GKC_RELEASE_ASSERT(m_ecsManager != nullptr, "Entity manager is NULL!");
     GKC_RELEASE_ASSERT(m_ecsHelper != nullptr, "Entity manager helper is NULL!");
     GKC_RELEASE_ASSERT(m_systemList.size() >= GKC_SYSTEMS_COUNTER
         || !m_systemList.empty(), "system manager is NULL!");
+
+    auto sceneScriptFolderPath = m_appPath / GKC_SCRIPT_PATH / "local" / name;
+    if(!Filesystem::CheckDirectory(sceneScriptFolderPath)) {
+        Filesystem::CreateFolder(sceneScriptFolderPath);
+        
+    }
 }
 
 Scene::~Scene() {
-    // CRITICAL FIX: Properly destroy all allocated resources
-    GKC_ENGINE_INFO("Cleaning up scene resources...");
-    
-    // Clear all entities and their components first
     auto& entityList = m_ecsManager->GetEntityList();
     vector<EntityID> entityIds;
     for (auto& [id, entity] : entityList) {
@@ -116,31 +118,37 @@ Scene::~Scene() {
         m_ecsManager->DeleteEntity(id);
     }
     
-    // Clear component registry
     ECS::ComponentRegistry::Clear();
-    
-    // Delete helper objects
     delete m_textureHelper;
     delete m_animationHelper;
     delete m_ecsHelper;
-    
-    // Delete ECS Manager and Registry
+    delete m_rPixelsHelper;
     delete m_ecsManager;
     delete m_registry;
-    
-    // Delete Window Manager
     delete m_windowManager;
-    
-    GKC_ENGINE_INFO("Scene resources cleaned up successfully!");
+
+    Script::LuaGalaktic::Shutdown();
 }
 
 void Scene::Run()  {
+    m_managerWrapper->m_textureManager->LoadAllAssets(m_window->GetRenderer());
+    m_managerWrapper->m_animationManager->LoadAllAssets(m_window->GetRenderer());
+
     // Allow events to be polled from window
     m_window->SetCallback(
     [this](Events::GKC_Event& event) {
             OnEvent(event);
         }
     );
+
+    auto console = Core::App::GetConsole();
+    auto fontPath = path(m_appPath / "assets" / "fonts" / "minecraft.ttf");
+    TTF_Font* font = TTF_OpenFont(fontPath.string().c_str(), 12.f);
+    if(font == nullptr)
+    {
+        GKC_ENGINE_ERROR("Failed to open font");
+        exit(0);
+    }
 
     //@todo Make ECS System
     Clock::Init();
@@ -159,21 +167,55 @@ void Scene::Run()  {
     GKC_RELEASE_ASSERT(movement_system != nullptr, "movement_system is NULL!");
     GKC_RELEASE_ASSERT(ecsEventSystem != nullptr, "entity_event_system is NULL!");
 
-    // @TODO Add a modifiable function to edit
-    // Add Debug Information
-    Debug::Console::SetRenderer(GKC_GET_RENDERER(m_window));
-    strcpy(Debug::Console::GetDebugInformation()->engine_name_, Debug::Logger::GetEngineName().c_str());
 
-    m_managerWrapper->m_textureManager->LoadAllTextures(GKC_GET_RENDERER(m_window));
-    m_managerWrapper->m_animationManager->LoadAllAnimations(GKC_GET_RENDERER(m_window));
+    
     
     auto& player = m_ecsHelper->GetEntityByName("Player");
     auto& player_transform = player.Get<ECS::TransformComponent>();
 
-    auto script = m_managerWrapper->m_scriptManager->GetScriptFromName("PlayMusic.lua");
-    script->RunScript();
+    /**@bug When creating an object the X and Y coordinates of the player are filled with gargabe and set to 0 after clicking */
+    
+    ECS::Entity myObject = m_ecsHelper->CreateStaticObject("myObject");
 
-    while (m_isRunning) {
+    m_textureHelper->SetTextureToEntity(player.GetID(), "cat.png");
+    m_textureHelper->SetTextureToEntity(myObject.GetID(), "cat.png");
+
+    SDL_Color mainColor = {123, 42, 11, 255};
+    auto group = Render::PixelColoredGroupInfo("group", mainColor, player.GetID(), *m_ecsManager);
+
+    Render::PixelMapping_List pixelMap = []() {
+        std::vector<std::vector<bool>> map(32, std::vector<bool>(32, false));
+
+        // 20% of 1024 = ~204 true values
+        const int total = 32 * 32;
+        const int trueCount = static_cast<int>(total * 0.2f);
+
+        // Create a flat list of indices, shuffle, and pick the first trueCount
+        std::vector<int> indices(total);
+        std::iota(indices.begin(), indices.end(), 0);
+
+        std::mt19937 rng(std::random_device{}());
+        std::shuffle(indices.begin(), indices.end(), rng);
+
+        for (int i = 0; i < trueCount; ++i) {
+            int row = indices[i] / 32;
+            int col = indices[i] % 32;
+            map[row][col] = true;
+        }
+
+        return map;
+    }();
+
+    group.AddEntityToGroup(myObject.GetID());
+    group.SetSelectedPixels(pixelMap);
+    group.ApplyColorToEntities();
+
+    while (m_isRunning) 
+    {
+        if(m_bPaused)
+        {
+            break;
+        }
         // Timing
         Clock::Update();
         double delta_time = Clock::GetDeltaTime();
@@ -181,13 +223,6 @@ void Scene::Run()  {
         accumulator += delta_time;
 
         // Event Handling
-
-        Debug::Console::GetDebugInformation()->ram_usage_ = Debug::GetGalakticRAMUsage();
-        if(delta_time > 0) {
-            Debug::Console::GetDebugInformation()->fps_ = static_cast<float>(1 / delta_time);
-        }
-        Debug::Console::GetDebugInformation()->x_coordinate_ = player_transform.m_location.x;
-        Debug::Console::GetDebugInformation()->y_coordinate_ = player_transform.m_location.y;
 
         m_window->PollEvents();
         if (m_window->ShouldClose()) {
@@ -210,11 +245,24 @@ void Scene::Run()  {
         m_window->Draw(GKC_GET_RENDERER(m_window));
         Render::Drawer::DrawEntities(m_ecsManager->GetEntityList(), GKC_GET_RENDERER(m_window),
             *camera_systemPtr);
+        
+        m_rPixelsHelper->DrawAllGroups();
         m_managerWrapper->m_animationManager->UpdateAll(delta_time);
 
-        if (Debug::Console::GetIsActive()) {
-            Debug::Console::CallConsole();
+        if(m_bShowWireframe)
+        {
+            Render::Drawer::DrawWireframes(m_ecsManager->GetEntityList(), GKC_GET_RENDERER(m_window),
+                *camera_systemPtr);
         }
+
+        if(m_bShowColliders)
+        {
+            Render::Drawer::DrawColliders(m_ecsManager->GetEntityList(), GKC_GET_RENDERER(m_window),
+                *camera_systemPtr);
+        }
+        
+        console->Display(GKC_GET_RENDERER(m_window), font, m_window->GetWidth(), m_window->GetHeight());
+
         SDL_RenderPresent(GKC_GET_RENDERER(m_window));
         SDL_Delay(16); // Caps at ~60fps
     }
@@ -223,6 +271,11 @@ void Scene::Run()  {
 void Scene::Save() {
     FileWriter::WriteScene(m_appPath / path(m_sceneInfo.scene_name_ + ".gkscene")
         , *this, m_registry);
+}
+
+void Scene::Pause() 
+{
+    !m_bPaused;
 }
 
 void Scene::OnEvent(Events::GKC_Event& event) {
@@ -270,12 +323,15 @@ void Scene::CreatePlayer() {
 
 void Scene::CreateCamera(const string& name) {
     auto cameraComponent = ECS::CameraComponent();
-    cameraComponent.m_isActive = true;
+    cameraComponent.isActive = true;
     m_ecsHelper->CreateCameraEntity(name);
     m_ecsHelper->ModifyEntity(name, cameraComponent);
 }
 void Scene::Close() {
-    Free();
     m_isRunning = false;
-    exit(0);
+}
+
+void Scene::SetFullscreen()
+{
+    m_window->SetFullScreen();
 }

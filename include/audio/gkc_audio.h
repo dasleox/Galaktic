@@ -24,58 +24,39 @@
 #pragma once
 #include <pch.hpp>
 
-namespace Galaktic::Audio {
+namespace Galaktic::Audio 
+{
     /**
      * @class AudioFile
      * @brief Stores a \c MIX_Audio and initializes it by providing a path to the sound file
      */
-    class AudioFile {
+    class AudioFile 
+    {
+        private:
+            MIX_Audio* m_audio = nullptr;
         public:
             /**
              * @param filepath sound filepath
              * @param mixer MIX_Mixer
              */
             explicit AudioFile(const path &filepath, MIX_Mixer* mixer);
+
             MIX_Audio* GetAudioSample() { return m_audio; }
 
             /**
              * @brief Checks if the audio initialized is valid for usage
              * @return true if it's valid, false if it is nullptr
              */
-            bool IsValid() const;
-        private:
-            MIX_Audio* m_audio = nullptr;
+            bool IsValid() const
+            {
+                return m_audio != nullptr;
+            }
     };
-
-    /**
-     * @struct AudioInfo
-     * @brief Wraps an \c AudioFile instance with an AudioID
-     *
-     * This struct is used to keep track of audio files and play them by ID,
-     * if the ID is 0, it means the audio file is invalid, and it will not play
-     * or even cause an error
-     */
-    struct AudioInfo {
-        AudioID id_;
-        shared_ptr<AudioFile> audioFile_;
+    
+    struct AudioInfo : public AssetInfo<AudioFile>
+    {
+        using AssetInfo<AudioFile>::AssetInfo;
     };
-
-    /**
-     * @brief Type for saving the filename (includes extension, e.g: file.mp3)  and
-     *        a shared_ptr to an \c AudioInfo struct
-     */
-    typedef unordered_map<string, shared_ptr<AudioInfo>> Audio_List;
-
-    /**
-     * @brief Checks if the file is an audio file
-     * @param path filepath
-     * @return true if the file is an audio file, false otherwise
-     */
-    extern bool CheckAudioExtension(const path& path);
+    
+    typedef unordered_map<AudioID, unique_ptr<AudioInfo>> Audio_List;
 }
-
-/**
- * @brief Gets the audio file from an \c AudioFile instance
- * @param file audio file
- */
-#define GKC_GET_AUDIOFILE(file) file->GetAudioSample();

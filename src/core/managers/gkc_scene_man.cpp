@@ -7,7 +7,8 @@
 using namespace Galaktic::Core;
 
 Managers::SceneManager::SceneManager(const path &folder, ManagersWrapper* wrapper, const DeviceInformation &info)
-    : m_deviceInfo(info), m_folder(folder), m_managersWrapper(wrapper) {}
+    : m_deviceInfo(info), m_folder(folder), m_managersWrapper(wrapper) 
+{}
 
 void Managers::SceneManager::CreateScene(const string &name) {
     m_sceneList.emplace(name, make_unique<Scene>(name, m_managersWrapper, m_deviceInfo, m_folder));
@@ -42,6 +43,15 @@ void Managers::SceneManager::LoadSpecificSceneFromFile(const path &filepath) {
     LoadSpecificScene(sceneName);
 }
 
+void Managers::SceneManager::ShowSceneList()
+{
+    for(auto& [name, scene] : m_sceneList)
+    {
+        uint64_t fileSize = Filesystem::GetFileSize(m_folder / path(name + ".gkscene"));
+        GKC_ENGINE_INFO("Scene '{}' (Size: {} MB)", name, Core::BytesToMegabytes(fileSize));
+    }
+}
+
 unique_ptr<Scene> Managers::SceneManager::GetScene(const string &name) {
     auto it = m_sceneList.find(name);
     if (it != m_sceneList.end()) {
@@ -51,3 +61,7 @@ unique_ptr<Scene> Managers::SceneManager::GetScene(const string &name) {
     return nullptr;
 }
 
+bool Managers::SceneManager::SceneExists(const string& name)
+{
+    return m_sceneList.contains(name);
+}

@@ -15,7 +15,7 @@ void Systems::ECS_EventSystem::OnEvent(Events::GKC_Event &event) {
     dispatcher.DispatchEvent<Events::EntityCreatedEvent> (
         [this](Events::EntityCreatedEvent &e) {
             m_ecsManager.CreateEntityByTypeIndex(e.GetEntityName(), e.GetEntityType());
-            GKC_ENGINE_INFO("'{}' entity ({}) has been created!", e.GetEntityName(), Debug::Logger::DemangleTypename(e.GetEntityType().name()));
+            GKC_ENGINE_INFO("'{}' entity ({}) has been created!", e.GetEntityName(), Debug::DemangleTypename(e.GetEntityType().name()));
             return false;
         });
 

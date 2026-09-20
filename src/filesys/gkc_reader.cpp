@@ -7,7 +7,7 @@
 using namespace Galaktic;
 
 void Filesystem::FileReader::ReadString(ifstream &file, string &str) {
-    GKC_ENSURE_FILE_OPEN(file, Debug::ReadingException);
+    GKC_ENSURE_FILE_OPEN(file, ReadingError);
     using namespace ECS;
 
     size_t len = 0;
@@ -22,7 +22,7 @@ void Filesystem::FileReader::ReadString(ifstream &file, string &str) {
 
 void Filesystem::FileReader::ReadEntity(ifstream &file, Core::Managers::ECS_Manager& manager,
     ECS::Registry* registry) {
-    GKC_ENSURE_FILE_OPEN(file, Debug::ReadingException);
+    GKC_ENSURE_FILE_OPEN(file, ReadingError);
     using namespace ECS;
 
     size_t entitySize = 0;
@@ -36,14 +36,14 @@ void Filesystem::FileReader::ReadEntity(ifstream &file, Core::Managers::ECS_Mana
     Entity entity(id, registry); entity.SetID(id);
     manager.AddEmptyEntity(id, entity);
     registry->ForEachRegisteredComponent([&](const ComponentTypeInfo& info) {
-        if (info.m_isTag) {
-            manager.AddTagByType(id, info.m_type);
+        if (info.isTag) {
+            manager.AddTagByType(id, info.type);
             return;
         }
 
         any component;
-        info.m_deserialize(component, file);
-        manager.AddRawComponentToEntity(id, info.m_type, std::move(component));
+        info.deserialize(component, file);
+        manager.AddRawComponentToEntity(id, info.type, std::move(component));
     });
 
     #if GKC_DEBUG
@@ -57,7 +57,7 @@ void Filesystem::FileReader::ReadScene(const path& path, Core::Managers::ECS_Man
 
     GKC_ENGINE_INFO("Reading scene from {}", path.string());
     ifstream file(path, std::ios::binary);
-    GKC_ENSURE_FILE_OPEN(file, Debug::ReadingException);
+    GKC_ENSURE_FILE_OPEN(file, ReadingError);
 
     size_t sceneSize = 0;
     unsigned int version = 0;

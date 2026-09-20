@@ -9,7 +9,7 @@ bool Window::m_isFullscreen = false;
 Window::Window(const string& title, Uint32 width, Uint32 height, Window_Type type)
     : m_title(title), m_width(width), m_height(height), m_type(type) {
 
-    // Dont worry about unsigned values here
+    // Dont worry be happi uuuh ,about unsigned values here
     m_window = SDL_CreateWindow(title.c_str(), width, height, TranslateSDLType(type) |
         SDL_WINDOW_RESIZABLE);
     m_renderer = SDL_CreateRenderer(m_window, NULL);
@@ -17,7 +17,7 @@ Window::Window(const string& title, Uint32 width, Uint32 height, Window_Type typ
     GKC_ASSERT(m_renderer != nullptr, "Renderer wasn't created correctly!");
     GKC_ASSERT(m_window != nullptr, "Window wasn't created correctly!");
 
-    if (TranslateSDLType(type) == SDL_WINDOW_RESIZABLE || SDL_WINDOW_OPENGL) {
+    if (TranslateSDLType(type) == SDL_WINDOW_RESIZABLE) {
         SDL_MaximizeWindow(m_window);
     }
 
@@ -75,7 +75,7 @@ SDL_WindowFlags Window::TranslateSDLType(const Window_Type& type) {
 
 void Window::SDL_KeyboardEventCheck(SDL_Event &e) {
     using namespace Galaktic::Core::Events;
-    GKC_RELEASE_ASSERT(m_callback != nullptr,"Event callbacks are not registered, please register a callback function from the scene");
+    GKC_RELEASE_ASSERT(m_callback != nullptr, "Event callbacks are not registered, please register a callback function from the scene");
 
     switch (e.type) {
         case SDL_EVENT_KEY_DOWN: {
@@ -91,7 +91,7 @@ void Window::SDL_KeyboardEventCheck(SDL_Event &e) {
 
 void Window::SDL_WindowEventCheck(SDL_Event &e) {
     using namespace Galaktic::Core::Events;
-    GKC_RELEASE_ASSERT(m_callback != nullptr,"Event callbacks are not registered, please register a callback function from the scene");
+    GKC_RELEASE_ASSERT(m_callback != nullptr, "Event callbacks are not registered, please register a callback function from the scene");
     switch (e.type) {
         case SDL_EVENT_WINDOW_RESIZED: {
             WindowResizeEvent event(e.window.data1, e.window.data2, m_windowID);
@@ -125,5 +125,7 @@ void Galaktic::Render::Window::SetIcon(const path &iconPath) {
         GKC_ENGINE_ERROR("Failed to create icon!");
         return;
     }
+    
     SDL_SetWindowIcon(m_window, surface);
+    SDL_DestroySurface(surface);
 }

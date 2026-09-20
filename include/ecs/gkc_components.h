@@ -23,177 +23,177 @@
 
 #pragma once
 #include <pch.hpp>
-#include "core/gkc_exception.h"
 #include "core/gkc_logger.h"
+#include "core/gkc_error.h"
 
 namespace Galaktic::ECS {
     struct TransformComponent {
         TransformComponent() {}
 
-        Render::Vec2 m_location{0.f, 0.f};
-        Render::Vec2 m_size{50.f, 50.f};
-        float m_rotation = 0.f;
+        Render::Vec2 location{0.f, 0.f};
+        Render::Vec2 size{50.f, 50.f};
+        float rotation = 0.f;
     };
 
     struct HealthComponent {
         HealthComponent() {}
         HealthComponent(float maxHealth, bool canTakeDamage) 
-            : m_canTakeDamage(canTakeDamage) {
+            : canTakeDamage(canTakeDamage) {
             if(maxHealth <= 0.f && canTakeDamage) {
                 GKC_ASSERT(maxHealth > 0.f, "Max health must be greater than 0");
-                m_maxHealth = 100.f;
-                m_currentHealth = 100.f;
+                maxHealth = 100.f;
+                currentHealth = 100.f;
             } else {
                 if(!canTakeDamage) {
-                    m_maxHealth = 100.f;
-                    m_currentHealth = 100.f;
+                    maxHealth = 100.f;
+                    currentHealth = 100.f;
                 } else {
-                    m_maxHealth = maxHealth;
-                    m_currentHealth = maxHealth;
+                    maxHealth = maxHealth;
+                    currentHealth = maxHealth;
                 }
             }
         }
         
-        float m_currentHealth = 100.f;
-        float m_maxHealth = 100.f;
-        bool m_canTakeDamage = true;
+        float currentHealth = 100.f;
+        float maxHealth = 100.f;
+        bool canTakeDamage = true;
     };
 
     struct JumpComponent {
         JumpComponent() {}
-        JumpComponent(float jumpHeight, bool canJump) : m_jumpHeight(jumpHeight), m_canJump(canJump) {
+        JumpComponent(float jumpHeight, bool canJump) : jumpHeight(jumpHeight), canJump(canJump) {
             // Ensure jump height is positive
-            if(m_jumpHeight <= 0.f) m_jumpHeight = 100.f;
+            if(jumpHeight <= 0.f) jumpHeight = 100.f;
         }
         
-        float m_jumpHeight = 100.f;
-        bool m_canJump = true;
+        float jumpHeight = 100.f;
+        bool canJump = true;
     };
 
     struct RigidBody {
         RigidBody() {}
         RigidBody(Render::Vec2 velocity, Render::Vec2 force, float mass)
-            : m_velocity(velocity), m_force(force), m_mass(mass) {
+            : velocity(velocity), force(force), mass(mass) {
             // Ensure mass is positive
-            if(m_mass <= 0.f) {
-                GKC_ASSERT(m_mass > 0.f, "Mass must be greater than 0");
-                m_mass = 1.f;
+            if(mass <= 0.f) {
+                GKC_ASSERT(mass > 0.f, "Mass must be greater than 0");
+                mass = 1.f;
             }
         }
         
-        Render::Vec2 m_velocity{0.f, 0.f};
-        Render::Vec2 m_force{0.f, 0.f};
-        float m_mass = 1.f;
+        Render::Vec2 velocity{0.f, 0.f};
+        Render::Vec2 force{0.f, 0.f};
+        float mass = 1.f;
     };
 
     struct CollisionComponent {
         CollisionComponent() {}
         CollisionComponent(Render::Vec2 collisionBox, bool collidable)
-            : m_collisionBox(collisionBox), m_collidable(collidable) {}
+            : collisionBox(collisionBox), collidable(collidable) {}
         
-        Render::Vec2 m_collisionBox = {0.f, 0.f};
-        bool m_collidable = true;
+        Render::Vec2 collisionBox = {0.f, 0.f};
+        bool collidable = true;
     };
 
     struct SpeedComponent {
         SpeedComponent() {}
-        SpeedComponent(float maxSpeed) : m_maxSpeed(maxSpeed) {
+        SpeedComponent(float maxSpeed) : maxSpeed(maxSpeed) {
             // Ensure max speed is non-negative
-            if(m_maxSpeed < 0.f) m_maxSpeed = 1000.f;
+            if(maxSpeed < 0.f) maxSpeed = 1000.f;
         }
         
-        float m_maxSpeed = 1000.f;
+        float maxSpeed = 1000.f;
     };
 
     struct ColorComponent {
-        ColorComponent() : m_color(GREY_COLOR) {}
-        ColorComponent(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255) : m_color{r, g, b, a} {}
-        ColorComponent(SDL_Color color) : m_color(color) {}
+        ColorComponent() : color(GREY_COLOR) {}
+        ColorComponent(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255) : color{r, g, b, a} {}
+        ColorComponent(SDL_Color color) : color(color) {}
         
-        SDL_Color m_color;
+        SDL_Color color;
     };
 
     struct NameComponent {
         NameComponent() {}
-        NameComponent(const string& name) : m_name(name) {}
-        string m_name = "";
+        NameComponent(const string& name) : name(name) {}
+        string name = "";
 
         static void Write(ofstream& file, const NameComponent& comp) {
-            GKC_ENSURE_FILE_OPEN(file, Debug::WritingException);
-            auto len = static_cast<Uint32>(comp.m_name.size());
+            GKC_ENSURE_FILE_OPEN(file, WritingError);
+            auto len = static_cast<Uint32>(comp.name.size());
             file.write(GKC_WRITE_BINARY(len), sizeof(len));
-            file.write(comp.m_name.data(), len);
+            file.write(comp.name.data(), len);
         }
 
         static void Read(ifstream& file, NameComponent& comp) {
-            GKC_ENSURE_FILE_OPEN(file, Debug::ReadingException);
+            GKC_ENSURE_FILE_OPEN(file, ReadingError);
             Uint32 len;
             file.read(GKC_READ_BINARY(len), sizeof(len));
-            comp.m_name.resize(len);
-            file.read(comp.m_name.data(), len);
+            comp.name.resize(len);
+            file.read(comp.name.data(), len);
         }
 
         static size_t Size(const NameComponent& comp) {
-            return sizeof(Uint32) + comp.m_name.size();
+            return sizeof(Uint32) + comp.name.size();
         }
     };
 
     struct LightComponent {
         LightComponent() {}
         LightComponent(Render::Vec2 location, float watts, float radius, SDL_Color color)
-            : m_location(location), m_watts(watts), m_radius(radius), m_color(color) {
+            : location(location), watts(watts), radius(radius), color(color) {
             // Ensure watts and radius are positive
-            if(m_watts <= 0.f) m_watts = 100.f;
-            if(m_radius <= 0.f) m_radius = 1.f;
+            if(watts <= 0.f) watts = 100.f;
+            if(radius <= 0.f) radius = 1.f;
         }
         
-        Render::Vec2 m_location = {0.f, 0.f};
-        float m_watts = 100.f;
-        float m_radius = 1.f;  // 1 meter = 32px
-        SDL_Color m_color = WHITE_COLOR;
+        Render::Vec2 location = {0.f, 0.f};
+        float watts = 100.f;
+        float radius = 1.f;  // 1 meter = 32px
+        SDL_Color color = WHITE_COLOR;
     };
 
     struct CameraComponent {
         CameraComponent() {}
         CameraComponent(Render::Vec2 location, EntityID entityToFollowID,
                         float zoom, float smoothing, bool isActive)
-            : m_location(location), m_entityToFollowID(entityToFollowID), 
-              m_zoom(zoom), m_smoothing(smoothing), m_isActive(isActive) {
+            : location(location), entityToFollowID(entityToFollowID), 
+              zoom(zoom), smoothing(smoothing), isActive(isActive) {
             // Ensure zoom is positive
-            if(m_zoom <= 0.f) m_zoom = 1.f;
+            if(zoom <= 0.f) zoom = 1.f;
             // Ensure smoothing is non-negative
-            if(m_smoothing < 0.f) m_smoothing = 3.f;
+            if(smoothing < 0.f) smoothing = 3.f;
         }
         
-        Render::Vec2 m_location = {0.f, 0.f};
-        EntityID m_entityToFollowID = InvalidEntity;
-        float m_zoom = 1.f;
-        float m_smoothing = 3.f;
-        bool m_isActive = false;
+        Render::Vec2 location = {0.f, 0.f};
+        EntityID entityToFollowID = InvalidEntity;
+        float zoom = 1.f;
+        float smoothing = 3.f;
+        bool isActive = false;
     };
 
     struct TextureComponent {
         TextureComponent() {}
-        TextureComponent(TextureID id) : m_id(id) {}
-        TextureID m_id = 0;
+        TextureComponent(TextureID id) : id(id) {}
+        TextureID id = 0;
     };
 
     struct ScriptComponent {
         ScriptComponent() {}
-        ScriptComponent(ScriptID id) : m_id(id) {}
-        ScriptID m_id = 0;
+        ScriptComponent(ScriptID id) : id(id) {}
+        ScriptID id = 0;
     };
 
     struct AnimationComponent {
         AnimationComponent() {}
-        AnimationComponent(AnimationID id) : m_id(id) {}
-        AnimationID m_id = 0;
+        AnimationComponent(AnimationID id) : id(id) {}
+        AnimationID id = 0;
     };
 
     struct VisibilityComponent {
         VisibilityComponent() {}
-        VisibilityComponent(bool visible) : m_visible(visible) {}
-        bool m_visible = true;
+        VisibilityComponent(bool visible) : visible(visible) {}
+        bool visible = true;
     };
 
     struct PhysicsObjectTag {};
@@ -213,25 +213,25 @@ namespace Galaktic::ECS {
             void (*serializeFn)(const any&, ofstream&),
             void (*deserializeFn)(any&, ifstream&)
         )
-            : m_type(type)
-            , m_size(size)
-            , m_parentID(parentID)
-            , m_isTag(isTag)
-            , m_isPOD(isPOD)
-            , m_sizeFunc(sizeFn)
-            , m_serialize(serializeFn)
-            , m_deserialize(deserializeFn)
+            : type(type)
+            , size(size)
+            , parentID(parentID)
+            , isTag(isTag)
+            , isPOD(isPOD)
+            , sizeFunc(sizeFn)
+            , serialize(serializeFn)
+            , deserialize(deserializeFn)
         {}
         
-        type_index m_type;
-        size_t m_size;
-        EntityID m_parentID;
-        bool m_isTag;
-        bool m_isPOD;
+        type_index type;
+        size_t size;
+        EntityID parentID;
+        bool isTag;
+        bool isPOD;
 
         // Modifiable Lambdas for writing/reading/size
-        size_t (*m_sizeFunc)(const std::any&);
-        void (*m_serialize)(const std::any&, ofstream&);
-        void (*m_deserialize)(std::any&, ifstream&);
+        size_t (*sizeFunc)(const std::any&);
+        void (*serialize)(const std::any&, ofstream&);
+        void (*deserialize)(std::any&, ifstream&);
     };
 }

@@ -1,7 +1,6 @@
 #include <pch.hpp>
 #include <filesys/gkc_filesys.h>
 #include <core/gkc_logger.h>
-#include "core/gkc_exception.h"
 
 using namespace Galaktic;
 using namespace std::filesystem;
@@ -29,7 +28,7 @@ bool Filesystem::CreateFolder(const path& dir_name) {
 
 void Filesystem::RenameFile(const path& old_name, const path& new_name) {
     if (!CheckFile(old_name)) {
-        GKC_THROW_EXCEPTION(Debug::FilesystemException, "File to rename doesn't exist!");
+        return;
     }
     try {
         rename(old_name, new_name);
@@ -99,7 +98,7 @@ vector<string> Filesystem::GetFilenamesInFolder(const path &folder) {
                 fileNames.push_back(entry.path().string());
         }
     } catch (const filesystem_error& e) {
-        GKC_THROW_EXCEPTION(Debug::FilesystemException, e.what());
+        throw;
     }
 
     return fileNames;
@@ -125,15 +124,41 @@ string Filesystem::GetFilenameFromRelativePath(const path &fullPath, const path 
 }
 
 void Filesystem::RefreshFolderContents(vector<string>& content, const path& folder) {
-    content.empty() ? GKC_ENGINE_INFO("Passed folder content is empty!") : void(0);
-    try {
+    if(content.empty())
+    {
+        GKC_ENGINE_WARNING("Passed folder content is empty!");
+        return;
+    }
+
+    // @todo Add Error handling
         for (const auto& entry : recursive_directory_iterator(folder)) {
             if (entry.exists() && entry.is_regular_file())
                 content.push_back(entry.path().string());
         }
-    } catch (const filesystem_error& e) {
-        GKC_THROW_EXCEPTION(Debug::FilesystemException, e.what());
+
+}
+
+bool Filesystem::CheckExtension(const path& filepath, const vector<string>& allowedExtensions)
+{
+    for(auto& extension : allowedExtensions)
+    {
+        if(filepath.extension() == extension)
+        {
+            return true;
+        }
     }
+    return false;
+}
+
+uintmax_t Filesystem::GetFileSize(const path& filepath)
+{
+    if(CheckFile(filepath))
+    {
+        return file_size(filepath);
+    }
+    
+    GKC_ENGINE_ERROR("file '{}' to retrieve size from doesn't exists!", filepath.string());
+    return 0;
 }
 
 path Filesystem::GetFullPath() {

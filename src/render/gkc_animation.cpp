@@ -5,12 +5,6 @@
 using namespace Galaktic::Render;
 
 Galaktic::Render::Animation::Animation(const path& path, SDL_Renderer* renderer) {
-    GKC_ENGINE_INFO("Loading {0}...", path.string());
-    if (path.empty() || !Filesystem::CheckFile(path)) {
-        GKC_ENGINE_ERROR( "given path doesn't exists!");
-        return;
-    }
-
     m_animation = IMG_LoadAnimation(path.string().c_str());
 
     if (m_animation == nullptr) {
@@ -96,15 +90,4 @@ void Animation::SetFrame(int frame) {
         m_currentFrame = frame;
         m_accumulatedTime = 0;
     }
-}
-
-bool Galaktic::Render::CheckAnimationExtension(const path& path) {
-    if (path.empty() || !Filesystem::CheckFile(path)) {
-        return false;
-    }
-    auto pathStr = path.extension().string();
-
-    if (pathStr == ".gif" || pathStr == ".apng") { return true; }
-
-    return false;
 }

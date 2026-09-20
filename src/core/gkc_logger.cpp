@@ -1,22 +1,36 @@
 #include <core/gkc_logger.h>
+#include <script/gkc_library.h>
+#include <core/gkc_error.h>
+
 using namespace Galaktic::Debug;
 
 namespace Galaktic::Debug {
-    std::shared_ptr<spdlog::logger> Logger::engine_logger_;
-    std::shared_ptr<spdlog::logger> Logger::client_logger_;
+    shared_ptr<spdlog::logger> Logger::m_engineLogger;
+    shared_ptr<spdlog::logger> Logger::m_clientLogger;
+    shared_ptr<ConsoleMutex_mt> Logger::m_mutexSink;
 }
 
 void Logger::Init() {
-    #if GKC_DEBUG
-        // [Warning] [09/28/25--23:25:40] [your_mom.cpp -> inMyBed || Line: 69] [Leonardo]: Hi :333!
-        spdlog::set_pattern("%^[%l]%$ [%D--%X] [%s -> %! || Line: %#] [%n]: %v ");
-    #else
-        // [Warning] [09/28/25--23:25:40] [Leonardo]: Hi :333!
-        spdlog::set_pattern("%^[%l]%$ [%D--%X] [%n]: %v ");
-    #endif
+    m_mutexSink = make_shared<ConsoleMutex_mt>();
+    spdlog::sinks_init_list(m_mutexSink);
 
-    engine_logger_ = spdlog::stdout_color_mt("GALAKTIC");
-    client_logger_ = spdlog::stdout_color_mt("CLIENT");
+    #if GKC_DEBUG
+        // Engine logger: shows file/line/function
+        spdlog::set_pattern("%^[%l]%$ [%D--%X] [%s -> %! || Line: %#] \033[1;33m [%n]\033[0m: %v ");
+        
+        m_engineLogger = spdlog::stdout_color_mt("GALAKTIC");
+        
+        // Client logger: simple format with [Lua]: prefix
+
+        m_clientLogger = spdlog::stdout_color_mt("CLIENT");
+        m_clientLogger->set_pattern("%^[%l]%$ [%D--%X]%v ");
+    #else
+        spdlog::set_pattern("%^[%l]%$ [%D--%X] \033[1;33m [%n]\033[0m: %v ");
+        m_engineLogger = spdlog::stdout_color_mt("GALAKTIC");
+        
+        m_clientLogger = spdlog::stdout_color_mt("CLIENT");
+        m_clientLogger->set_pattern("%^[%l]%$ [%D--%X] %v ");
+    #endif
 }
 
 void Logger::PrintEngineInformation() {
@@ -24,19 +38,17 @@ void Logger::PrintEngineInformation() {
         << GKC_SUFFIX << "' " << "Build " << GKC_BUILD_VERSION << endl;
 }
 
-string Logger::GetEngineName() {
-    return "Galaktic Engine " + GKC_VERSION_STR + " '"
-        + GKC_SUFFIX + "' " + "Build " + to_string(GKC_BUILD_VERSION);
-}
-string Logger::GetDisplayInfo(const Core::DeviceInformation& deviceInfo) {
-    return to_string(deviceInfo.width_) + "x" + to_string(deviceInfo.height_);
+void Logger::LogInfoLua(const string& msg) {
+    auto luaContext = Galaktic::Script::LuaGalaktic::GetLuaCallContext(1);
+    GKC_CLIENT_INFO(" {} \033[1;34m[LUA]\033[0m: {}", luaContext, msg);
 }
 
-string Logger::DemangleTypename(const char *name) {
-    int status = -1;
-    unique_ptr<char, void(*)(void*)> res = {
-        abi::__cxa_demangle(name, NULL, NULL, &status),
-        std::free
-    };
-    return (status == 0) ? res.get() : name;
+void Logger::LogWarningLua(const string& msg) {
+    auto luaContext = Galaktic::Script::LuaGalaktic::GetLuaCallContext(1);
+    GKC_CLIENT_WARNING(" {} \033[1;34m[LUA]\033[0m: {}", luaContext, msg);
+}
+
+void Logger::LogErrorLua(const string& msg) {
+    auto luaContext = Galaktic::Script::LuaGalaktic::GetLuaCallContext(1);
+    GKC_CLIENT_ERROR(" {} \033[1;34m[LUA]\033[0m: {}", luaContext, msg);
 }

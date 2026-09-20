@@ -27,8 +27,8 @@ void Systems::ScriptSystem::OnEvent(Events::GKC_Event& e) {
             if(entity != nullptr) {     
                 ECS::IfComponentExists<ECS::ScriptComponent>(*entity, [&]() {
                     auto& scriptComp = entity->Get<ECS::ScriptComponent>();
-                    auto script = ScriptManager::GetScriptFromID(scriptComp.m_id);
-                    GKC_CHECK_RUN_SCRIPT(script, scriptComp.m_id);
+                    auto script = ScriptManager::GetScriptFromID(scriptComp.id);
+                    GKC_CHECK_RUN_SCRIPT(script, scriptComp.id);
                 });
             } 
             return false;

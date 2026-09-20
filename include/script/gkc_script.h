@@ -24,6 +24,13 @@
 #pragma once
 #include <pch.hpp>
 
+extern "C" {
+    #include <lua.h>
+    #include <lauxlib.h>
+    #include <lualib.h>
+}
+#include <LuaBridge/LuaBridge.h>
+
 namespace Galaktic::Script {
     class GKC_Script {
         public:

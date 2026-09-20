@@ -34,8 +34,6 @@ namespace Galaktic::Core::Events {
      * and for dispatching a \n \c std::function with a boolean return value is used,
      * returns true if the event was handled, false otherwise.
      *
-     * This class dispatches events on the go and doesn't have any 'queue' style
-     * for dispatch.
      */
     class GKC_EventDispatcher {
         public:

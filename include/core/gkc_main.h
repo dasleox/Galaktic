@@ -33,6 +33,7 @@
 #include <iostream>
 #include <filesystem>
 #include <typeindex>
+#include <cxxabi.h>
 #include <any>
 
 // Operating System Detection
@@ -89,8 +90,8 @@
 
 #define GKC_MAJOR_VERSION 0
 #define GKC_MINOR_VERSION 3
-#define GKC_PATCH_VERSION 0
-#define GKC_SET_COLOR(color) color.r, color.g, color.b, color.a
+#define GKC_PATCH_VERSION 2
+#define GKC_SET_COLOR(color) (color.r), (color.g), (color.b), (color.a)
 
 // 'using' declarations
 using std::shared_ptr, std::unique_ptr, std::weak_ptr, std::cout, std::cin, std::endl;
@@ -98,22 +99,33 @@ using std::string, std::to_string, std::vector, std::map, std::unordered_map, st
 using std::stringstream, std::ifstream, std::ofstream;
 using std::make_shared, std::make_unique, std::function;
 using std::filesystem::path, std::unordered_multimap;
-using std::type_index, std::any, std::array;
+using std::type_index, std::any, std::array, std::move;
 
 const string GKC_SUFFIX = "Earthy";
-const Uint32 GKC_BUILD_VERSION = 396;
+const Uint32 GKC_BUILD_VERSION = 422;
 inline const string GKC_VERSION_STR = to_string(GKC_MAJOR_VERSION) + "."
     + to_string(GKC_MINOR_VERSION) + "." + to_string(GKC_PATCH_VERSION);
 
 typedef Uint32 EntityID;
 typedef Uint32 AudioID;
-typedef Uint32 GKC_WindowID;
+typedef Uint32 GKC_WindowID;    
 typedef Uint32 ComponentTypeID;
 typedef Uint32 TextureID;
 typedef Uint32 ScriptID;
 typedef Uint32 AnimationID;
+typedef Uint32 PixelGroupID;
+typedef Uint32 FontID;
 
 inline constexpr Uint32 MAX_WINDOW_QUANTITY = 64;
+inline constexpr Uint32 MAX_ENTITY_QUANTITY = 4096 * 8;
+inline constexpr Uint32 MAX_COMPONENT_QUANTITY = MAX_ENTITY_QUANTITY * 8;
+inline constexpr Uint32 MAX_TEXTURE_QUANTITY = 8192;
+inline constexpr Uint32 MAX_ANIMATION_QUANTITY = 8192;
+inline constexpr Uint32 MAX_SOUNDFILE_QUANTITY = 4096;
+inline constexpr Uint32 MAX_SCRIPT_QUANTITY = 1024;
+inline constexpr Uint32 MAX_TRACKS_QUANTITY = 8192 * 2;
+inline constexpr Uint32 MAX_FONT_QUANTITY = 1024;
+
 inline constexpr EntityID InvalidEntity = 0;
 inline constexpr double FIXED_DELTA_TIME = 1.0 / 60;
 
@@ -124,13 +136,17 @@ inline constexpr double FIXED_DELTA_TIME = 1.0 / 60;
     inline const path GKC_SCENE_PATH = "scenes";
     inline const path GKC_SCRIPT_PATH = "scripts";
     inline const path GKC_CONFIG_PATH = "config";
+
+    inline const path GKC_ARIAL_FONT = "C:\\Windows\\Fonts\\Arial.ttf";
 #else
     inline const path GKC_TEXTURE_PATH = "assets/textures";
     inline const path GKC_SOUND_PATH = "assets/sounds";
-    inline const path GKC_ANIMATION_PATH = "assets/animations"
-    inline const path GKC_SCENE_PATH = "assets/scenes"
+    inline const path GKC_ANIMATION_PATH = "assets/animations";
+    inline const path GKC_SCENE_PATH = "assets/scenes";
     inline const path GKC_SCRIPT_PATH = "scripts";
     inline const path GKC_CONFIG_PATH = "config";
+
+    inline const path GKC_ARIAL_FONT = "/usr/share/fonts/truetype/Arial.ttf";
 #endif
 
 inline constexpr SDL_Color WHITE_COLOR = {255, 255, 255, 255};
@@ -143,6 +159,59 @@ inline constexpr SDL_Color MAGENTA_COLOR = {255, 0, 255, 255};
 inline constexpr SDL_Color CYAN_COLOR = {0, 255, 255, 255};
 inline constexpr SDL_Color GREY_COLOR = {128, 128, 128, 255}; 
 
+namespace Galaktic
+{
+    template<typename AssetType>
+    struct AssetInfo 
+    {
+        AssetInfo(const string& filepath) 
+            : filepath(filepath) {}
+
+        string filepath;
+        unique_ptr<AssetType> asset = nullptr;
+        bool isLoaded = false;
+
+        template<typename... Args>
+        bool LoadAsset(const string& filepath, Args&& ...args)
+        {
+            asset = make_unique<AssetType>(filepath, std::forward<Args>(args)...);
+            if(asset == nullptr)
+            {
+                return false;
+            }
+
+            isLoaded = true;
+            return true;
+        }
+
+        bool IsLoaded() const
+        {
+            return isLoaded;
+        } 
+
+        const string& GetFilepath() const { return filepath; }
+
+        unique_ptr<AssetType>& GetAsset()
+        {
+            return asset;
+        }
+
+        const unique_ptr<AssetType>& GetAsset() const
+        {
+            return asset;
+        }
+
+        AssetType* GetRawAsset() 
+        {
+            return asset.get();
+        }
+
+        const AssetType* GetRawAsset() const 
+        {
+            return asset.get();
+        }
+    };
+}
 namespace Galaktic::Render {
     /**
      * @struct Vec2
@@ -224,9 +293,9 @@ namespace Galaktic::Core {
     inline SDL_Color HexToSDL_Color(const string& hex) {
         string s = hex;
 
-        if (s.starts_with("#"))
+        if (!s.empty() && s[0] == '#')
             s.erase(0, 1);
-        else if (s.starts_with("0x") || s.starts_with("0X"))
+        else if (!s.empty() && s[0] == '0' && (s[1] == 'x' || s[1] == 'X'))
             s.erase(0, 2);
 
         if (s.length() != 6 && s.length() != 8)
@@ -279,6 +348,11 @@ namespace Galaktic::Core {
         }
         return uniqueName;
     }
+
+    inline constexpr uint64_t BytesToMegabytes(uint64_t bytes) 
+    {
+        return (bytes / 1024) / 1024;
+    }
 }
 
 /**
@@ -289,7 +363,7 @@ namespace Galaktic::Core {
 
 namespace Galaktic::Debug {
     #if GKC_OS_INT == 0
-    inline size_t GetGalakticRAMUsage() {
+        inline size_t GetGalakticRAMUsage() {
             PROCESS_MEMORY_COUNTERS pmc{};
             if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc)))
             {
@@ -298,7 +372,7 @@ namespace Galaktic::Debug {
             return 0;
         }
 
-    inline size_t GetSystemRAM() {
+        inline size_t GetSystemRAM() {
             MEMORYSTATUSEX mem{};
             mem.dwLength = sizeof(mem);
             GlobalMemoryStatusEx(&mem);
@@ -333,6 +407,56 @@ namespace Galaktic::Debug {
         }
         */
     #endif
+
+    /**
+    * @brief Gets the engine version
+    * @return A string with the engine version
+    */
+    inline string GetEngineName() {
+        return "Galaktic Engine " + GKC_VERSION_STR + " '"
+        + GKC_SUFFIX + "' " + "Build " + to_string(GKC_BUILD_VERSION);
+    }  
+
+    /**
+     * @brief Returns a string with the display information
+     * FORMAT: Width x Height @ (Hertz) Hz
+     * @param deviceInfo DeviceInformation instance
+     * @return A string with the display information
+    */
+    inline string GetDisplayInfo(const Core::DeviceInformation& deviceInfo) {
+        return to_string(deviceInfo.width_) + "x" + to_string(deviceInfo.height_);
+    }
+
+    /**
+    * @brief Demangle a typename
+    * @param name Typename
+    * @return name of the typename
+    */
+    inline string DemangleTypename(const char* name) 
+    {
+        int status = -1;
+        unique_ptr<char, void(*)(void*)> res = {
+            abi::__cxa_demangle(name, NULL, NULL, &status),
+            std::free
+        };
+        return (status == 0) ? res.get() : name;
+    }
+
+    inline string GetCleanTypename(const char* name)
+    {
+        string demangled = DemangleTypename(name);
+        size_t pos = demangled.rfind("::");
+        if(pos != string::npos)
+            demangled = demangled.substr(pos + 2);
+        
+        return demangled;
+    }
+
+    template<typename T>
+    inline string GetCleanTypename()
+    {
+        return GetCleanTypename(typeid(T).name());
+    }
 }
 
 namespace Galaktic::Filesystem {
@@ -340,14 +464,27 @@ namespace Galaktic::Filesystem {
     constexpr unsigned int GKC_VERSION_SCENE = 1;
 }
 
+#define GKC_WRITE_BINARY(x) reinterpret_cast<const char*>(&x)
+#define GKC_READ_BINARY(x) reinterpret_cast<char*>(&x)
+
+#define GKC_ENSURE_FILE_OPEN(file, errorType)                          \
+    do {                                                                \
+        if (!(file).is_open()) {                                        \
+            Debug::Logger::LogErrorWithType(ErrorType::errorType, "file is not open!");       \
+            return;                                                    \
+        }                                                               \
+    } while (0)
+
+#define GKC_ENSURE_FILE_OPEN_BOOL(file, errorType)                          \
+    do {                                                                \
+        if (!(file).is_open()) {                                        \
+            Debug::Logger::LogErrorWithType(ErrorType::errorType, "file is not open!");       \
+            return false;                                                    \
+        }                                                               \
+    } while (0)
 
 
-#define GKC_ENSURE_FILE_OPEN(file, ex)                          \
-    do {                                                        \
-        if (!(file).is_open()) {                                \
-            GKC_THROW_EXCEPTION(ex, "file is not open!");       \
-            }                                                   \
-    } while (0)        
-
-#define GKC_WRITE_BINARY(var) reinterpret_cast<const char*>(&var)
-#define GKC_READ_BINARY(var) reinterpret_cast<char*>(&var)
+#define GKC_PASSED_PARAM_NULL(param, paramType)             \
+    if(param == nullptr) {                                  \
+        GKC_ENGINE_INFO("{} passed is NULL!", paramType);   \
+    }

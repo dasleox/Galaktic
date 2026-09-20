@@ -1,4 +1,4 @@
-![Galaktic Title Logo](docs/images/title_logo.png.jpeg)
+w![Galaktic Title Logo](docs/images/title_logo.png.jpeg)
 ***
 
 Galaktic is a 2D Game Engine specialized in making pixel art games with ease and runable with very limited resources.

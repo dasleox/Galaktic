@@ -30,6 +30,7 @@ namespace Galaktic::Core::Helpers {
     class ECS_Helper;
     class TextureHelper;
     class AnimationHelper;
+    class RPixelsHelper;
 }
 namespace Galaktic::Core::Events {
     class GKC_Event;
@@ -78,6 +79,23 @@ namespace Galaktic::Core {
      */
     class Scene {
         public:
+            static void* operator new(std::size_t size)
+            {
+                std::cout << "MEMORY DEBUGGER" << std::endl;
+                std::cout << "ALLOCATING: " << size << std::endl;
+                void* ptr = std::malloc(size);
+                if(ptr == nullptr)
+                {
+                    throw std::bad_alloc();
+                }
+                return ptr;
+            }
+
+            static void operator delete(void* ptr) noexcept {
+                std::cout << "MEMORY DEBUGGER" << std::endl;
+                std::cout << "DELETING" << &ptr << std::endl;
+                std::free(ptr); 
+            }
             /**
              * @param name Name of the scene
              * @param device_information DeviceInformation instance
@@ -96,6 +114,8 @@ namespace Galaktic::Core {
             void Run();
 
             void Save();
+
+            void Pause();
 
             /**
              * @brief Executes all events using the engine's systems
@@ -148,17 +168,33 @@ namespace Galaktic::Core {
              */
             void CreateCamera(const string &name);
 
+            void ToggleWireframes()
+            {
+                !m_bShowWireframe;
+            }
+            void ToggleColliders()
+            {
+                !m_bShowColliders;
+            }
+
+            void SetFullscreen();
+            
             ECS::Registry*& GetRegistry() { return m_registry; }
             Managers::ECS_Manager*& GetECSManager() { return m_ecsManager; }
             SceneInformation m_sceneInfo;
         private:
             bool m_isRunning = true;
+            bool m_bPaused = false;
+            bool m_bShowWireframe = false;
+            bool m_bShowColliders = false;
+
             shared_ptr<Render::Window> m_window;
             Systems::System_List m_systemList;
             ECS::Registry* m_registry = nullptr;
             Managers::WindowManager* m_windowManager = nullptr;
             Managers::ECS_Manager* m_ecsManager = nullptr;
             Helpers::ECS_Helper* m_ecsHelper = nullptr;
+            Helpers::RPixelsHelper* m_rPixelsHelper = nullptr;
             Helpers::TextureHelper* m_textureHelper = nullptr;
             Helpers::AnimationHelper* m_animationHelper = nullptr;
             ManagersWrapper* m_managerWrapper = nullptr;
