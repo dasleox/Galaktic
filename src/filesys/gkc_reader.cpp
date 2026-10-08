@@ -18,19 +18,15 @@ void Filesystem::FileReader::ReadString(ifstream &file, string &str) {
     file.read(str.data(), len);
 }
 
-// @todo Add a function to convert old save files into new formats
-
 void Filesystem::FileReader::ReadEntity(ifstream &file, Core::Managers::ECS_Manager& manager,
     ECS::Registry* registry) {
     GKC_ENSURE_FILE_OPEN(file, ReadingError);
     using namespace ECS;
 
     size_t entitySize = 0;
-    unsigned int entityVersion = 0;
     EntityID id = 0;
 
     file.read(GKC_READ_BINARY(entitySize), sizeof(entitySize));
-    Read(file, entityVersion);
     Read(file, id);
 
     Entity entity(id, registry); entity.SetID(id);
@@ -51,13 +47,13 @@ void Filesystem::FileReader::ReadEntity(ifstream &file, Core::Managers::ECS_Mana
     #endif
 }
 
-void Filesystem::FileReader::ReadScene(const path& path, Core::Managers::ECS_Manager& manager,
+bool Filesystem::FileReader::ReadScene(const path& path, Core::Managers::ECS_Manager& manager,
     ECS::Registry* registry, Core::Scene& scene) {
     using namespace ECS;
 
     GKC_ENGINE_INFO("Reading scene from {}", path.string());
     ifstream file(path, std::ios::binary);
-    GKC_ENSURE_FILE_OPEN(file, ReadingError);
+    GKC_ENSURE_FILE_OPEN_BOOL(file, ReadingError);
 
     size_t sceneSize = 0;
     unsigned int version = 0;
@@ -66,13 +62,14 @@ void Filesystem::FileReader::ReadScene(const path& path, Core::Managers::ECS_Man
     file.read(GKC_READ_BINARY(sceneSize), sizeof(sceneSize));
     Read(file, version);
     if (version != GKC_VERSION_SCENE) {
+        GKC_ENGINE_ERROR("Scene version mismatch! Expected: {}, Found: {}", GKC_VERSION_SCENE, version);
         if (version < GKC_VERSION_SCENE) {
             GKC_ENGINE_ERROR("This scene cannot be read by this function, use a newer version");
-            return;
+            return false;
         }
         if (version > GKC_VERSION_SCENE) {
             GKC_ENGINE_ERROR("This scene cannot be read by this function, use an older version");
-            return;
+            return false;
         }
     }
 
@@ -116,4 +113,5 @@ void Filesystem::FileReader::ReadScene(const path& path, Core::Managers::ECS_Man
 
     file.close();
     GKC_ENGINE_INFO("'{}' scene was read successfully!", scene.m_sceneInfo.scene_name_);
+    return true;
 }

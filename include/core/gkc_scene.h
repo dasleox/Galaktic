@@ -44,14 +44,18 @@ namespace Galaktic::Render {
 }
 namespace Galaktic::Core::Systems {
     typedef unordered_map<string, shared_ptr<BaseSystem>> System_List;
+    class CameraSystem;
 }
 namespace Galaktic::Core::Managers {
-    class WindowManager;
     class ECS_Manager;
     class TextureManager;
     class AudioManager;
     class ScriptManager;
     class AnimationManager;
+    class FontManager;  
+}
+namespace Galaktic::Core {
+    class Console;
 }
 
 namespace Galaktic::Core {
@@ -71,6 +75,7 @@ namespace Galaktic::Core {
             Managers::AudioManager* m_audioManager = nullptr;
             Managers::ScriptManager* m_scriptManager = nullptr;
             Managers::AnimationManager* m_animationManager = nullptr;
+            Managers::FontManager* m_fontManager = nullptr; 
     };
 
     /**
@@ -79,23 +84,6 @@ namespace Galaktic::Core {
      */
     class Scene {
         public:
-            static void* operator new(std::size_t size)
-            {
-                std::cout << "MEMORY DEBUGGER" << std::endl;
-                std::cout << "ALLOCATING: " << size << std::endl;
-                void* ptr = std::malloc(size);
-                if(ptr == nullptr)
-                {
-                    throw std::bad_alloc();
-                }
-                return ptr;
-            }
-
-            static void operator delete(void* ptr) noexcept {
-                std::cout << "MEMORY DEBUGGER" << std::endl;
-                std::cout << "DELETING" << &ptr << std::endl;
-                std::free(ptr); 
-            }
             /**
              * @param name Name of the scene
              * @param device_information DeviceInformation instance
@@ -170,11 +158,11 @@ namespace Galaktic::Core {
 
             void ToggleWireframes()
             {
-                !m_bShowWireframe;
+                m_bShowWireframe = !m_bShowWireframe;
             }
             void ToggleColliders()
             {
-                !m_bShowColliders;
+                m_bShowColliders = !m_bShowColliders;
             }
 
             void SetFullscreen();
@@ -191,7 +179,6 @@ namespace Galaktic::Core {
             shared_ptr<Render::Window> m_window;
             Systems::System_List m_systemList;
             ECS::Registry* m_registry = nullptr;
-            Managers::WindowManager* m_windowManager = nullptr;
             Managers::ECS_Manager* m_ecsManager = nullptr;
             Helpers::ECS_Helper* m_ecsHelper = nullptr;
             Helpers::RPixelsHelper* m_rPixelsHelper = nullptr;
@@ -199,7 +186,38 @@ namespace Galaktic::Core {
             Helpers::AnimationHelper* m_animationHelper = nullptr;
             ManagersWrapper* m_managerWrapper = nullptr;
             path m_appPath;
-            
+
+        private:
+            // ---- Startup helpers, called once from the constructor ----
+
+            /** @brief Creates the ECS registry and manager for this scene */
+            void InitializeECS();
+            /** @brief Creates the helper classes that sit on top of the ECS manager */
+            void InitializeHelpers();
+            /** @brief Creates and registers every engine system used by the scene's loop */
+            void InitializeSystems();
+            /** @brief Ensures the scene's local script folder exists on disk */
+            void EnsureSceneScriptFolder(const string& name);
+
+            // ---- Run-loop helpers, called every time Run() executes ----
+
+            /** @brief Loads every texture/animation asset onto this scene's renderer */
+            void LoadRunAssets();
+            /** @brief Opens the debug console's font; returns nullptr and logs on failure */
+            TTF_Font* OpenConsoleFont();
+            /**
+             * @brief Spawns the sandbox entities used to exercise texture and pixel-group
+             *        features while the engine is under development.
+             * @todo  Move this into the sandbox project once a scene-scripting entry point
+             *        exists - Scene::Run() should not be authoring test content.
+             */
+            void SpawnDebugDemoEntities();
+            /** @brief Advances gameplay systems by one fixed timestep */
+            void FixedUpdate(float deltaTime, const shared_ptr<Systems::BaseSystem>& movementSystem,
+                const shared_ptr<Systems::CameraSystem>& cameraSystem);
+            /** @brief Draws one frame, including debug overlays and the engine console */
+            void RenderFrame(float deltaTime, TTF_Font* consoleFont, Console* console,
+                const shared_ptr<Systems::CameraSystem>& cameraSystem);
     };
 
     typedef unordered_map<string, unique_ptr<Scene>> Scene_List;

@@ -3,6 +3,8 @@
 #include "core/events/gkc_dispatcher.h"
 #include "core/managers/gkc_script_man.h"
 #include "render/gkc_window.h"
+#include "core/gkc_app.h"
+#include "core/gkc_console.h"
 
 using namespace Galaktic::Core::Systems;
 using namespace Galaktic::Core;
@@ -12,7 +14,7 @@ void UISystem::OnEvent(Events::GKC_Event &e) {
     dispatcher.DispatchEvent<Events::KeyPressedEvent>(
         [this](Events::KeyPressedEvent &e) {
             if (GKC_SDLK_TO_ENUM(e) == Key::F3) {
-                
+                Core::App::GetConsole()->ToggleVisibility();
             }
             return false;
         });

@@ -90,9 +90,11 @@ namespace Galaktic::Filesystem {
              * @param path Path to the scene file (.gkscene)
              * @param manager ECS_Manager
              * @param registry Registry (ECS)
-             * @param scene Scene reference to read data into
+             * @param scene Scene reference to read data into\
+             * 
+             * @return True if the scene was read successfully, false otherwise.
              */
-            static void ReadScene(const path& path, Core::Managers::ECS_Manager& manager,
+            static bool ReadScene(const path& path, Core::Managers::ECS_Manager& manager,
                 ECS::Registry* registry, Core::Scene& scene);
     };
 }

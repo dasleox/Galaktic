@@ -38,7 +38,7 @@ using namespace Galaktic;
 
 void Filesystem::FileWriter::WriteString(ofstream &file, const string &str) {
     GKC_ENSURE_FILE_OPEN(file, WritingError);
-    auto len = static_cast<Uint32>(str.size());
+    size_t len = str.size();
     file.write(GKC_WRITE_BINARY(len), sizeof(len));
     file.write(str.data(), len);
 }
@@ -52,11 +52,9 @@ void Filesystem::FileWriter::WriteEntity(ofstream &file, const ECS::Entity &enti
     EntityID id = entity.GetID();
 
     entitySize += registry->GetAllComponentsSize(id);
-
-    entitySize += sizeof(unsigned int) + sizeof(unsigned int);
+    entitySize += sizeof(size_t);
 
     file.write(GKC_WRITE_BINARY(entitySize), sizeof(entitySize));
-    Write(file, GKC_VERSION_ENTITY);
     Write(file, entity.GetID());
 
     auto& pools = registry->GetComponentPools();
@@ -107,11 +105,10 @@ void Filesystem::FileWriter::WriteScene(const path& path, Core::Scene& scene, EC
 
 
     auto filepath = path.filename().string();
-    auto desiredPath = (path.parent_path() / GKC_SCENE_PATH / path.filename()).string();
-    if (CheckFile(desiredPath)) {
-        RemoveFile(desiredPath);
+    if (CheckFile(path)) {
+        RemoveFile(path);
     }
 
-    std::rename(filepath.c_str(), desiredPath.c_str());
+    std::rename(filepath.c_str(), path.string().c_str());
     GKC_ENGINE_INFO("'{}' scene was written successfully!", scene.m_sceneInfo.scene_name_);
 }

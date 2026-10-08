@@ -48,7 +48,9 @@ namespace Galaktic::Core::Managers
      *
      * @attention Key values for the asset list are registered using only the filename
      * <b>(extension included!)</b>, do not use the full filepath when retrieving
-     * assets by name, only the filename.
+     * assets by name, only the filename. All log output below follows the same rule:
+     * it always reports the short filename, never the full registration path, so
+     * long project paths don't drown out the message.
      *
      * @tparam AssetType  The underlying asset type being managed
      * @tparam AssetInfo  The info wrapper that holds the asset and its metadata
@@ -86,24 +88,23 @@ namespace Galaktic::Core::Managers
 
                 GKC_CHECK_PATH_INTEGRITY(path(filepath));
 
+                string assetName = Filesystem::GetFilename(filepath);
                 uint32_t id = m_IDCounter.fetch_add(1);
                 auto assetInfo = make_unique<AssetInfo>(filepath);
 
                 if (assetInfo == nullptr)
                 {
                     Debug::Logger::LogErrorWithType(ErrorType::AssetRegistrationError,
-                        "Failed to register asset '{}'", filepath);
+                        "Failed to register asset '{}'", assetName);
                     m_IDCounter.fetch_sub(1);
                     return;
                 }
-
-                string assetName = Filesystem::GetFilename(filepath);
 
                 m_assetList.emplace(id, std::move(assetInfo));
                 m_NameToIDList.emplace(assetName, id);
                 m_IDToNameList.emplace(id, assetName);
 
-                GKC_ENGINE_INFO("'{}' registered successfully!", filepath);
+                GKC_ENGINE_INFO("'{}' registered successfully!", assetName);
             }
 
             /**
@@ -127,13 +128,14 @@ namespace Galaktic::Core::Managers
 
                 GKC_CHECK_PATH_INTEGRITY(path(filepath));
 
+                string assetName = Filesystem::GetFilename(filepath);
                 uint32_t id = m_IDCounter.fetch_add(1);
                 auto assetInfo = make_unique<AssetInfo>(filepath);
 
                 if (assetInfo == nullptr)
                 {
                     Debug::Logger::LogErrorWithType(ErrorType::AssetRegistrationError,
-                        "Failed to register asset '{}'", filepath);
+                        "Failed to register asset '{}'", assetName);
                     m_IDCounter.fetch_sub(1);
                     return;
                 }
@@ -141,17 +143,16 @@ namespace Galaktic::Core::Managers
                 if (!assetInfo->LoadAsset(filepath, std::forward<Args>(args)...))
                 {
                     Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError,
-                        "Failed to load '{}'", filepath); 
+                        "Failed to load '{}'", assetName); 
                     m_IDCounter.fetch_sub(1);
                     return;
                 }
 
-                string assetName = Filesystem::GetFilename(filepath);
                 m_assetList.emplace(id, std::move(assetInfo));
                 m_NameToIDList.emplace(assetName, id);
                 m_IDToNameList.emplace(id, assetName);
 
-                GKC_ENGINE_INFO("'{}' loaded and registered successfully!", filepath);
+                GKC_ENGINE_INFO("'{}' loaded and registered successfully!", assetName);
             }
 
              /**
@@ -172,7 +173,7 @@ namespace Galaktic::Core::Managers
                 if (!AssetExistsByName(assetName))
                 {
                     Debug::Logger::LogErrorWithType(ErrorType::AssetNotFound,
-                        "'{}' to load doesn't exist!", filepath);
+                        "'{}' to load doesn't exist!", assetName);
                     return;
                 }
 
@@ -180,18 +181,18 @@ namespace Galaktic::Core::Managers
                 if (assetInfo == nullptr)
                 {
                     Debug::Logger::LogErrorWithType(ErrorType::AssetIsNull,
-                        "'{}' asset info is NULL!", filepath);
+                        "'{}' asset info is NULL!", assetName);
                     return;
                 }
 
                 if (!assetInfo->LoadAsset(filepath, std::forward<Args>(args)...))
                 {
                     Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError,
-                        "Failed to load '{}'", filepath);
+                        "Failed to load '{}'", assetName);
                     return;                              
                 }
 
-                GKC_ENGINE_INFO("'{}' loaded successfully!", filepath);
+                GKC_ENGINE_INFO("'{}' loaded successfully!", assetName);
             }
 
 
@@ -366,6 +367,13 @@ namespace Galaktic::Core::Managers
              *
              * @param  assetInfo Pointer to an \c AssetInfo instance
              * @return           Address of the asset, or \c nullptr if unloaded or NULL
+             *
+             * @note This must cast the raw asset pointer directly. \c CastToVoidPtr
+             * is meant for taking the address of an object passed by reference; handing
+             * it a pointer instead makes it return the address of the local pointer
+             * parameter (a stack address) rather than the address it points to, which
+             * is what previously made \c PrintList report bogus, constantly-changing
+             * addresses for every asset.
              */
             static const void* GetAddressOfAsset(const AssetInfo* assetInfo)
             {
@@ -374,7 +382,7 @@ namespace Galaktic::Core::Managers
                     const AssetType* asset = assetInfo->GetRawAsset();
                     if (asset != nullptr)
                     {
-                        return CastToVoidPtr(asset);
+                        return static_cast<const void*>(asset);
                     }
                     return nullptr;
                 }
@@ -445,4 +453,4 @@ namespace Galaktic::Core::Managers
             static const unordered_map<string, uint32_t>& GetNameToIDList() { return m_NameToIDList; }
             static const unordered_map<uint32_t, string>& GetIDToNameList() { return m_IDToNameList; } 
     };
-}   
+}

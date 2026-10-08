@@ -3,6 +3,7 @@
 #include "ecs/gkc_entity.h"
 #include "ecs/gkc_components.h"
 #include <core/gkc_scene.h>
+#include <config/gkc_config.h>
 
 #include "core/gkc_logger.h"
 
@@ -18,21 +19,16 @@ void MovementSystem::Update(const Entity_List& list, float dt) {
 
         auto& transform = entity.second.Get<TransformComponent>();
         auto& player = entity.second.Get<SpeedComponent>();
-        // Movement Updates
-        if (player.maxSpeed * dt == player.maxSpeed) {
-            continue;
-        }
-
-        // Modify this to use the Player.lua file
-        if (m_keySystem.IsKeyDown(Key::W))
+        
+        if(IsActionDown(Config::ActionType::MoveForward, Key::W))
             transform.location.y -= player.maxSpeed * dt;
-        if (m_keySystem.IsKeyDown(Key::S))
+        if(IsActionDown(Config::ActionType::MoveBackward, Key::S))
             transform.location.y += player.maxSpeed * dt;
-        if (m_keySystem.IsKeyDown(Key::A))
+        if(IsActionDown(Config::ActionType::MoveLeft, Key::A))
             transform.location.x -= player.maxSpeed * dt;
-        if (m_keySystem.IsKeyDown(Key::D))
-            transform.location.x += player.maxSpeed   * dt;
-        if(m_keySystem.IsKeyDown(Key::Space))
+        if(IsActionDown(Config::ActionType::MoveRight, Key::D))
+            transform.location.x += player.maxSpeed * dt;
+        if(IsActionDown(Config::ActionType::Jump, Key::Space))
             ApplyJump(entity.second);
     }
 }
@@ -42,4 +38,13 @@ void MovementSystem::ApplyJump(ECS::Entity &entity) {
         auto& jump_comp = entity.Get<ECS::JumpComponent>();
         entity.Get<ECS::RigidBody>().force.y += jump_comp.jumpHeight;
     }
+}
+
+bool MovementSystem::IsActionDown(Config::ActionType action, Key fallbackKey) const {
+    Config::BindType bind = Config::BindConfigurator::GetBindByAction(action);
+    if (bind.keyBind != Key::Unknown) {
+        return m_keySystem.IsKeyDown(bind.keyBind);
+    }
+
+    return m_keySystem.IsKeyDown(fallbackKey);
 }

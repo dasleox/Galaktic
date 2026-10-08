@@ -23,6 +23,7 @@ Window::Window(const string& title, Uint32 width, Uint32 height, Window_Type typ
 
     SDL_SyncWindow(m_window);
     m_ID = SDL_GetWindowID(m_window);
+    SDL_StartTextInput(m_window);
 }
 
 Window::~Window() {
@@ -84,6 +85,10 @@ void Window::SDL_KeyboardEventCheck(SDL_Event &e) {
         }
         case SDL_EVENT_KEY_UP: {
             KeyHoldEvent event(e.key.key);
+            m_callback(event); break;
+        }
+        case SDL_EVENT_TEXT_INPUT: {
+            TextInputEvent event(e.text.text);
             m_callback(event); break;
         }
     }

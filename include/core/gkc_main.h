@@ -116,6 +116,8 @@ typedef Uint32 AnimationID;
 typedef Uint32 PixelGroupID;
 typedef Uint32 FontID;
 
+inline constexpr float GKC_PI = 3.14159265358979323846f;
+
 inline constexpr Uint32 MAX_WINDOW_QUANTITY = 64;
 inline constexpr Uint32 MAX_ENTITY_QUANTITY = 4096 * 8;
 inline constexpr Uint32 MAX_COMPONENT_QUANTITY = MAX_ENTITY_QUANTITY * 8;
@@ -460,8 +462,7 @@ namespace Galaktic::Debug {
 }
 
 namespace Galaktic::Filesystem {
-    constexpr unsigned int GKC_VERSION_ENTITY = 1;
-    constexpr unsigned int GKC_VERSION_SCENE = 1;
+    constexpr unsigned int GKC_VERSION_SCENE = 2;
 }
 
 #define GKC_WRITE_BINARY(x) reinterpret_cast<const char*>(&x)

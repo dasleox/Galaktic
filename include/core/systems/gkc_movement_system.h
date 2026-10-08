@@ -24,7 +24,7 @@
 #pragma once
 #include <pch.hpp>
 #include <core/systems/gkc_system.h>
-
+#include <config/gkc_config.h>
 namespace Galaktic::ECS {
     class Entity;
     typedef unordered_map<EntityID, Entity> Entity_List;
@@ -58,5 +58,6 @@ namespace Galaktic::Core::Systems {
             KeySystem& m_keySystem;
 
             void ApplyJump(ECS::Entity& entity);
+            bool IsActionDown(Config::ActionType action, Key fallbackKey) const;
     };
 }

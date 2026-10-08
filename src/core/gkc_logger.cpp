@@ -12,25 +12,33 @@ namespace Galaktic::Debug {
 
 void Logger::Init() {
     m_mutexSink = make_shared<ConsoleMutex_mt>();
-    spdlog::sinks_init_list(m_mutexSink);
+
+    // Every logger writes to its own stdout sink (terminal output) AND the
+    // shared in-game console sink, so GKC_ENGINE_*/GKC_CLIENT_* output shows
+    // up both in the terminal and inside Console::Display(). Previously
+    // `spdlog::sinks_init_list(m_mutexSink)` built a throwaway temporary and
+    // never actually attached the sink to a logger, so the in-game console
+    // never received any lines at all.
+    auto engineColorSink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    auto clientColorSink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
+
+    m_engineLogger = make_shared<spdlog::logger>("GALAKTIC",
+        spdlog::sinks_init_list{engineColorSink, m_mutexSink});
+    m_clientLogger = make_shared<spdlog::logger>("CLIENT",
+        spdlog::sinks_init_list{clientColorSink, m_mutexSink});
+
+    spdlog::register_logger(m_engineLogger);
+    spdlog::register_logger(m_clientLogger);
 
     #if GKC_DEBUG
         // Engine logger: shows file/line/function
-        spdlog::set_pattern("%^[%l]%$ [%D--%X] [%s -> %! || Line: %#] \033[1;33m [%n]\033[0m: %v ");
-        
-        m_engineLogger = spdlog::stdout_color_mt("GALAKTIC");
-        
-        // Client logger: simple format with [Lua]: prefix
-
-        m_clientLogger = spdlog::stdout_color_mt("CLIENT");
-        m_clientLogger->set_pattern("%^[%l]%$ [%D--%X]%v ");
+        m_engineLogger->set_pattern("%^[%l]%$ [%D--%X] [%s -> %! || Line: %#] \033[1;33m [%n]\033[0m: %v ");
     #else
-        spdlog::set_pattern("%^[%l]%$ [%D--%X] \033[1;33m [%n]\033[0m: %v ");
-        m_engineLogger = spdlog::stdout_color_mt("GALAKTIC");
-        
-        m_clientLogger = spdlog::stdout_color_mt("CLIENT");
-        m_clientLogger->set_pattern("%^[%l]%$ [%D--%X] %v ");
+        m_engineLogger->set_pattern("%^[%l]%$ [%D--%X] \033[1;33m [%n]\033[0m: %v ");
     #endif
+
+    // Client logger: simple format with [Lua]: prefix
+    m_clientLogger->set_pattern("%^[%l]%$ [%D--%X]%v ");
 }
 
 void Logger::PrintEngineInformation() {

@@ -8,11 +8,13 @@ using namespace Galaktic::Core;
 
 Managers::SceneManager::SceneManager(const path &folder, ManagersWrapper* wrapper, const DeviceInformation &info)
     : m_deviceInfo(info), m_folder(folder), m_managersWrapper(wrapper) 
-{}
+{
+    GKC_ENGINE_INFO("SceneManager initialized with folder: {}", folder.string());
+}
 
 void Managers::SceneManager::CreateScene(const string &name) {
     m_sceneList.emplace(name, make_unique<Scene>(name, m_managersWrapper, m_deviceInfo, m_folder));
-}
+}   
 
 void Managers::SceneManager::DeleteScene(const string &name) {
     auto it = m_sceneList.find(name);
@@ -22,32 +24,46 @@ void Managers::SceneManager::DeleteScene(const string &name) {
     }
 }
 
-void Managers::SceneManager::LoadSpecificScene(const string &name) const {
+bool Managers::SceneManager::LoadSpecificScene(const string &name) const {
     if (!m_sceneList.contains(name)) {
         GKC_ENGINE_ERROR("Scene not found!");
-        return;
+        return false;
     }
     m_sceneList.find(name)->second->Run();
+    return true;
 }
 
-void Managers::SceneManager::LoadSpecificSceneFromFile(const path &filepath) {
-    if (!Filesystem::CheckFile(filepath)) {
+bool Managers::SceneManager::LoadSpecificSceneFromFile(const path &filepath) {
+    auto scenePath = m_folder / GKC_SCENE_PATH /filepath;
+
+    #if GKC_DEBUG
+        GKC_ENGINE_INFO("Loading scene from file: {}", scenePath.string());
+    #endif
+    
+    if (!Filesystem::CheckFile(scenePath)) {
         GKC_ENGINE_ERROR("Scene not found in the specified filepath!");
-        return;
+        return false;
     }
+
     string sceneName = StripExtension(filepath.filename().string());
     auto m_scene = make_unique<Scene>(sceneName, m_managersWrapper, m_deviceInfo, m_folder);
-    Filesystem::FileReader::ReadScene(filepath, *m_scene.get()->GetECSManager(),
+    Filesystem::FileReader::ReadScene(scenePath, *m_scene.get()->GetECSManager(),
         m_scene.get()->GetRegistry(), *m_scene);
     m_sceneList.emplace(sceneName, std::move(m_scene));
-    LoadSpecificScene(sceneName);
+    
+    if(!LoadSpecificScene(sceneName)) {
+        GKC_ENGINE_ERROR("Failed to load scene: {}", sceneName);
+        return false;
+    }
+
+    return true;
 }
 
 void Managers::SceneManager::ShowSceneList()
 {
     for(auto& [name, scene] : m_sceneList)
     {
-        uint64_t fileSize = Filesystem::GetFileSize(m_folder / path(name + ".gkscene"));
+        uint64_t fileSize = Filesystem::GetFileSize(m_folder / "scenes" / (name + ".gkscene"));
         GKC_ENGINE_INFO("Scene '{}' (Size: {} MB)", name, Core::BytesToMegabytes(fileSize));
     }
 }

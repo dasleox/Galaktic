@@ -70,22 +70,32 @@ namespace Galaktic::Config {
      * Binds
      * 
      */
-    class Bind {  
+   class Bind {  
         public:
             BindType m_bind;
             bool m_isEnabled = true;
-            ActionType m_actionType;
+            ActionType m_actionType = ActionType::Unknown;
             string m_name;
             function<void()> m_functionCallback;    //< Assigned Later
 
         public:
+            /**
+             * @brief Default-constructs an inert/invalid bind.
+             * @note Used as a safe fallback by BindConfigurator::GetBind when a
+             *       bind name isn't found, instead of the old (undefined
+             *       behavior) fallback of indexing the map with an integer 0.
+             */
+            Bind() = default;
+
             Bind(const string& bindName, ActionType type, const Core::Systems::Key& key) {
                 m_name = bindName;
+                m_actionType = type;
                 m_bind.keyBind = key;
             }
 
             Bind(const string& bindName, ActionType type, const Core::Systems::MouseClick& click) {
                 m_name = bindName;
+                m_actionType = type;
                 m_bind.mouseClick = click;
             }
     };
@@ -96,7 +106,7 @@ namespace Galaktic::Config {
         public:
             BindConfigurator(const path& filepath);
             static void DeleteBind(const string &bindName);
-
+            static BindType GetBindByAction(ActionType type);
             static void BindAction(const string& bindType, const string& actionName);
             static Bind GetBind(const string &bindName);
         private:

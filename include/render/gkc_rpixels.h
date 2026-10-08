@@ -29,29 +29,87 @@ namespace Galaktic::Core::Managers {
 }
 
 namespace Galaktic::Render {
+    /**
+     * A pixel selection mask, addressed row-major as \c list[y][x]. This matches
+     * how the underlying SDL pixel buffer is addressed in
+     * \c PixelColoredGroupInfo::RecolorEntityTexture, so a mask built for one
+     * texture size can be applied directly without transposing it.
+     */
     typedef vector<vector<bool>> PixelMapping_List;
 
+    /**
+     * @class PixelColoredGroupInfo
+     * @brief Groups entities that share a texture so a chosen set of pixels can be
+     *        recolored across all of them at once.
+     *
+     * A group is anchored to a "parent" entity (the one passed to the constructor):
+     * its texture defines the group's pixel dimensions, and every pixel mask handed
+     * to \c SetSelectedPixels is validated against those dimensions. Any entity added
+     * afterwards via \c AddEntityToGroup must share that same texture, since the mask
+     * only makes sense for one texture layout.
+     *
+     * @attention This class does not own the texture or the entities in the group,
+     * it only reads their existing \c TextureComponent through the \c ECS_Manager
+     * reference passed to the constructor.
+     */
     class PixelColoredGroupInfo {
         public:
-            PixelColoredGroupInfo(const string& name, SDL_Color mainColor, EntityID id, 
+            /**
+             * @param name Name of the group (used for logging/identification)
+             * @param mainColor Color applied to the selected pixels
+             * @param id Entity ID of the group's parent; its texture defines the group's dimensions
+             * @param ecsManager ECS_Manager owning the entity/component data
+             */
+            PixelColoredGroupInfo(const string& name, SDL_Color mainColor, EntityID id,
                 Core::Managers::ECS_Manager& ecsManager);
 
-            ~PixelColoredGroupInfo();
+            ~PixelColoredGroupInfo() = default;
 
+            /**
+             * @brief Sets which pixels of the group's texture are affected by the group's color
+             * @param list Pixel mask, addressed as list[y][x]; its dimensions must match
+             *        the parent texture's height and width or the call is rejected
+             */
             void SetSelectedPixels(const PixelMapping_List& list);
-            void SetName(const string& newName);
-            void SetColor(SDL_Color newColor);
+
+            void SetName(const string& newName) { m_groupName = newName; }
+            void SetColor(SDL_Color newColor) { m_mainColor = newColor; }
+
+            [[nodiscard]] const string& GetName() const { return m_groupName; }
+            [[nodiscard]] SDL_Color GetColor() const { return m_mainColor; }
+            [[nodiscard]] size_t GetWidth() const { return m_textureWidth; }
+            [[nodiscard]] size_t GetHeight() const { return m_textureHeight; }
+            [[nodiscard]] size_t GetEntityCount() const { return m_affectedEntities.size(); }
+
+            /**
+             * @brief Adds an entity to the group
+             * @param id Entity's ID; it must exist and share the parent's texture
+             */
             void AddEntityToGroup(EntityID id);
+
+            /**
+             * @brief Removes an entity from the group
+             * @param id Entity's ID
+             */
             void DeleteEntityFromGroup(EntityID id);
+
+            /**
+             * @brief Recolors the selected pixels on every entity currently in the group
+             */
             void ApplyColorToEntities();
 
+        private:
             string m_groupName;
             SDL_Color m_mainColor;
-            unordered_map<EntityID, EntityID> m_affectedEntities;
+            EntityID m_parentEntityID = InvalidEntity;
+            size_t m_textureWidth = 0;
+            size_t m_textureHeight = 0;
+            unordered_set<EntityID> m_affectedEntities;
             PixelMapping_List m_affectedPixels;
-        protected:
-            bool HasSameTexture(EntityID id);
-            bool HasSameWidthAndHeight();
             Core::Managers::ECS_Manager& m_ecsManager;
+
+            bool HasSameTexture(EntityID id) const;
+            bool MatchesTextureDimensions() const;
+            void RecolorEntityTexture(EntityID id);
     };
 }

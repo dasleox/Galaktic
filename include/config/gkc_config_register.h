@@ -24,8 +24,14 @@
 #pragma once
 #include <pch.hpp>
 
+#pragma once
+#include <pch.hpp>
+
 namespace Galaktic::Config
 {
+    /**
+     * @class CallbackRegister
+     */
     class CallbackRegister
     {
         private:
@@ -38,10 +44,25 @@ namespace Galaktic::Config
                 static CallbackRegister instance;
                 return instance;
             }
+
+            /**
+             * @brief Registers a callback under a name so it can later be
+             *        found with Find(). Overwrites an existing callback of
+             *        the same name (with a warning).
+             * @param callbackName name to register the callback under
+             * @param callback the callback to store
+             */
             void RegisterCallback(const string& callbackName, Callback callback);
+
+            /**
+             * @brief Looks up a previously registered callback by name.
+             * @param callbackName name the callback was registered under
+             * @return pointer to the stored callback, or nullptr if none is
+             *         registered under that name
+             */
             const Callback* Find(const string& callbackName) const;
     };
 }
 
 #define GKC_REGISTER_CALLBACK(name, fn) \
-    ::Galaktic::CallbackRegister::Get().Register(#name, fn)
+    ::Galaktic::Config::CallbackRegister::Get().RegisterCallback(#name, fn)

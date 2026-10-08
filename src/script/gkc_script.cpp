@@ -62,6 +62,9 @@ void Script::GKC_Script::RunScript() {
         }
     } else {
         lua_pop(m_luaState, 1);
+        Debug::Logger::LogErrorWithType(ErrorType::ScriptRuntimeError,
+            "Script '{}' has no global function named '{}' - nothing was run!",
+            m_scriptName, m_scriptName);
     }
 }
 

@@ -15,13 +15,14 @@ bool ConfigParser::ParseFile(const path& filepath)
     GKC_CHECK_PATH_INTEGRITY_BOOL(filepath);
 
     m_configFilepath = filepath;
+    m_bindEntryList.clear();
+
     ifstream file(filepath);
     GKC_ENSURE_FILE_OPEN_BOOL(file, FileNotOpen);
 
     string line;
     while(std::getline(file, line))
     {   
-        // Remove comments
         auto commentPos = line.find("#");
         if(commentPos != std::string::npos)
         {
@@ -36,10 +37,13 @@ bool ConfigParser::ParseFile(const path& filepath)
 
         ss >> directive;
 
-        // Only accept bind keyword
         if(directive != "bind") continue;
 
-        m_bindEntryList.push_back(ParseLine(line));
+        BindEntry entry = ParseLine(line);
+        if (entry.bindKey.empty() || entry.actionName.empty())
+            continue; 
+
+        m_bindEntryList.push_back(entry);
     }
 
     return true;
@@ -51,18 +55,22 @@ BindEntry ConfigParser::ParseLine(const string& line)
     string directive, key, action, callbackFull;
     ss >> directive >> key >> action >> callbackFull;
 
+    BindEntry entry;
+    entry.bindKey    = key;
+    entry.actionName = action;
+
     auto colonPos = callbackFull.find(':');
     if (colonPos == std::string::npos)
     {
         Logger::LogErrorWithType(ErrorType::InvalidCallback, "Malformed Callback ({}) in '{}' config file!", 
             callbackFull, m_configFilepath.string());
+        entry.callbackType.clear();
+        entry.callbackName.clear();
+        return entry;
     }
 
-    BindEntry entry;
-    entry.bindKey      = key;
-    entry.actionName   = action;
-    entry.callbackType = callbackFull.substr(0, colonPos);  // C++ defined or in Lua scripts
-    entry.callbackName = callbackFull.substr(colonPos + 1);  
+    entry.callbackType = callbackFull.substr(0, colonPos); 
+    entry.callbackName = callbackFull.substr(colonPos + 1);
     return entry;
 }
 

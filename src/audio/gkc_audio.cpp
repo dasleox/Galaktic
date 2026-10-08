@@ -6,7 +6,7 @@
 using namespace Galaktic;
 
 Audio::AudioFile::AudioFile(const path &filepath, MIX_Mixer* mixer) {
-    m_audio = MIX_LoadAudio(mixer, filepath.string().c_str(), true);
+    m_audio = MIX_LoadAudio(mixer, filepath.string().c_str(), false);
     if (m_audio == nullptr) {
         Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "failed to load audio!");
     }

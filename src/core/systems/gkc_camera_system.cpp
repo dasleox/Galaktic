@@ -11,6 +11,9 @@ void Systems::CameraSystem::Update(const ECS::Entity_List& list, float dt,
     Uint32 width, Uint32 height) {
     FindPrimaryCamera(list);
 
+    GKC_RELEASE_ASSERT(m_activeCamera.Has<ECS::CameraComponent>(),
+        "Active camera entity lost its CameraComponent!");
+
     for (auto pair : list) {
         auto& entity = pair.second;
         auto& id = pair.first;

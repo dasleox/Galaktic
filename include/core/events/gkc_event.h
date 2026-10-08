@@ -73,7 +73,8 @@ namespace Galaktic::Core::Events {
         EntityDeleted, 
         EntityModified,
         ScriptCalledFromEntity,
-        ScriptCalled
+        ScriptCalled,
+        TextInput
     };
 
     /**
@@ -280,7 +281,6 @@ namespace Galaktic::Core::Events {
 // ###################################
 // ### Script Events
 // ###################################
-
 namespace Galaktic::Core::Events {
     class ScriptCalledFromEntity final : public GKC_Event {
         public:
@@ -298,6 +298,30 @@ namespace Galaktic::Core::Events {
             [[nodiscard]] ScriptID GetScriptID() { return m_id; }
         private:
             ScriptID m_id;
+    };
+}
+
+// ###################################
+// ### Text Input Events
+// ###################################
+namespace Galaktic::Core::Events {
+    /**
+     * @class TextInputEvent
+     * @brief Fired for SDL's composed text input (SDL_EVENT_TEXT_INPUT).
+     *
+     * Carries the UTF-8 text SDL produced for this input step. Prefer this
+     * over KeyPressedEvent for anything that needs actual typed characters
+     * (e.g. the Console's input line), since it already accounts for
+     * keyboard layout and shift/caps state.
+     */
+    class TextInputEvent final : public GKC_Event {
+        public:
+            explicit TextInputEvent(const string& text) : m_text(text) {}
+            GKC_WRITE_EVENT_FUNCS(TextInput, "TextInput", Input);
+
+            [[nodiscard]] const string& GetText() const { return m_text; }
+        private:
+            string m_text;
     };
 }
 

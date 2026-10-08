@@ -61,15 +61,17 @@ namespace Galaktic::Core::Managers
              * Loads a specific scene by its name inside the list,
              * and runs it
              * @param name 
+             * @return true if the scene was loaded successfully, false otherwise
              */
-            void LoadSpecificScene(const string& name) const;
+            bool LoadSpecificScene(const string& name) const;
 
             /**
              * Loads a specific scene from a file (.gkscene), if the file
              * is loaded correctly, it is added to the scene list.
              * @param filepath 
+             * @return true if the scene was loaded successfully, false otherwise
              */
-            void LoadSpecificSceneFromFile(const path& filepath);
+            bool LoadSpecificSceneFromFile(const path& filepath);
 
             /**
              * Displays all the scenes in the scenes folder

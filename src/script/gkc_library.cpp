@@ -307,6 +307,7 @@ void LuaGalaktic::BindLoggingFunctions() {
             .addFunction("LogInfo", &Galaktic::Debug::Logger::LogInfoLua)
             .addFunction("LogWarning", &Galaktic::Debug::Logger::LogWarningLua)
             .addFunction("LogError", &Galaktic::Debug::Logger::LogErrorLua)
+            .addFunction("PrintLuaStack", &LuaGalaktic::PrintLuaStack)
         .endNamespace()
     .endNamespace();
 }

@@ -31,7 +31,7 @@ namespace Galaktic::Render {
             ~Animation();
 
             void Update(float deltaTime);
-            void Render(SDL_Renderer *renderer, const SDL_FRect &rect);
+            void Render(SDL_Renderer *renderer, const SDL_FRect &rect, float rotation = 0.f);
             void Play();
             void Pause();
             void Stop();

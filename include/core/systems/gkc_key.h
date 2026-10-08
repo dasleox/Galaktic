@@ -214,4 +214,4 @@ namespace Galaktic::Core::Systems {
  * @brief Transforms a SDL_Keycode from an GKC_Event to a Key enum
  * @param e GKC_Event
  */
-#define GKC_SDLK_TO_ENUM(e) SDL_KeyToKeyEnum(e.GetKeyCode())
+#define GKC_SDLK_TO_ENUM(e) ::Galaktic::Core::Systems::SDL_KeyToKeyEnum(e.GetKeyCode())

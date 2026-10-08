@@ -2,7 +2,6 @@
 #include <core/gkc_logger.h>
 #include <core/gkc_error.h>
 
-
 using namespace Galaktic::Config;
 using namespace Galaktic;
 
@@ -14,7 +13,12 @@ void CallbackRegister::RegisterCallback(const string& callbackName, Callback cal
         return;
     }
 
-    m_callbackList.emplace(callbackName, std::move(callback));
+    if (m_callbackList.contains(callbackName))
+    {
+        GKC_ENGINE_WARNING("Callback '{}' is already registered, overwriting it.", callbackName);
+    }
+
+    m_callbackList.insert_or_assign(callbackName, std::move(callback));
 }
 
 const CallbackRegister::Callback* CallbackRegister::Find(const string& callbackName) const 
@@ -25,6 +29,6 @@ const CallbackRegister::Callback* CallbackRegister::Find(const string& callbackN
         return &it->second;
     }
 
-    Debug::Logger::LogErrorWithType(ErrorType::EmptyString, "Callback name is empty!");
+    Debug::Logger::LogErrorWithType(ErrorType::CallbackNotFound, "Callback '{}' not found!", callbackName);
     return nullptr;
 }

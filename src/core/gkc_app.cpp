@@ -53,11 +53,9 @@ App::App(const path& project_path, const string &title)
     Filesystem::CreateFolder(title);
     Filesystem::CreateAppDirectoryStructure(project_path / title);
     ScreenStartup();
-    
- 
 
     m_managersWrapper = make_unique<ManagersWrapper>();
-    GKC_RELEASE_ASSERT(m_managersWrapper != nullptr, "CRITICAL ERROR CREATING MANAGER WRAPPER!");
+    GKC_RELEASE_ASSERT(m_managersWrapper != nullptr, "Failed to create the managers wrapper!");
     m_managersWrapper->m_audioManager = new Managers::AudioManager(path(project_path / title /GKC_SOUND_PATH).string());
     m_managersWrapper->m_textureManager = new Managers::TextureManager(path(project_path / title / GKC_TEXTURE_PATH).string());
     m_managersWrapper->m_animationManager = new Managers::AnimationManager(path(project_path / title / GKC_ANIMATION_PATH).string());
@@ -67,9 +65,8 @@ App::App(const path& project_path, const string &title)
     Script::LuaGalaktic::BindGalaktic();
     m_managersWrapper->m_scriptManager = new Managers::ScriptManager(path(project_path / title / GKC_SCRIPT_PATH).string(), Script::LuaGalaktic::GetLuaState());
 
-    // Execute scripts to init managers
-
+    // The scene manager is created last: it owns scene creation/loading from
+    // here on, and every manager it may hand to a scene already exists above.
     m_sceneManager = new Managers::SceneManager(project_path / title, m_managersWrapper.get(), m_deviceInfo);
-    
+    m_console->SetSceneManager(m_sceneManager);
 }
-

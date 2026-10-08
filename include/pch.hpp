@@ -22,3 +22,4 @@
 #include <core/gkc_main.h>
 #include <typeindex>
 #include <cxxabi.h>
+#include <stack>

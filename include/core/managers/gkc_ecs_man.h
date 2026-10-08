@@ -396,11 +396,19 @@ namespace Galaktic::Core::Managers {
              */
             void DeleteEntity(EntityID id) {
                 if(m_entityList.contains(id)) {
+                    auto it = m_entityList.find(id);
+                    if (it != m_entityList.end() && it->second.Has<ECS::PlayerTag>()) {
+                        GKC_ENGINE_ERROR("The Player entity cannot be deleted!");
+                        return;
+                    }
+
+                    if (it != m_entityList.end() && it->second.Has<ECS::CameraTag>())  {
+                        GKC_ENGINE_ERROR("The Camera entity cannot be deleted!");
+                        return;
+                    }
                     // Remove all components from the registry before deleting entity
                     m_registry->RemoveAllComponents(id);
-                    
-                    // Also remove from name index
-                    auto it = m_entityList.find(id);
+                
                     if(it != m_entityList.end()) {
                         if(it->second.Has<ECS::NameComponent>()) {
                             auto& nameComp = it->second.Get<ECS::NameComponent>();
@@ -411,11 +419,34 @@ namespace Galaktic::Core::Managers {
                 }
             }
 
+            void CopyEntity(EntityID sourceID, const string& newName) {
+                auto it = m_entityList.find(sourceID);
+                if (it == m_entityList.end()) {
+                    GKC_ENGINE_ERROR("Source entity does not exist!");
+                    return;
+                }
+
+                EntityID newID = s_nextID++;
+                ECS::Entity newEntity(newID, m_registry);
+                m_entityList.emplace(newID, newEntity);
+
+                auto components = m_registry->GetComponentsFromEntity(sourceID);
+                if(!components.empty()) {
+                    for (const auto& comp : components) {
+                        GetComponentOfEntityByTypeIndex(sourceID, comp, newID);
+                    }
+                }
+
+                // Assign a unique name to the new entity
+                string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, newName);
+                AddComponentToEntity<ECS::NameComponent>(newID, uniqueName);
+                m_nameToEntityList.emplace(uniqueName, newID);
+            }
+
             void DeleteEntityByName(const string& name) {
                 auto it = m_nameToEntityList.find(name);
                 if (it != m_nameToEntityList.end()) {
                     DeleteEntity(it->second);
-                    m_nameToEntityList.erase(it);
                 }
             }
 
@@ -450,6 +481,33 @@ namespace Galaktic::Core::Managers {
                         auto& transformComp = entity->Get<ECS::TransformComponent>();
                         transformComp.location.x = x; 
                         transformComp.location.y = y;
+                    });
+                }
+            }
+
+            void TeleportEntityToEntityByName(const string& name, const string& targetName)
+            {
+                if(EntityExists(name) && EntityExists(targetName))
+                {
+                    ECS::Entity* entity = GetEntityByName(name);
+                    ECS::Entity* targetEntity = GetEntityByName(targetName);
+
+                    if(entity == nullptr) {
+                        GKC_ENGINE_ERROR("Source entity does not exist!");
+                        return;
+                    }
+                    if(targetEntity == nullptr) {
+                        GKC_ENGINE_ERROR("Target entity does not exist!");
+                        return;
+                    }
+                    
+                    ECS::IfComponentExists<ECS::TransformComponent>(*entity, [&](){
+                        ECS::IfComponentExists<ECS::TransformComponent>(*targetEntity, [&](){
+                            auto& transformComp = entity->Get<ECS::TransformComponent>();
+                            auto& targetTransformComp = targetEntity->Get<ECS::TransformComponent>();
+                            transformComp.location.x = targetTransformComp.location.x; 
+                            transformComp.location.y = targetTransformComp.location.y;
+                        });
                     });
                 }
             }

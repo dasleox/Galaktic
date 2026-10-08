@@ -61,10 +61,10 @@ void Animation::Update(float deltaTime) {
     }
 }
 
-void Animation::Render(SDL_Renderer* renderer, const SDL_FRect& rect) {
+void Animation::Render(SDL_Renderer* renderer, const SDL_FRect& rect, float rotation) {
     if (!IsValid()) return;
     
-    SDL_RenderTexture(renderer, m_textures[m_currentFrame], nullptr, &rect);
+    SDL_RenderTextureRotated(renderer, m_textures[m_currentFrame], nullptr, &rect, rotation, nullptr, SDL_FLIP_NONE);
 }
 
 void Animation::Play() {

@@ -57,5 +57,6 @@ namespace Galaktic::Render {
             static void RenderColor(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer);
             static void RenderTexture(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer);
             static void RenderAnimation(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer);
+            static void CalculateVertices(SDL_FRect rect, float rotation, SDL_Color color, SDL_Vertex outVerts[4]);
     };
 }
