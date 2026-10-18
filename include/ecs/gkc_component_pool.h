@@ -77,6 +77,14 @@ namespace Galaktic::ECS {
              * @return Size in bytes of a single component
              */
             virtual size_t GetComponentSize() const = 0;
+
+            /**
+             * @brief Copy a component from one entity to another
+             * @param sourceID Entity's ID to copy from
+             * @param targetID Entity's ID to copy to
+             */
+            virtual void CopyComponent(EntityID sourceID, EntityID targetID) = 0;
+
             
             /**
              * @brief Serialize a specific component to file
@@ -130,6 +138,11 @@ namespace Galaktic::ECS {
              * Uses copy semantics for the component data.
              */
             void Set(EntityID id, const T& component) {
+                if(m_components.size() >= MAX_COMPONENT_QUANTITY) {
+                    Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max component quantity reached!");
+                    return;
+                }
+
                 auto it = m_entityToIndex.find(id);
                 if (it != m_entityToIndex.end()) {
                     // Update existing component
@@ -152,6 +165,11 @@ namespace Galaktic::ECS {
              * or can be moved from.
              */
             void Set(EntityID id, T&& component) {
+                if(m_components.size() >= MAX_COMPONENT_QUANTITY) {
+                    Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max component quantity reached!");
+                    return;
+                }
+                
                 auto it = m_entityToIndex.find(id);
                 if (it != m_entityToIndex.end()) {
                     // Update existing component
@@ -202,7 +220,15 @@ namespace Galaktic::ECS {
             bool Contains(EntityID id) const override {
                 return m_entityToIndex.find(id) != m_entityToIndex.end();
             }
-            
+
+            void CopyComponent(EntityID sourceID, EntityID targetID) override {
+                const T* src = Get(sourceID);
+                if (!src) return;
+                T copy = *src;      // Component copy        
+                Set(targetID, std::move(copy));
+            }
+
+                        
             /**
              * @brief Remove component from entity using swap-and-pop
              * @param id Entity's ID
@@ -368,6 +394,10 @@ namespace Galaktic::ECS {
              */
             bool Contains(EntityID id) const override {
                 return m_entities.find(id) != m_entities.end();
+            }
+
+            void CopyComponent(EntityID from, EntityID to) override {
+                if (Contains(from)) Set(to);
             }
             
             /**

@@ -158,6 +158,14 @@ namespace Galaktic::Core::Managers {
                 }
             }
 
+            EntityID GetEntityIDByName(const string& name) const {
+                auto it = m_nameToEntityList.find(name);
+                if (it != m_nameToEntityList.end()) {
+                    return it->second;
+                }
+                return InvalidEntity;
+            }
+
             /**
              * @brief Adds a raw tag to an entity by specifying its type
              *
@@ -420,24 +428,20 @@ namespace Galaktic::Core::Managers {
             }
 
             void CopyEntity(EntityID sourceID, const string& newName) {
-                auto it = m_entityList.find(sourceID);
-                if (it == m_entityList.end()) {
+                if (!m_entityList.contains(sourceID)) {
                     GKC_ENGINE_ERROR("Source entity does not exist!");
+                    return;
+                }
+                if (m_entityList.size() >= MAX_ENTITY_QUANTITY) {
+                    Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max entity quantity reached!");
                     return;
                 }
 
                 EntityID newID = s_nextID++;
-                ECS::Entity newEntity(newID, m_registry);
-                m_entityList.emplace(newID, newEntity);
+                m_entityList.emplace(newID, ECS::Entity(newID, m_registry));
+                m_registry->CopyAllComponents(sourceID, newID);
 
-                auto components = m_registry->GetComponentsFromEntity(sourceID);
-                if(!components.empty()) {
-                    for (const auto& comp : components) {
-                        GetComponentOfEntityByTypeIndex(sourceID, comp, newID);
-                    }
-                }
-
-                // Assign a unique name to the new entity
+                // Overwrites the copied NameComponent with a unique one
                 string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, newName);
                 AddComponentToEntity<ECS::NameComponent>(newID, uniqueName);
                 m_nameToEntityList.emplace(uniqueName, newID);

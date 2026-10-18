@@ -43,7 +43,7 @@ void Logger::Init() {
 
 void Logger::PrintEngineInformation() {
     cout << "Galaktic Engine " << GKC_VERSION_STR << " '"
-        << GKC_SUFFIX << "' " << "Build " << GKC_BUILD_VERSION << endl;
+        << GKC_SUFFIX << "' " << endl;
 }
 
 void Logger::LogInfoLua(const string& msg) {

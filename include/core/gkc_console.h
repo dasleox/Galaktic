@@ -72,6 +72,7 @@ namespace Galaktic::Core {
         SetRotationEntity,
         DisplayEntityInformation,
         PrintEntityList,
+        CopyEntity,
 
         // Scriting/Lua Related
         ExecuteScript,

@@ -90,7 +90,7 @@
 
 #define GKC_MAJOR_VERSION 0
 #define GKC_MINOR_VERSION 3
-#define GKC_PATCH_VERSION 2
+#define GKC_PATCH_VERSION 3
 #define GKC_SET_COLOR(color) (color.r), (color.g), (color.b), (color.a)
 
 // 'using' declarations
@@ -102,7 +102,6 @@ using std::filesystem::path, std::unordered_multimap;
 using std::type_index, std::any, std::array, std::move;
 
 const string GKC_SUFFIX = "Earthy";
-const Uint32 GKC_BUILD_VERSION = 422;
 inline const string GKC_VERSION_STR = to_string(GKC_MAJOR_VERSION) + "."
     + to_string(GKC_MINOR_VERSION) + "." + to_string(GKC_PATCH_VERSION);
 
@@ -416,7 +415,7 @@ namespace Galaktic::Debug {
     */
     inline string GetEngineName() {
         return "Galaktic Engine " + GKC_VERSION_STR + " '"
-        + GKC_SUFFIX + "' " + "Build " + to_string(GKC_BUILD_VERSION);
+        + GKC_SUFFIX;
     }  
 
     /**

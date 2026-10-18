@@ -342,6 +342,19 @@ void Console::EntityCommands(const CommandWrapper& wrapper)
             break;
         }
 
+        case CommandTypes::CopyEntity:
+        {
+            SET_ARGUMENT_QUANTITY(2, args);
+            string sourceName = args[0];
+            string newName = args[1];
+                
+            EntityID sourceID = manager->GetEntityIDByName(sourceName);
+            manager->CopyEntity(sourceID, newName);
+        
+            break;
+        }
+
+
         case CommandTypes::SetRotationEntity:
         {
             SET_ARGUMENT_QUANTITY(2, args);

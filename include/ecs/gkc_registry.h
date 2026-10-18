@@ -52,7 +52,7 @@ namespace Galaktic::ECS {
              */
             ~Registry() = default;
             
-            // Prevent copying (pools contain pointers/references)
+            // Prevent copying (m_pools contain pointers/references)
             Registry(const Registry&) = delete;
             Registry& operator=(const Registry&) = delete;
             
@@ -62,7 +62,7 @@ namespace Galaktic::ECS {
              * @param other Registry to move from
              */
             Registry(Registry&& other) noexcept {
-                pools = move(other.pools);
+                m_pools = move(other.m_pools);
             }
             
             /**
@@ -72,7 +72,7 @@ namespace Galaktic::ECS {
              */
             Registry& operator=(Registry&& other) noexcept {
                 if (this != &other) {
-                    pools = move(other.pools);
+                    m_pools = move(other.m_pools);
                 }
                 return *this;
             }
@@ -100,14 +100,14 @@ namespace Galaktic::ECS {
              */
             template<typename T, typename... Args>
             T& Add(EntityID id, Args&&... args) {
-                if(pools.size() >= MAX_COMPONENT_QUANTITY) {
+                if(m_pools.size() >= MAX_COMPONENT_QUANTITY) {
                     Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max component quantity reached!");
                     static T dummy{};
                     return dummy;
                 }
                 
                 // Get or create the pool for this component type
-                unique_ptr<IComponentPool>& pool = pools[typeid(T)];
+                unique_ptr<IComponentPool>& pool = m_pools[typeid(T)];
                 
                 if (!pool) {
                     // Create new pool based on whether it's a tag or regular component
@@ -143,13 +143,13 @@ namespace Galaktic::ECS {
              */
             template<typename T>
             T& Add(EntityID id, T&& component) {
-                if(pools.size() >= MAX_COMPONENT_QUANTITY) {
+                if(m_pools.size() >= MAX_COMPONENT_QUANTITY) {
                     Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max component quantity reached!");
                     static T dummy{};
                     return dummy;
                 }
                 
-                unique_ptr<IComponentPool>& pool = pools[typeid(T)];
+                unique_ptr<IComponentPool>& pool = m_pools[typeid(T)];
                 
                 if (!pool) {
                     if constexpr (IsTag<T>) {
@@ -186,8 +186,8 @@ namespace Galaktic::ECS {
              */
             template<typename T>
             T& Get(EntityID id) {
-                auto it = pools.find(typeid(T));
-                if (it == pools.end()) {
+                auto it = m_pools.find(typeid(T));
+                if (it == m_pools.end()) {
                     Debug::Logger::LogErrorWithType(ErrorType::InvalidComponent, 
                         "Component type not found for entity!");
                     static T dummy{};
@@ -218,8 +218,8 @@ namespace Galaktic::ECS {
              */
             template<typename T>
             const T& Get(EntityID id) const {
-                auto it = pools.find(typeid(T));
-                if (it == pools.end()) {
+                auto it = m_pools.find(typeid(T));
+                if (it == m_pools.end()) {
                     Debug::Logger::LogErrorWithType(ErrorType::InvalidComponent,
                         "Component type not found for entity!");
                     static T dummy{};
@@ -261,8 +261,8 @@ namespace Galaktic::ECS {
              */
             template<typename T>
             bool Has(EntityID id) const {
-                auto it = pools.find(typeid(T));
-                if (it == pools.end())
+                auto it = m_pools.find(typeid(T));
+                if (it == m_pools.end())
                     return false;
 
                 return it->second->Contains(id);
@@ -279,8 +279,8 @@ namespace Galaktic::ECS {
              * @return true if component exists
              */
             bool HasByType(EntityID id, const type_index& type) const {
-                auto it = pools.find(type);
-                if (it == pools.end())
+                auto it = m_pools.find(type);
+                if (it == m_pools.end())
                     return false;
                     
                 return it->second->Contains(id);
@@ -299,19 +299,19 @@ namespace Galaktic::ECS {
              */
             template<typename T>
             void Remove(EntityID id) {
-                auto it = pools.find(typeid(T));
-                if (it != pools.end()) {
+                auto it = m_pools.find(typeid(T));
+                if (it != m_pools.end()) {
                     it->second->Remove(id);
                     
-                    // Clean up empty pools to save memory
+                    // Clean up empty m_pools to save memory
                     if (it->second->Size() == 0) {
-                        pools.erase(it);
+                        m_pools.erase(it);
                     }
                 }
             }
 
             /**
-             * @brief Get all component pools
+             * @brief Get all component m_pools
              * 
              * Returns reference to the internal pool storage for
              * iteration and low-level operations.
@@ -319,7 +319,7 @@ namespace Galaktic::ECS {
              * @return Map of type_index to component pool
              */
             unordered_map<type_index, unique_ptr<IComponentPool>>& GetComponentPools() {
-                return pools;
+                return m_pools;
             }
 
             /**
@@ -334,13 +334,29 @@ namespace Galaktic::ECS {
             vector<type_index> GetComponentsFromEntity(EntityID id) {
                 vector<type_index> components;
 
-                for (const auto& [type, pool] : pools) {
+                for (const auto& [type, pool] : m_pools) {
                     if (pool->Contains(id)) {
                         components.emplace_back(type);
                     }
                 }
 
                 return components;
+            }
+
+            /**
+             * @brief Copy all components from one entity to another
+             * 
+             * Copies all components from the source entity to the target entity.
+             * This is useful for duplicating entities or creating templates.
+             * 
+             * @param from Source entity ID
+             * @param to Target entity ID
+             */
+            void CopyAllComponents(EntityID from, EntityID to) {
+                for (auto& [type, pool] : m_pools) {
+                    if (pool && pool->Contains(from))
+                        pool->CopyComponent(from, to);
+                }
             }
 
             /**
@@ -356,7 +372,7 @@ namespace Galaktic::ECS {
              */
             void ForEachComponentDo(EntityID id,
                                     const function<void(const ComponentTypeInfo&, const any&)> func) {
-                for (const auto& [type, pool] : pools) {
+                for (const auto& [type, pool] : m_pools) {
                     if (!pool->Contains(id))
                         continue;
 
@@ -367,7 +383,7 @@ namespace Galaktic::ECS {
                     if (info.isTag)
                         continue;
                     
-                    // Call with empty any - serialization now uses pools directly
+                    // Call with empty any - serialization now uses m_pools directly
                     // This is kept for backwards compatibility
                     any empty;
                     func(info, empty);
@@ -396,7 +412,7 @@ namespace Galaktic::ECS {
             size_t GetAllComponentsSize(EntityID id) {
                 size_t size = 0;
 
-                for (const auto& [type, pool] : pools) {
+                for (const auto& [type, pool] : m_pools) {
                     if (pool->Contains(id)) {
                         size += pool->GetComponentSize();
                     }
@@ -419,23 +435,23 @@ namespace Galaktic::ECS {
              * @brief Clear all components for an entity
              * 
              * Removes all components from an entity efficiently.
-             * Also cleans up any empty pools after removal.
+             * Also cleans up any empty m_pools after removal.
              * 
              * @param id Entity ID to clear all components from
              */
             void RemoveAllComponents(EntityID id) {
                 vector<type_index> componentTypes = GetComponentsFromEntity(id);
                 for (const auto& type : componentTypes) {
-                    auto it = pools.find(type);
-                    if (it != pools.end()) {
+                    auto it = m_pools.find(type);
+                    if (it != m_pools.end()) {
                         it->second->Remove(id);
                     }
                 }
                 
-                // Clean up empty pools
-                for (auto it = pools.begin(); it != pools.end(); ) {
+                // Clean up empty m_pools
+                for (auto it = m_pools.begin(); it != m_pools.end(); ) {
                     if (it->second->Size() == 0) {
-                        it = pools.erase(it);
+                        it = m_pools.erase(it);
                     } else {
                         ++it;
                     }
@@ -444,8 +460,8 @@ namespace Galaktic::ECS {
 
         private:
             /**
-             * @brief Storage for all component pools
+             * @brief Storage for all component m_pools
             */
-            unordered_map<type_index, unique_ptr<IComponentPool>> pools;
+            unordered_map<type_index, unique_ptr<IComponentPool>> m_pools;
     };
 }
