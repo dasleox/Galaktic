@@ -164,15 +164,50 @@ void Console::ShowFPS()
 
 void Console::DisplayHelp(const string& type)
 {
-    GKC_ENGINE_INFO("Available commands:");
-    GKC_ENGINE_INFO(" save | load <file> | show_scene_list | pause");
-    GKC_ENGINE_INFO(" create_static_object <name> | create_physics_object <name> | delete_entity <name>");
-    GKC_ENGINE_INFO(" teleport_entity <name> <x> <y> / <target_name> | set_rotation_entity <name> <deg> | print_entity_list");
-    GKC_ENGINE_INFO(" get_entity_info <name> | print_entity_list");
-    GKC_ENGINE_INFO(" execute_script <name> | print_luastack | bind <key> <action>");
-    GKC_ENGINE_INFO(" set_fullscreen | set_cheats <true|false> | clear | help");
-    GKC_ENGINE_INFO(" play_sound <name> | stop_sound <name> | stop_all_sounds | print_sound_list");
-    GKC_ENGINE_INFO(" show_fps | show_wireframe | show_colliders | show_debug_info");
+    if (type.empty())
+    {
+        GKC_ENGINE_INFO("Usage: help <section>");
+        GKC_ENGINE_INFO(" Sections: scene | entity | script | app | sound | debug");
+        return;
+    }
+
+    if (type == "scene")
+    {
+        GKC_ENGINE_INFO("Scene commands:");
+        GKC_ENGINE_INFO(" save | load <file> | show_scene_list | pause");
+    }
+    else if (type == "entity")
+    {
+        GKC_ENGINE_INFO("Entity commands:");
+        GKC_ENGINE_INFO(" create_static_object <name> | create_physics_object <name>");
+        GKC_ENGINE_INFO(" copy_entity <name> [new_name] | delete_entity <name>");
+        GKC_ENGINE_INFO(" teleport_entity <name> <x> <y> | set_rotation_entity <name> <deg>");
+        GKC_ENGINE_INFO(" get_entity_info <name> | print_entity_list");
+    }
+    else if (type == "script")
+    {
+        GKC_ENGINE_INFO("Script commands:");
+        GKC_ENGINE_INFO(" execute_script <name> | print_luastack | bind <key> <action>");
+    }
+    else if (type == "app")
+    {
+        GKC_ENGINE_INFO("App commands:");
+        GKC_ENGINE_INFO(" set_fullscreen | set_cheats <true|false> | clear | help [section]");
+    }
+    else if (type == "sound")
+    {
+        GKC_ENGINE_INFO("Sound commands:");
+        GKC_ENGINE_INFO(" play_sound <name> | stop_sound <name> | stop_all_sounds | print_sound_list");
+    }
+    else if (type == "debug")
+    {
+        GKC_ENGINE_INFO("Debug commands:");
+        GKC_ENGINE_INFO(" show_fps | show_wireframe | show_colliders | show_debug_info");
+    }
+    else
+    {
+        InvalidArgumentError("Unknown help section '" + type + "'");
+    }
 }
 
 void Console::ClearConsole()
@@ -344,6 +379,10 @@ void Console::EntityCommands(const CommandWrapper& wrapper)
 
         case CommandTypes::CopyEntity:
         {
+            if (args.empty()) {
+                InvalidArgumentError("usage: copy_entity <name> [new_name]");
+                break;
+            }
             SET_ARGUMENT_QUANTITY(2, args);
             string sourceName = args[0];
             string newName = args[1];
@@ -411,7 +450,7 @@ void Console::ScriptCommands(const CommandWrapper& wrapper)
 
 void Console::AppCommands(const CommandWrapper& wrapper)
 {
-    const string& args = wrapper.args;
+    const auto& args = GetListOfArguments(wrapper.args);
     switch(wrapper.type)
     {
         case CommandTypes::FullscreenToggle: 
@@ -423,8 +462,12 @@ void Console::AppCommands(const CommandWrapper& wrapper)
         case CommandTypes::CheatsToggle:
         {
             bool toggle = false;
-            if(args == "true") toggle = true;
-            else if(args == "false") toggle = false;
+            if(args.empty()) {
+                InvalidArgumentError("missing argument!");
+                return;
+            }
+            if(args[0] == "true") toggle = true;
+            else if(args[0] == "false") toggle = false;
             else { 
                 InvalidArgumentError("Argument should be true or false!");
                 return;
@@ -440,13 +483,15 @@ void Console::AppCommands(const CommandWrapper& wrapper)
         }
         case CommandTypes::HelpConsole: 
         {
-            if(args.empty()) {
-                GKC_ENGINE_INFO("Type 'help <type>' for more information on a specific type.");
-                GKC_ENGINE_INFO("Available types: scene, entity, script, app, sound, debug");
-                return;
-            }
+            GKC_ENGINE_INFO("Help command usage: help <type>");
+            GKC_ENGINE_INFO("Type 'help <type>' for more information on a specific type.");
+            GKC_ENGINE_INFO("Available types: scene, entity, script, app, sound, debug");
 
-            DisplayHelp(args);
+            
+            if(!args.empty() && args[0] != " ") {
+                DisplayHelp(args[0]);
+            }
+  
             break;
         }
     }
@@ -567,6 +612,7 @@ CommandWrapper Console::ArgumentCommands(const string& command, const string& ar
     COM_WRAPPER_RETURN("create_physics_object", CommandTypes::CreatePhysicsObject);
     COM_WRAPPER_RETURN("delete_entity", CommandTypes::DeleteEntity);
     COM_WRAPPER_RETURN("teleport_entity", CommandTypes::TeleportEntity);
+    COM_WRAPPER_RETURN("copy_entity", CommandTypes::CopyEntity);
     COM_WRAPPER_RETURN("set_rotation_entity", CommandTypes::SetRotationEntity);
     COM_WRAPPER_RETURN("get_entity_info", CommandTypes::DisplayEntityInformation);
     COM_WRAPPER_RETURN("execute_script", CommandTypes::ExecuteScript);

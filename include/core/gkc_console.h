@@ -136,7 +136,7 @@ namespace Galaktic::Core {
             shared_ptr<Debug::ConsoleMutex_mt> m_sink = nullptr;
 
             bool m_cheatsToggle = false;
-            bool m_isVisible = true;
+            bool m_isVisible = false;
 
             /// Text currently being typed into the console's input line.
             string m_inputBuffer;

@@ -437,6 +437,12 @@ namespace Galaktic::Core::Managers {
                     return;
                 }
 
+                const auto& source = m_entityList.at(sourceID);
+                if (source.Has<ECS::PlayerTag>() || source.Has<ECS::CameraTag>()) {
+                    GKC_ENGINE_ERROR("Player and Camera entities can't be copied! (Not today :D)");
+                    return;
+                }
+
                 EntityID newID = s_nextID++;
                 m_entityList.emplace(newID, ECS::Entity(newID, m_registry));
                 m_registry->CopyAllComponents(sourceID, newID);
@@ -445,6 +451,33 @@ namespace Galaktic::Core::Managers {
                 string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, newName);
                 AddComponentToEntity<ECS::NameComponent>(newID, uniqueName);
                 m_nameToEntityList.emplace(uniqueName, newID);
+            }
+
+            ECS::Entity* CopyAndGetEntity(EntityID sourceID, const string& newName) {
+                if (!m_entityList.contains(sourceID)) {
+                    GKC_ENGINE_ERROR("Source entity does not exist!");
+                    return nullptr;
+                }
+                if (m_entityList.size() >= MAX_ENTITY_QUANTITY) {
+                    Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max entity quantity reached!");
+                    return nullptr;
+                }
+
+                EntityID newID = s_nextID++;
+                m_entityList.emplace(newID, ECS::Entity(newID, m_registry));
+                m_registry->CopyAllComponents(sourceID, newID);
+
+                // Overwrites the copied NameComponent with a unique one
+                string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, newName);
+                AddComponentToEntity<ECS::NameComponent>(newID, uniqueName);
+                m_nameToEntityList.emplace(uniqueName, newID);
+
+                if(!m_entityList.contains(newID)) {
+                    GKC_ENGINE_ERROR("Failed to copy entity!");
+                    return nullptr;
+                }
+
+                return &m_entityList[newID];
             }
 
             void DeleteEntityByName(const string& name) {
