@@ -89,8 +89,8 @@
 #endif
 
 #define GKC_MAJOR_VERSION 0
-#define GKC_MINOR_VERSION 3
-#define GKC_PATCH_VERSION 4
+#define GKC_MINOR_VERSION 4
+#define GKC_PATCH_VERSION 0
 #define GKC_SET_COLOR(color) (color.r), (color.g), (color.b), (color.a)
 
 // 'using' declarations
@@ -171,6 +171,7 @@ namespace Galaktic
         string filepath;
         unique_ptr<AssetType> asset = nullptr;
         bool isLoaded = false;
+        std::filesystem::file_time_type lastWriteTime{};
 
         template<typename... Args>
         bool LoadAsset(const string& filepath, Args&& ...args)

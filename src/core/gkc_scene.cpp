@@ -176,6 +176,22 @@ Scene::~Scene() {
     Script::LuaGalaktic::Shutdown();
 }
 
+void Scene::ReloadAssets(double deltaTime)
+{
+    m_hotReloadTimer += deltaTime;
+    if (m_hotReloadTimer < 5.0)
+        return;
+
+    m_hotReloadTimer = 0.0;
+
+    m_managerWrapper->m_textureManager->CheckForReloadAssets(GKC_GET_RENDERER(m_window));
+    m_managerWrapper->m_animationManager->CheckForReloadAssets(GKC_GET_RENDERER(m_window));
+
+    //@todo Add for fonts, audio and scripts inside their own functions
+
+    //@bug Fix a bug where RPixels are not reloaded when their texture is reloaded, causing them to be invisible until the scene is restarted
+}
+
 void Scene::Run()  {
     LoadRunAssets();
 
@@ -223,6 +239,8 @@ void Scene::Run()  {
         Clock::Update();
         double deltaTime = std::min(Clock::GetDeltaTime(), 0.25);
         accumulator += deltaTime;
+
+        ReloadAssets(deltaTime);
 
         m_window->PollEvents();
         if (m_window->ShouldClose()) {

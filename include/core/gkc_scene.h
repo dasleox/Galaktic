@@ -166,6 +166,8 @@ namespace Galaktic::Core {
             }
 
             void SetFullscreen();
+
+            void ReloadAssets(double deltaTime);
             
             ECS::Registry*& GetRegistry() { return m_registry; }
             Managers::ECS_Manager*& GetECSManager() { return m_ecsManager; }
@@ -175,6 +177,8 @@ namespace Galaktic::Core {
             bool m_bPaused = false;
             bool m_bShowWireframe = false;
             bool m_bShowColliders = false;
+
+            double m_hotReloadTimer = 0.0;
 
             shared_ptr<Render::Window> m_window;
             Systems::System_List m_systemList;

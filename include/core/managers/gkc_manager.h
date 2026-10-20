@@ -195,6 +195,67 @@ namespace Galaktic::Core::Managers
                 GKC_ENGINE_INFO("'{}' loaded successfully!", assetName);
             }
 
+            /**
+             * Reloads an already registered asset by its ID
+             *
+             * @param id   The ID of the asset to reload
+             * @param args Additional arguments forwarded to the reload function
+             */
+            template <typename... Args>
+            static void ReloadAsset(uint32_t id, Args&&... args) 
+            {
+                if(!AssetExistsByID(id))
+                {
+                    Debug::Logger::LogErrorWithType(ErrorType::AssetNotFound,
+                        "Asset with ID '{}' to reload doesn't exist!", id);
+                    return;
+                }
+
+                auto& assetInfo = m_assetList[id];
+                if(assetInfo == nullptr)
+                {
+                    Debug::Logger::LogErrorWithType(ErrorType::AssetIsNull,
+                        "Asset info with ID '{}' is NULL!"  , id);
+                    return;
+                }
+
+                std::error_code errorCode;
+                assetInfo->lastWriteTime = std::filesystem::last_write_time(assetInfo->GetFilepath(), errorCode);
+                
+                // Make a fresh instance of the asset to replace the old one, forwarding any additional arguments
+                auto freshAsset = make_unique<AssetType>(assetInfo->GetFilepath(), std::forward<Args>(args)...);
+                if(freshAsset == nullptr)
+                {
+                    Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError,
+                        "Failed to reload asset: {}", assetInfo->GetFilepath());
+                    return;
+                }
+
+                assetInfo->asset = std::move(freshAsset);   
+                GKC_ENGINE_INFO("Asset '{}' reloaded successfully!", assetInfo->GetFilepath());
+            }
+
+            /**
+             * Checks for assets that have been modified and reloads them
+             *
+             * @param args Additional arguments to forward to the reload function
+             */
+            template <typename... Args>
+            static void CheckForReloadAssets(Args&&... args)
+            {
+                for (auto& [id, info] : m_assetList)
+                {
+                    if (info == nullptr || !info->IsLoaded())
+                        continue;
+
+                    std::error_code errorCode;
+                    auto currentTime = std::filesystem::last_write_time(info->GetFilepath(), errorCode);
+                    if (errorCode || currentTime == info->lastWriteTime)
+                        continue;
+
+                    ReloadAsset(id, args...);
+                }
+            }
 
             /**
              * Returns the ID associated with the given asset name
