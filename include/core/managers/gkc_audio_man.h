@@ -98,6 +98,9 @@ namespace Galaktic::Core::Managers {
              * @param fadeOutMs fade ms
              */
             static void StopAllSounds(Sint64 fadeOutMs = 0);
+
+
+            static void ReloadAudioFiles();
         private:
             static std::multimap<AudioID, MIX_Track*> m_activeTracks;
             static SDL_AudioSpec m_audioSpec;
@@ -110,5 +113,12 @@ namespace Galaktic::Core::Managers {
              * @param track Track created from an AudioFile
              */
             static void RegisterTrack(AudioID id, MIX_Track* track);
+
+            /**
+             * Checks if a track is currently active based on its ID
+             * @param id AudioInfo's id
+             * @return true if the track is active, false otherwise
+             */
+            static bool IsTrackActive(AudioID id);
     };
 }

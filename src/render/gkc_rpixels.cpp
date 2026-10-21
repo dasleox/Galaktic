@@ -121,52 +121,79 @@ void PixelColoredGroupInfo::ApplyColorToEntities() {
     }
 
     for (EntityID id : m_affectedEntities) {
-        RecolorEntityTexture(id);
+        ApplyColorToEntity(id);
     }
 }
 
-void PixelColoredGroupInfo::RecolorEntityTexture(EntityID id) {
-    auto& textureComp = m_ecsManager.GetComponentOfEntity<ECS::TextureComponent>(id);
-    auto* texture = Managers::TextureManager::GetAssetByID(textureComp.id);
-    if (texture == nullptr) {
-        GKC_ENGINE_ERROR("Entity (ID: {}) in group '{}' has no valid texture!", id, m_groupName);
+void PixelColoredGroupInfo::RefreshChangedTextures() {
+    if(m_affectedPixels.empty() || m_affectedPixels[0].empty())
         return;
+
+    auto& entities = m_ecsManager.GetEntityList();
+    for(auto id : m_affectedEntities) {
+        auto entIt = entities.find(id);
+        if(entIt == entities.end() || !entIt->second.Has<ECS::TextureComponent>())
+            continue;
+
+        auto* texture = Managers::TextureManager::GetAssetByID(
+            entIt->second.Get<ECS::TextureComponent>().id);
+        if(texture == nullptr)
+            continue;
+
+        auto painted = m_paintedTextures.find(id);
+        if(painted == m_paintedTextures.end() || painted->second != texture->GetSDLTexture())
+            ApplyColorToEntity(id);
     }
+}
+
+void PixelColoredGroupInfo::ApplyColorToEntity(EntityID id) {
+    auto& entities = m_ecsManager.GetEntityList();
+    auto entIt = entities.find(id);
+    if (entIt == entities.end() || !entIt->second.Has<ECS::TextureComponent>())
+        return;
+
+    auto* texture = Managers::TextureManager::GetAssetByID(
+        entIt->second.Get<ECS::TextureComponent>().id);
+    if (texture == nullptr)
+        return;
 
     SDL_Texture* sdlTexture = texture->GetSDLTexture();
-    SDL_Surface* originalSurface = texture->GetSDLSurface();
+    SDL_Surface* surface = texture->GetSDLSurface();
+    if (sdlTexture == nullptr || surface == nullptr)
+        return;
+
+    // The mask was built for the original size. A reloaded image with a
+    // different size can't use it.
+    if (surface->w != static_cast<int>(m_textureWidth) ||
+        surface->h != static_cast<int>(m_textureHeight))
+    {
+        GKC_ENGINE_ERROR("Texture of entity {} is {}x{}, but group '{}' expects {}x{}",
+            id, surface->w, surface->h, m_groupName, m_textureWidth, m_textureHeight);
+        m_paintedTextures[id] = sdlTexture; 
+        return;
+    }
 
     void* pixels = nullptr;
     int pitch = 0;
-    if (!SDL_LockTexture(sdlTexture, NULL, &pixels, &pitch) || pixels == nullptr) {
-        GKC_ENGINE_ERROR("Failed to get pixels from texture! (ID: {})", id);
+    if (!SDL_LockTexture(sdlTexture, nullptr, &pixels, &pitch) || pixels == nullptr) 
+    {
+        GKC_ENGINE_ERROR("Failed to lock texture! (ID: {})", id);
         return;
     }
 
-    SDL_ConvertPixels(
-        originalSurface->w, originalSurface->h,
-        originalSurface->format,
-        originalSurface->pixels, originalSurface->pitch,
-        originalSurface->format,
-        pixels, pitch
-    );
+    SDL_ConvertPixels(surface->w, surface->h, surface->format, surface->pixels,
+        surface->pitch, surface->format, pixels, pitch);
 
+    const SDL_PixelFormatDetails* format = SDL_GetPixelFormatDetails(surface->format);
+    const Uint32 color = SDL_MapRGBA(format, nullptr, GKC_SET_COLOR(m_mainColor));
     Uint32* pixelArray = static_cast<Uint32*>(pixels);
-    int stride = pitch / sizeof(Uint32);
+    const size_t stride = pitch / sizeof(Uint32);
 
-    // Rows (y) first, columns (x) second - this now matches how
-    // m_affectedPixels is actually sized (height rows of width columns),
-    // instead of transposing width/height like the previous version did.
-    for (size_t y = 0; y < m_textureHeight; y++) {
-        for (size_t x = 0; x < m_textureWidth; x++) {
-            if (m_affectedPixels[y][x]) {
-                pixelArray[y * stride + x] = SDL_MapRGBA(
-                    SDL_GetPixelFormatDetails(SDL_PIXELFORMAT_RGBA8888),
-                    NULL, GKC_SET_COLOR(m_mainColor)
-                );
-            }
-        }
-    }
+    for (size_t y = 0; y < m_textureHeight; y++)
+        for (size_t x = 0; x < m_textureWidth; x++)
+            if (m_affectedPixels[y][x])
+                pixelArray[y * stride + x] = color;
 
     SDL_UnlockTexture(sdlTexture);
+    m_paintedTextures[id] = sdlTexture;
 }

@@ -160,8 +160,6 @@ void Console::ShowFPS()
     GKC_ENGINE_INFO("FPS: {:.1f}", fps);
 }
 
-//@todo Divide this into sections from an argument perspective, e.g. "scene", "entity", "script", "app", "sound", "debug"
-
 void Console::DisplayHelp(const string& type)
 {
     if (type.empty())

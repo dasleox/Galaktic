@@ -64,6 +64,7 @@ Font::Font(const path &path, SDL_Renderer* renderer, float size) {
 
 Font::~Font() {
     if (m_font != nullptr) {
+        TTF_CloseFont(m_font);
         m_font = nullptr;
     }
 }

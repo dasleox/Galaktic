@@ -130,11 +130,10 @@ void Filesystem::RefreshFolderContents(vector<string>& content, const path& fold
         return;
     }
 
-    // @todo Add Error handling
-        for (const auto& entry : recursive_directory_iterator(folder)) {
-            if (entry.exists() && entry.is_regular_file())
-                content.push_back(entry.path().string());
-        }
+    for (const auto& entry : recursive_directory_iterator(folder)) {
+        if (entry.exists() && entry.is_regular_file())
+             content.push_back(entry.path().string());
+    }
 
 }
 

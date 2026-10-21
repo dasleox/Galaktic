@@ -90,7 +90,7 @@
 
 #define GKC_MAJOR_VERSION 0
 #define GKC_MINOR_VERSION 4
-#define GKC_PATCH_VERSION 0
+#define GKC_PATCH_VERSION 1
 #define GKC_SET_COLOR(color) (color.r), (color.g), (color.b), (color.a)
 
 // 'using' declarations

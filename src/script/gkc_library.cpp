@@ -146,8 +146,6 @@ void LuaGalaktic::BindScriptFunctions() {
     .endNamespace();
 }
 
-
-///@todo Change this to return the actual entity and add non-static functions for THOSE (Static, Physics, Camera, etc.) objects, add barriers to avoid/
 void LuaGalaktic::BindEntityFunctions() {
     // Galaktic::EntityHelper (doesn't match Galaktic namespace for readability purposes)
     luabridge::getGlobalNamespace(m_luaState).beginNamespace("Galaktic")

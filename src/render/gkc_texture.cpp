@@ -43,6 +43,8 @@ Texture::Texture(const path &path, SDL_Renderer* renderer) {
 Texture::~Texture() {
     if (m_texture != nullptr) {
         SDL_DestroyTexture(m_texture);
+        SDL_DestroySurface(m_surface);
         m_texture = nullptr;
+        m_surface = nullptr;
     }
 }

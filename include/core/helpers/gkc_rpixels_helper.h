@@ -42,6 +42,8 @@ namespace Galaktic::Core::Helpers {
              void DeleteEntityFromGroup(const string& groupName, EntityID id);
             
              void DrawAllGroups();
+
+             shared_ptr<Render::PixelColoredGroupInfo> GetPixelGroup(const string& groupName);
         private:
              unordered_map<string, shared_ptr<Render::PixelColoredGroupInfo>> m_groupList; 
              Managers::ECS_Manager& m_ecsManager; 

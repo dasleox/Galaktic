@@ -112,6 +112,19 @@ void Managers::AudioManager::StopSound(const string &name, Sint64 fadeOutMs) {
     }
 }
 
+bool Managers::AudioManager::IsTrackActive(AudioID id) {
+    auto trackIt = m_activeTracks.find(id);
+    if (trackIt != m_activeTracks.end()) 
+    {
+        MIX_Track* track = trackIt->second;
+        if (track != nullptr && MIX_TrackPlaying(track)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void Managers::AudioManager::StopAllTracksFromSound(const string &name, Sint64 fadeOutMs) {
     auto* audioInfo = GetAssetInfo(name);
     if (audioInfo != nullptr) {
@@ -147,4 +160,25 @@ void Managers::AudioManager::StopAllSounds(Sint64 fadeOutMs) {
 
 void Managers::AudioManager::RegisterTrack(AudioID id, MIX_Track *track) {
     m_activeTracks.emplace(id, track);
+}
+
+void Managers::AudioManager::ReloadAudioFiles() {
+    for (auto& [id, info] : m_assetList)
+    {
+        if (info == nullptr || !info->IsLoaded())
+            continue;
+
+        std::error_code errorCode;
+        auto currentTime = std::filesystem::last_write_time(info->GetFilepath(), errorCode);
+        if (errorCode || currentTime == info->lastWriteTime)
+        {
+            continue;
+        }
+
+        // Reload the audio file if it's not currently playing
+        if(info->asset != nullptr && !IsTrackActive(id))
+        {   
+            ReloadAsset(id, m_mixer);
+        }
+    }
 }

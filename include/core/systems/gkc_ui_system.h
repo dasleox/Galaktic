@@ -25,8 +25,6 @@
 #include <core/systems/gkc_system.h>
 #include "gkc_key.h"
 
-/// @todo Comment and document this file
-
 namespace Galaktic::Core::Systems {
     /**
      * @class UISystem

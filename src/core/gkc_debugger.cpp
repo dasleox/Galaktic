@@ -5,7 +5,7 @@ using namespace Galaktic::Debug;
 
 void Galaktic::Debug::StartLibraries() {
     Logger::Init();
-
+    GKC_ENGINE_INFO(Debug::GetEngineName());
     GKC_RELEASE_ASSERT(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) && TTF_Init() && MIX_Init(), "SDL could not initialize!");
     GKC_ENGINE_INFO("Initialized SDL successfully.");
 }

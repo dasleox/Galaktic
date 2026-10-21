@@ -50,6 +50,7 @@ App::App(const path& project_path, const string &title)
     Debug::StartLibraries();
 
     m_console = make_unique<Console>(Debug::Logger::GetConsoleMutex());
+
     Filesystem::CreateFolder(title);
     Filesystem::CreateAppDirectoryStructure(project_path / title);
     ScreenStartup();

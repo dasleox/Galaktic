@@ -186,10 +186,7 @@ void Scene::ReloadAssets(double deltaTime)
 
     m_managerWrapper->m_textureManager->CheckForReloadAssets(GKC_GET_RENDERER(m_window));
     m_managerWrapper->m_animationManager->CheckForReloadAssets(GKC_GET_RENDERER(m_window));
-
-    //@todo Add for fonts, audio and scripts inside their own functions
-
-    //@bug Fix a bug where RPixels are not reloaded when their texture is reloaded, causing them to be invisible until the scene is restarted
+    m_managerWrapper->m_audioManager->ReloadAudioFiles();
 }
 
 void Scene::Run()  {
@@ -280,21 +277,20 @@ TTF_Font* Scene::OpenConsoleFont() {
 
 void Scene::SpawnDebugDemoEntities() {
     auto& player = m_ecsHelper->GetEntityByName("Player");
-
-    // @bug Newly created entities briefly report a garbage TransformComponent
-    // position until the next OnEvent pass corrects it. Tracked separately
-    // from this cleanup pass.
     ECS::Entity testObject = m_ecsHelper->CreateStaticObject("myObject");
 
     m_textureHelper->SetTextureToEntity(player.GetID(), "cat.png");
     m_textureHelper->SetTextureToEntity(testObject.GetID(), "cat.png");
 
-    SDL_Color mainColor = {123, 42, 11, 255};
-    Render::PixelColoredGroupInfo group("group", mainColor, player.GetID(), *m_ecsManager);
+    // The helper owns the group, so it lives as long as the scene
+    m_rPixelsHelper->CreatePixelGroup("group", player.GetID());
+    auto group = m_rPixelsHelper->GetPixelGroup("group");
+    if (group == nullptr)
+        return;
 
-    group.AddEntityToGroup(testObject.GetID());
-    group.SetSelectedPixels(BuildRandomPixelMask(group.GetWidth(), group.GetHeight(), 0.2f));
-    group.ApplyColorToEntities();
+    group->SetColor({123, 42, 11, 255});
+    group->AddEntityToGroup(testObject.GetID());
+    group->SetSelectedPixels(BuildRandomPixelMask(group->GetWidth(), group->GetHeight(), 0.2f));
 }
 
 void Scene::FixedUpdate(float deltaTime, const shared_ptr<Systems::BaseSystem>& movementSystem,

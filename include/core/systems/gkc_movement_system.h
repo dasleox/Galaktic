@@ -47,7 +47,6 @@ namespace Galaktic::Core::Systems {
             explicit MovementSystem(KeySystem& system) : m_keySystem(system) {}
 
             /// @todo Implement diagonal movement normalization
-            /// @todo Make a configurable system for key bindings
             /**
              * Updates the entities movement using delta time, with WASD keys for navigation.
              * @param list List of entities

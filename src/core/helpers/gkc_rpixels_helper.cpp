@@ -61,9 +61,13 @@ void Helpers::RPixelsHelper::DrawAllGroups() {
         if(group == nullptr) 
             continue;
         
-        group->ApplyColorToEntities();
+        group->RefreshChangedTextures();
     }
 }
 
+shared_ptr<Render::PixelColoredGroupInfo> Helpers::RPixelsHelper::GetPixelGroup(const string& groupName) {
+    auto it = m_groupList.find(groupName);
+    return it != m_groupList.end() ? it->second : nullptr;
+}
 
 #undef GROUP_EXISTS

@@ -97,7 +97,8 @@ namespace Galaktic::Render {
              * @brief Recolors the selected pixels on every entity currently in the group
              */
             void ApplyColorToEntities();
-
+            
+            void RefreshChangedTextures();
         private:
             string m_groupName;
             SDL_Color m_mainColor;
@@ -105,11 +106,12 @@ namespace Galaktic::Render {
             size_t m_textureWidth = 0;
             size_t m_textureHeight = 0;
             unordered_set<EntityID> m_affectedEntities;
+            unordered_map<EntityID, const SDL_Texture*> m_paintedTextures;
             PixelMapping_List m_affectedPixels;
             Core::Managers::ECS_Manager& m_ecsManager;
 
+            void ApplyColorToEntity(EntityID id);
             bool HasSameTexture(EntityID id) const;
             bool MatchesTextureDimensions() const;
-            void RecolorEntityTexture(EntityID id);
     };
 }
