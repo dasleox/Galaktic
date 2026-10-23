@@ -69,6 +69,11 @@ namespace Galaktic::Core::Systems {
              * @param id 
              */
             void SetFollowEntity(EntityID id);
+
+            /**
+             * Finds the player entity and sets the camera to follow it
+             */
+            void FollowPlayer(const unordered_map<EntityID, ECS::Entity>& list);
         private:
             /**
              * Helper funciton to find the primary camera (a.k.a active camera) in the entity list,
@@ -76,6 +81,7 @@ namespace Galaktic::Core::Systems {
              * @param list Entity list
              */
             void FindPrimaryCamera(const unordered_map<EntityID, ECS::Entity>& list);
+            
             ECS::Entity& m_activeCamera;
     };
 }

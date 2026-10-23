@@ -142,13 +142,7 @@ namespace Galaktic::ECS {
              * @return Reference to the stored component
              */
             template<typename T>
-            T& Add(EntityID id, T&& component) {
-                if(m_pools.size() >= MAX_COMPONENT_QUANTITY) {
-                    Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max component quantity reached!");
-                    static T dummy{};
-                    return dummy;
-                }
-                
+            T& Add(EntityID id, T&& component) {                
                 unique_ptr<IComponentPool>& pool = m_pools[typeid(T)];
                 
                 if (!pool) {

@@ -19,7 +19,7 @@ ECS::Entity Helpers::ECS_Helper::CreatePlayer(const string &name) {
     ECS::SpeedComponent speed;                                  // 1000.f max speed by default
     ECS::HealthComponent health;                                // 100.f max health, can take damage by default
     ECS::ColorComponent color(GREY_COLOR);                      // Grey color by default
-    ECS::CollisionComponent collision(transform.size , true); // Collisions true by default
+    ECS::CollisionComponent collision(transform.size , {0.f, 0.f},  true); // Collisions true by default
     ECS::JumpComponent jump;                                    // 100.f jump height, can jump by default
     ECS::RigidBody rigidBody;                                   
 
@@ -37,7 +37,7 @@ ECS::Entity Helpers::ECS_Helper::CreateStaticObject(const string &name) {
     ECS::Entity staticObject = m_ecsManager->CreateEntity<ECS::StaticObjectTag>(name);
     ECS::TransformComponent transform;      
     ECS::ColorComponent color;              
-    ECS::CollisionComponent collision(transform.size , true);        // Collision box same as size of the object, collidable by default
+    ECS::CollisionComponent collision(transform.size , {0.f, 0.f},  true);        // Collision box same as size of the object, collidable by default
     ECS::VisibilityComponent visibility(true);                        // Visible by default
 
     m_ecsManager->AddComponentToEntity<ECS::TransformComponent>(staticObject.GetID(), transform);
@@ -54,7 +54,7 @@ ECS::Entity Helpers::ECS_Helper::CreatePhysicsObject(const string &name) {
     ECS::Entity physicsObject = m_ecsManager->CreateEntity<ECS::PhysicsObjectTag>(name);
     ECS::TransformComponent transform;     
     ECS::ColorComponent color;            
-    ECS::CollisionComponent collision(transform.size, true); 
+    ECS::CollisionComponent collision(transform.size, {0.f, 0.f}, true); 
     ECS::RigidBody rigidBody;                                   // 0 velocity and force by default, mass of 1.f
     ECS::VisibilityComponent visibility;        
 

@@ -127,7 +127,7 @@ void Drawer::DrawWireframes(const ECS::Entity_List& list, SDL_Renderer* renderer
         SDL_FRect rect;
         rect.w = transform.size.x;
         rect.h = transform.size.y;
-        rect.x = transform.location.x - camera.location.x;
+        rect.x = (transform.location.x - camera.location.x);
         rect.y = transform.location.y - camera.location.y;
 
         SDL_Vertex verts[4];
@@ -137,7 +137,7 @@ void Drawer::DrawWireframes(const ECS::Entity_List& list, SDL_Renderer* renderer
             verts[0].position, verts[1].position, verts[2].position, verts[3].position, verts[0].position
         };
 
-        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Yellow, fully opaque
+        SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255); // magenta
         SDL_RenderLines(renderer, outline, 5);
     }
 }
@@ -146,6 +146,8 @@ void Drawer::DrawColliders(const ECS::Entity_List& list, SDL_Renderer* renderer,
     Core::Systems::CameraSystem& cameraSystem)
 {
     auto& camera = cameraSystem.GetActiveCamera().Get<ECS::CameraComponent>();
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     for (auto [id, entity] : list) {
         if (entity.Has<ECS::LightTag>() || entity.Has<ECS::CameraComponent>()
@@ -159,17 +161,22 @@ void Drawer::DrawColliders(const ECS::Entity_List& list, SDL_Renderer* renderer,
         SDL_FRect rect;
         rect.w = collisionBox.x;
         rect.h = collisionBox.y;
-        rect.x = (transform.location.x + collisionBox.x) - camera.location.x;
-        rect.y = (transform.location.y + collisionBox.y) - camera.location.y;
+        rect.x = transform.location.x - camera.location.x;
+        rect.y = transform.location.y - camera.location.y;
 
         SDL_Vertex verts[4];
-        CalculateVertices(rect, transform.rotation, {0, 255, 0, 191}, verts);
+        CalculateVertices(rect, transform.rotation, {0, 200, 0, 80}, verts);
+        const int indices[6] = {0, 1, 2, 2, 3, 0};
+        SDL_RenderGeometry(renderer, NULL, verts, 4, indices, 6);
 
+        // 2) Solid outline on top
         SDL_FPoint outline[5] = {
-            verts[0].position, verts[1].position, verts[2].position, verts[3].position, verts[0].position
+            verts[0].position, verts[1].position, verts[2].position,
+            verts[3].position, verts[0].position
         };
-
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 191); // Green, 75% alpha
+        SDL_SetRenderDrawColor(renderer, 0, 120, 0, 255);
         SDL_RenderLines(renderer, outline, 5);
     }
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }

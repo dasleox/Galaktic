@@ -264,7 +264,7 @@ namespace Galaktic::Core::Events {
         private:
             EntityID m_id;
             type_index m_type;
-            any& m_comp;
+            any m_comp;
     };
 
 

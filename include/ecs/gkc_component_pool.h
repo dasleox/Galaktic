@@ -105,6 +105,16 @@ namespace Galaktic::ECS {
              *       calls the component's Read method
              */
             virtual void Deserialize(EntityID id, std::ifstream& file) = 0;
+
+            /**
+             * @brief Set a component from a std::any object
+             * @param id Entity's ID to assign the component to
+             * @param component std::any containing the component data
+             * 
+             * This allows setting components in a type-erased manner, useful
+             * for generic code that doesn't know the specific component type.
+             */
+            virtual void SetFromAny(EntityID id, std::any&& component) = 0;
     };
 
     /**
@@ -228,6 +238,14 @@ namespace Galaktic::ECS {
                 Set(targetID, std::move(copy));
             }
 
+            void SetFromAny(EntityID id, std::any&& component) override {
+                try {
+                    T comp = std::any_cast<T>(component);
+                    Set(id, std::move(comp));
+                } catch (const std::bad_any_cast& e) {
+                    Debug::Logger::LogErrorWithType(ErrorType::InvalidComponentType, "Failed to set component from std::any: {}", e.what());
+                }
+            }
                         
             /**
              * @brief Remove component from entity using swap-and-pop
@@ -399,7 +417,11 @@ namespace Galaktic::ECS {
             void CopyComponent(EntityID from, EntityID to) override {
                 if (Contains(from)) Set(to);
             }
-            
+
+            void SetFromAny(EntityID id, std::any&& component) override {
+                Set(id);
+            }
+
             /**
              * @brief Get number of tagged entities
              * @return Count

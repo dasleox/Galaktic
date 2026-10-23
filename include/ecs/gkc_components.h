@@ -37,10 +37,10 @@ namespace Galaktic::ECS {
 
     struct HealthComponent {
         HealthComponent() {}
-        HealthComponent(float maxHealth, bool canTakeDamage) 
+        HealthComponent(float maxHealthValue, bool canTakeDamage) 
             : canTakeDamage(canTakeDamage) {
-            if(maxHealth <= 0.f && canTakeDamage) {
-                GKC_ASSERT(maxHealth > 0.f, "Max health must be greater than 0");
+            if(maxHealthValue <= 0.f && canTakeDamage) {
+                GKC_ASSERT(maxHealthValue > 0.f, "Max health must be greater than 0");
                 maxHealth = 100.f;
                 currentHealth = 100.f;
             } else {
@@ -48,7 +48,7 @@ namespace Galaktic::ECS {
                     maxHealth = 100.f;
                     currentHealth = 100.f;
                 } else {
-                    maxHealth = maxHealth;
+                    maxHealth = maxHealthValue;
                     currentHealth = maxHealth;
                 }
             }
@@ -63,7 +63,7 @@ namespace Galaktic::ECS {
         JumpComponent() {}
         JumpComponent(float jumpHeight, bool canJump) : jumpHeight(jumpHeight), canJump(canJump) {
             // Ensure jump height is positive
-            if(jumpHeight <= 0.f) jumpHeight = 100.f;
+            if(jumpHeight <= 0.f) this->jumpHeight = 100.f;
         }
         
         float jumpHeight = 100.f;
@@ -77,7 +77,7 @@ namespace Galaktic::ECS {
             // Ensure mass is positive
             if(mass <= 0.f) {
                 GKC_ASSERT(mass > 0.f, "Mass must be greater than 0");
-                mass = 1.f;
+                this->mass = 1.f;
             }
         }
         
@@ -88,10 +88,11 @@ namespace Galaktic::ECS {
 
     struct CollisionComponent {
         CollisionComponent() {}
-        CollisionComponent(Render::Vec2 collisionBox, bool collidable)
-            : collisionBox(collisionBox), collidable(collidable) {}
+        CollisionComponent(Render::Vec2 collisionBox, Render::Vec2 collisionOffset = {0.f, 0.f}, bool collidable = true)
+            : collisionBox(collisionBox), collisionOffset(collisionOffset), collidable(collidable) {}
         
         Render::Vec2 collisionBox = {0.f, 0.f};
+        Render::Vec2 collisionOffset = {0.f, 0.f};
         bool collidable = true;
     };
 
@@ -99,7 +100,7 @@ namespace Galaktic::ECS {
         SpeedComponent() {}
         SpeedComponent(float maxSpeed) : maxSpeed(maxSpeed) {
             // Ensure max speed is non-negative
-            if(maxSpeed < 0.f) maxSpeed = 1000.f;
+            if(maxSpeed < 0.f) this->maxSpeed = 1000.f;
         }
         
         float maxSpeed = 1000.f;
@@ -143,8 +144,8 @@ namespace Galaktic::ECS {
         LightComponent(Render::Vec2 location, float watts, float radius, SDL_Color color)
             : location(location), watts(watts), radius(radius), color(color) {
             // Ensure watts and radius are positive
-            if(watts <= 0.f) watts = 100.f;
-            if(radius <= 0.f) radius = 1.f;
+            if(watts <= 0.f) this->watts = 100.f;
+            if(radius <= 0.f) this->radius = 1.f;
         }
         
         Render::Vec2 location = {0.f, 0.f};
@@ -160,9 +161,9 @@ namespace Galaktic::ECS {
             : location(location), entityToFollowID(entityToFollowID), 
               zoom(zoom), smoothing(smoothing), isActive(isActive) {
             // Ensure zoom is positive
-            if(zoom <= 0.f) zoom = 1.f;
+            if(zoom <= 0.f) this->zoom = 1.f;
             // Ensure smoothing is non-negative
-            if(smoothing < 0.f) smoothing = 3.f;
+            if(smoothing < 0.f) this->smoothing = 3.f;
         }
         
         Render::Vec2 location = {0.f, 0.f};

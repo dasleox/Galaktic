@@ -24,7 +24,6 @@ void Managers::TextureManager::DestroyMissingTexture() {
     if (m_missingTexture != nullptr) {
         SDL_DestroyTexture(m_missingTexture);
         m_missingTexture = nullptr;
-        GKC_ENGINE_INFO("Missing texture destroyed");
     }
 }
 

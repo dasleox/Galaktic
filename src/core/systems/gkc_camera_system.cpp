@@ -43,6 +43,21 @@ void Systems::CameraSystem::SetFollowEntity(EntityID id) {
     m_activeCamera.Get<ECS::CameraComponent>().entityToFollowID = id;
 }
 
+void Systems::CameraSystem::FollowPlayer(const ECS::Entity_List& list) {
+    for (auto pair : list) {
+        auto& entity = pair.second;
+        auto& id = pair.first;
+
+        if (entity.Has<ECS::PlayerTag>()) {
+            m_activeCamera.Get<ECS::CameraComponent>().entityToFollowID = id;
+            break;
+        }
+    }
+
+    if(m_activeCamera.Get<ECS::CameraComponent>().entityToFollowID == InvalidEntity)
+        Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "No player entity found to follow!");
+}
+
 void Systems::CameraSystem::FindPrimaryCamera(const ECS::Entity_List& list) {
     for (auto pair : list) {
         auto& entity = pair.second;

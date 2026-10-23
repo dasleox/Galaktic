@@ -27,13 +27,18 @@ Window::Window(const string& title, Uint32 width, Uint32 height, Window_Type typ
 }
 
 Window::~Window() {
-    SDL_DestroyWindow(m_window);
     SDL_DestroyRenderer(m_renderer);
+    SDL_DestroyWindow(m_window);
     GKC_ENGINE_INFO("'{0}' window has been destroyed!", m_title);
 }
 
 void Window::Draw(SDL_Renderer* renderer) const {
-    SDL_SetWindowFullscreen(m_window, m_isFullscreen);
+    if(m_isFullscreen) {
+        SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN);
+    } else {
+        SDL_SetWindowFullscreen(m_window, 0);
+    }
+    
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 }
@@ -83,7 +88,7 @@ void Window::SDL_KeyboardEventCheck(SDL_Event &e) {
             KeyPressedEvent event(e.key.key);
             m_callback(event); break;
         }
-        case SDL_EVENT_KEY_UP: {
+        case SDL_EVENT_KEY_UP: {    
             KeyHoldEvent event(e.key.key);
             m_callback(event); break;
         }
@@ -114,7 +119,7 @@ void Window::SDL_MouseEventCheck(SDL_Event &e) {
     GKC_RELEASE_ASSERT(m_callback != nullptr,"Event callbacks are not registered, please register a callback function from the scene");
     switch (e.type) {
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-            MouseClickEvent event(e.motion.x, e.motion.y, e.button.button);
+            MouseClickEvent event(e.button.x, e.button.y, e.button.button);
             m_callback(event); break;
         }
     }

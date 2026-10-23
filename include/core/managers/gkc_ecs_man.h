@@ -25,10 +25,13 @@
 #include <pch.hpp>
 #include <ecs/gkc_registry.h>
 #include "ecs/gkc_entity.h"
+#include "ecs/gkc_component_pool.h"
 #include <ecs/gkc_components.h>
 #include "core/gkc_logger.h"
+#include "core/gkc_error.h"
 #include "core/systems/gkc_key.h"
 #include "ecs/gkc_template_traits.h"
+
 namespace Galaktic::ECS {
     /**
      * Checks if a component exists inside an entity, if it does executes
@@ -125,22 +128,26 @@ namespace Galaktic::Core::Managers {
              * @param id Entity's ID
              * @param type Component's Type
              * @param comp Component
+             * 
              */
             void AddRawComponentToEntity(EntityID id, const type_index& type, any&& comp){
-                if(m_registry->GetComponentPools().size() >= MAX_COMPONENT_QUANTITY) {
-                    Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max component quantity reached!");
-                    return;
-                }
+                GKC_ENGINE_WARNING("AddRawComponentToEntity called - consider using typed Add instead");
 
                 auto it = m_entityList.find(id);
                 if (it == m_entityList.end())
                     return;
 
-                GKC_ENGINE_WARNING("AddRawComponentToEntity called - consider using typed Add instead");
-                
                 if (!ECS::ComponentRegistry::IsRegistered(type)) {
                     ECS::ComponentRegistry::RegisterComponentByType(type, id, false);
                 }
+
+                auto& pools = m_registry->GetComponentPools();
+                if (pools.find(type) == pools.end()) {
+                    Debug::Logger::LogErrorWithType(ErrorType::ComponentNotFound,
+                         "Component pool for type '{}' not found!", Debug::DemangleTypename(type.name()));
+                    return;
+                }
+                pools[type]->SetFromAny(id, std::move(comp));
             }
 
             void DeleteRawComponentFromEntity(EntityID id, const type_index& type) {
@@ -429,7 +436,7 @@ namespace Galaktic::Core::Managers {
 
             void CopyEntity(EntityID sourceID, const string& newName) {
                 if (!m_entityList.contains(sourceID)) {
-                    GKC_ENGINE_ERROR("Source entity does not exist!");
+                    Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Source entity does not exist!");
                     return;
                 }
                 if (m_entityList.size() >= MAX_ENTITY_QUANTITY) {
@@ -455,7 +462,7 @@ namespace Galaktic::Core::Managers {
 
             ECS::Entity* CopyAndGetEntity(EntityID sourceID, const string& newName) {
                 if (!m_entityList.contains(sourceID)) {
-                    GKC_ENGINE_ERROR("Source entity does not exist!");
+                    Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Source entity does not exist!");
                     return nullptr;
                 }
                 if (m_entityList.size() >= MAX_ENTITY_QUANTITY) {
@@ -530,11 +537,11 @@ namespace Galaktic::Core::Managers {
                     ECS::Entity* targetEntity = GetEntityByName(targetName);
 
                     if(entity == nullptr) {
-                        GKC_ENGINE_ERROR("Source entity does not exist!");
+                        Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Source entity does not exist!");
                         return;
                     }
                     if(targetEntity == nullptr) {
-                        GKC_ENGINE_ERROR("Target entity does not exist!");
+                        Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Target entity does not exist!");
                         return;
                     }
                     

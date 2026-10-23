@@ -135,7 +135,7 @@ namespace Galaktic::ECS {
             static void RegisterComponentByType(const type_index& type, EntityID id, bool isTag) {
                 auto it = m_compTypes.find(type);
                 if (it == m_compTypes.end())
-                    GKC_RELEASE_ASSERT(false, "Attempted to deserialize unregistered component type");
+                    Debug::Logger::LogFatalWithType(ErrorType::InvalidComponent, "Attempted to deserialize unregistered component type");
             }
             
             static void UnregisterComponentByType(const type_index& type) {

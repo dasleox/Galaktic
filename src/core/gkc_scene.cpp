@@ -130,11 +130,8 @@ void Scene::InitializeSystems() {
     auto windowSystem = make_shared<Systems::WindowSystem>();
     auto cameraSystem = make_shared<Systems::CameraSystem>(camera);
     auto entityEventSystem = make_shared<Systems::ECS_EventSystem>(*m_ecsManager);
-
-    // @todo Entity ID 2 is the player by convention (Camera is created first,
-    // Player second - see ECS_Helper::CreatePlayer). Support following an
-    // explicitly chosen entity instead of relying on creation order.
-    cameraSystem->SetFollowEntity(2);
+        
+    cameraSystem->FollowPlayer(m_ecsManager->GetEntityList());
 
     m_systemList.emplace("KeySystem", keySystem);
     m_systemList.emplace("MouseSystem", mouseSystem);
@@ -156,6 +153,7 @@ void Scene::EnsureSceneScriptFolder(const string& name) {
 }
 
 Scene::~Scene() {
+    
     auto& entityList = m_ecsManager->GetEntityList();
     vector<EntityID> entityIds;
     for (auto& [id, entity] : entityList) {
@@ -173,6 +171,7 @@ Scene::~Scene() {
     delete m_ecsManager;
     delete m_registry;
 
+    Managers::TextureManager::DestroyMissingTexture();
     Script::LuaGalaktic::Shutdown();
 }
 

@@ -126,9 +126,9 @@ void LuaGalaktic::BindAnimationFunctions() {
     luabridge::getGlobalNamespace(m_luaState).beginNamespace("Galaktic").beginNamespace("Render")
         .beginClass<AnimationManager>("AnimationManager")
             .addStaticFunction("PlayAnimation", &AnimationManager::PlayAnimation)
-            .addStaticFunction("AddAnimation", &AnimationManager::PauseAnimation)
-            .addStaticFunction("LoadAnimation", &AnimationManager::StopAnimation)
-            .addStaticFunction("LoadAllAnimations", &AnimationManager::SetLoopToAnimation)
+            .addStaticFunction("PauseAnimation", &AnimationManager::PauseAnimation)
+            .addStaticFunction("StopAnimation", &AnimationManager::StopAnimation)
+            .addStaticFunction("SetLoopToAnimation", &AnimationManager::SetLoopToAnimation)
             .addStaticFunction("PrintList", &AnimationManager::PrintList)
         .endClass()
     .endNamespace();
