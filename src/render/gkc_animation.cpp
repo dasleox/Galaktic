@@ -15,6 +15,9 @@ Galaktic::Render::Animation::Animation(const path& path, SDL_Renderer* renderer)
     m_textures = new SDL_Texture*[m_animation->count];
     for (int i = 0; i < m_animation->count; ++i) {
         m_textures[i] = SDL_CreateTextureFromSurface(renderer, m_animation->frames[i]);
+        if (m_textures[i] != nullptr) {
+            SDL_SetTextureScaleMode(m_textures[i], SDL_SCALEMODE_NEAREST);
+        }
         if (m_textures[i] == nullptr) {
             GKC_ENGINE_ERROR("Failed to create texture for frame {0}: {1}", i, SDL_GetError());
         }

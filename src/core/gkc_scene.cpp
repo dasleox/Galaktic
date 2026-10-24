@@ -83,6 +83,7 @@ Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformati
     } else {
         m_window = Managers::WindowManager::GetWindow(1);
         m_window->SetTitle(name);
+        m_window->SetPixelResolution(320, 180);
     }
 
     m_managerWrapper->m_textureManager->CreateMissingTexture(GKC_GET_RENDERER(m_window));
@@ -296,11 +297,12 @@ void Scene::FixedUpdate(float deltaTime, const shared_ptr<Systems::BaseSystem>& 
     const shared_ptr<Systems::CameraSystem>& cameraSystem) {
     movementSystem->Update(m_ecsManager->GetEntityList(), deltaTime);
     cameraSystem->Update(m_ecsManager->GetEntityList(), deltaTime,
-        m_window->GetWidth(), m_window->GetHeight());
+        m_window->GetViewWidth(), m_window->GetViewHeight());
 }
 
 void Scene::RenderFrame(float deltaTime, TTF_Font* consoleFont, Console* console,
     const shared_ptr<Systems::CameraSystem>& cameraSystem) {
+
     m_window->Draw(GKC_GET_RENDERER(m_window));
     Render::Drawer::DrawEntities(m_ecsManager->GetEntityList(), GKC_GET_RENDERER(m_window), *cameraSystem);
 
@@ -315,7 +317,7 @@ void Scene::RenderFrame(float deltaTime, TTF_Font* consoleFont, Console* console
         Render::Drawer::DrawColliders(m_ecsManager->GetEntityList(), GKC_GET_RENDERER(m_window), *cameraSystem);
     }
 
-    console->Display(GKC_GET_RENDERER(m_window), consoleFont, m_window->GetWidth(), m_window->GetHeight());
+    console->Display(GKC_GET_RENDERER(m_window), consoleFont, m_window->GetViewWidth(), m_window->GetViewHeight());
 
     SDL_RenderPresent(GKC_GET_RENDERER(m_window));
 }
@@ -388,6 +390,11 @@ void Scene::CreateCamera(const string& name) {
 
 void Scene::Close() {
     m_isRunning = false;
+}
+
+void Scene::SetPixelResolution(int width, int height)
+{
+    m_window->SetPixelResolution(width, height);
 }
 
 void Scene::SetFullscreen()

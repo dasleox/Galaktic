@@ -167,6 +167,12 @@ namespace Galaktic::Core {
 
             void SetFullscreen();
 
+            /**
+             * Draws the scene at a small fixed size (for example 320x180) scaled by
+             * whole numbers to the window. Call it before \c Run()
+             */
+            void SetPixelResolution(int width, int height);
+
             void ReloadAssets(double deltaTime);
             
             ECS::Registry*& GetRegistry() { return m_registry; }

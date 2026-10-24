@@ -74,6 +74,15 @@ namespace Galaktic::Render {
             [[nodiscard]] GKC_WindowID GetWindowID() const { return m_windowID; }
             [[nodiscard]] Uint32 GetWidth() const { return m_width; }
             [[nodiscard]] Uint32 GetHeight() const { return m_height; }
+
+            /**
+             * Size of the area the game is drawn in. With a pixel resolution set,
+             * this is the small virtual size (for example 320x180), otherwise it is
+             * the real window size. Cameras and UI should use this, not GetWidth().
+             */
+            [[nodiscard]] Uint32 GetViewWidth() const { return HasPixelResolution() ? m_virtualWidth : m_width; }
+            [[nodiscard]] Uint32 GetViewHeight() const { return HasPixelResolution() ? m_virtualHeight : m_height; }
+            [[nodiscard]] bool HasPixelResolution() const { return m_virtualWidth > 0 && m_virtualHeight > 0; }
             [[nodiscard]] Window_Type GetType() const { return m_type; }
             [[nodiscard]] SDL_Window* GetWindow() const { return m_window; }
             [[nodiscard]] SDL_Renderer* GetRenderer() const { return m_renderer; }
@@ -93,6 +102,7 @@ namespace Galaktic::Render {
                 else
                     m_isFullscreen = true;
             }
+
             /**
              * @brief Polls events using an SDL_Event changing the callback depending on the
              *        event captured by SDL_Event (e.g A key press)
@@ -110,13 +120,35 @@ namespace Galaktic::Render {
              */
             bool IsValid();
 
+            /**
+             * @brief Sets the icon of the window
+             * @param iconPath Path to the icon file
+             */
             void SetIcon(const path& iconPath);
+
+            /**
+             * Draws the scene at a small fixed size (for example 320x180) and scales it
+             * to the window by whole numbers (x1, x2, x3...), with black bars when the
+             * window does not fit exactly.
+             * 
+             * @warning Do not combine with SDL_SetRenderScale.
+             * @param width Virtual width in pixels (> 0)
+             * @param height Virtual height in pixels (> 0)
+             */
+            void SetPixelResolution(int width, int height);
+
+            /**
+             * Goes back to drawing at the real window size
+             */
+            void DisablePixelResolution();
         private:
             string m_title;
             SDL_WindowID m_ID = 0;
             GKC_WindowID m_windowID = 0;
             Uint32 m_width = 0;
             Uint32 m_height = 0;
+            Uint32 m_virtualWidth = 0;   // 0 = pixel resolution disabled
+            Uint32 m_virtualHeight = 0;
             Window_Type m_type;
             SDL_Window* m_window = nullptr;
             SDL_Renderer* m_renderer = nullptr;

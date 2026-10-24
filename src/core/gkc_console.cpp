@@ -43,6 +43,7 @@ void Console::Display(SDL_Renderer* renderer, TTF_Font* font, int windowWidth, i
         return;
     } 
 
+    
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);
     SDL_FRect consolePanel = {0, 0, (float) windowWidth, (float) windowHeight * 0.4f};
@@ -61,6 +62,7 @@ void Console::Display(SDL_Renderer* renderer, TTF_Font* font, int windowWidth, i
     // stack upward from just above it, most recent line closest to input.
     float inputRowY = consolePanel.h - (float)lineHeight;
 
+    SDL_SetRenderLogicalPresentation(renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
     SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255);
     SDL_RenderLine(renderer, 0.f, inputRowY, consolePanel.w, inputRowY);
 

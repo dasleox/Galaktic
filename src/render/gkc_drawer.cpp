@@ -1,3 +1,4 @@
+#include <cmath>
 #include <render/gkc_drawer.h>
 #include "core/gkc_logger.h"
 #include "core/managers/gkc_texture_man.h"
@@ -16,8 +17,9 @@ void Drawer::DrawEntities(const ECS::Entity_List& list, SDL_Renderer *renderer,
 {
     using namespace Core::Managers;
     auto& camera = cameraSystem.GetActiveCamera().Get<ECS::CameraComponent>();
+    auto& entityOrderedList = OrderByZIndex(list);
 
-    for (auto [id, entity] : list) {
+    for (auto [id, entity] : entityOrderedList) {
         if (entity.Has<ECS::LightTag>() || entity.Has<ECS::CameraComponent>()
             || id == InvalidEntity) continue;
 
@@ -26,8 +28,8 @@ void Drawer::DrawEntities(const ECS::Entity_List& list, SDL_Renderer *renderer,
         rect.w = transform.size.x;
         rect.h = transform.size.y;
 
-        rect.x = transform.location.x - camera.location.x;
-        rect.y = transform.location.y - camera.location.y;
+        rect.x = ToScreen(transform.location.x, camera.location.x);
+        rect.y = ToScreen(transform.location.y, camera.location.y);
 
         if (entity.Has<ECS::AnimationComponent>()) {
             RenderAnimation(rect, entity, renderer);
@@ -118,8 +120,9 @@ void Drawer::DrawWireframes(const ECS::Entity_List& list, SDL_Renderer* renderer
     Core::Systems::CameraSystem& cameraSystem)
 {
     auto& camera = cameraSystem.GetActiveCamera().Get<ECS::CameraComponent>();
-
-    for (auto [id, entity] : list) {
+    auto& entityOrderedList = OrderByZIndex(list);
+    
+    for (auto [id, entity] : entityOrderedList) {
         if (entity.Has<ECS::LightTag>() || entity.Has<ECS::CameraComponent>()
             || id == InvalidEntity) continue;
 
@@ -127,8 +130,8 @@ void Drawer::DrawWireframes(const ECS::Entity_List& list, SDL_Renderer* renderer
         SDL_FRect rect;
         rect.w = transform.size.x;
         rect.h = transform.size.y;
-        rect.x = (transform.location.x - camera.location.x);
-        rect.y = transform.location.y - camera.location.y;
+        rect.x = ToScreen(transform.location.x, camera.location.x);
+        rect.y = ToScreen(transform.location.y, camera.location.y);
 
         SDL_Vertex verts[4];
         CalculateVertices(rect, transform.rotation, {255, 255, 0, 255}, verts);
@@ -146,10 +149,11 @@ void Drawer::DrawColliders(const ECS::Entity_List& list, SDL_Renderer* renderer,
     Core::Systems::CameraSystem& cameraSystem)
 {
     auto& camera = cameraSystem.GetActiveCamera().Get<ECS::CameraComponent>();
+    auto& entityOrderedList = OrderByZIndex(list);
 
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-    for (auto [id, entity] : list) {
+    for (auto [id, entity] : entityOrderedList) {
         if (entity.Has<ECS::LightTag>() || entity.Has<ECS::CameraComponent>()
             || id == InvalidEntity) continue;
 
@@ -161,8 +165,8 @@ void Drawer::DrawColliders(const ECS::Entity_List& list, SDL_Renderer* renderer,
         SDL_FRect rect;
         rect.w = collisionBox.x;
         rect.h = collisionBox.y;
-        rect.x = transform.location.x - camera.location.x;
-        rect.y = transform.location.y - camera.location.y;
+        rect.x = ToScreen(transform.location.x, camera.location.x);
+        rect.y = ToScreen(transform.location.y, camera.location.y);
 
         SDL_Vertex verts[4];
         CalculateVertices(rect, transform.rotation, {0, 200, 0, 80}, verts);
@@ -179,4 +183,17 @@ void Drawer::DrawColliders(const ECS::Entity_List& list, SDL_Renderer* renderer,
     }
 
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+}
+
+const std::vector<std::pair<EntityID, ECS::Entity>> Drawer::OrderByZIndex(const ECS::Entity_List& list) {
+    std::vector<std::pair<EntityID, ECS::Entity>> orderedList(list.begin(), list.end());
+    std::sort(orderedList.begin(), orderedList.end(),
+        [](std::pair<EntityID, ECS::Entity>& a, std::pair<EntityID, ECS::Entity>& b) {
+            if(!a.second.Has<ECS::TransformComponent>() || !b.second.Has<ECS::TransformComponent>()) {
+                return false;
+            }
+            return a.second.Get<ECS::TransformComponent>().zIndex < b.second.Get<ECS::TransformComponent>().zIndex;
+        });
+        
+    return orderedList;
 }

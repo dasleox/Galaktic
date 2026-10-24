@@ -22,17 +22,20 @@ void WindowSystem::OnEvent(Events::GKC_Event &e) {
     dispatcher.DispatchEvent<Events::WindowResizeEvent>(
         [this](Events::WindowResizeEvent &e) {
             auto window = Managers::WindowManager::GetWindow(e.GetWindowID()).get();
-
-            SDL_Window* sdlWindow  = SDL_GetWindowFromID(window->GetSDLWindowID());
-            SDL_Renderer* renderer = SDL_GetRenderer(sdlWindow);
-            if (window == nullptr || renderer == nullptr || sdlWindow == nullptr) {
+            if (window == nullptr || window->GetRenderer() == nullptr) {
                 Debug::Logger::LogFatalWithType(ErrorType::WindowError, "window to resize doesn't exist!");
                 return false;
             }
 
-            SDL_SetWindowSize(sdlWindow, e.GetWidth(), e.GetHeight());
-            SDL_Rect dimensions = {0, 0, (int) e.GetWidth(), (int) e.GetHeight()};
-            SDL_SetRenderViewport(renderer, &dimensions);
+            // Keep the stored size in sync (the camera and UI read it)
+            window->SetWidth(e.GetWidth());
+            window->SetHeight(e.GetHeight());
+
+            // With a pixel resolution, SDL handles scaling and black bars by itself
+            if (!window->HasPixelResolution()) {
+                SDL_Rect dimensions = {0, 0, (int) e.GetWidth(), (int) e.GetHeight()};
+                SDL_SetRenderViewport(window->GetRenderer(), &dimensions);
+            }
             return false;
         });
 }

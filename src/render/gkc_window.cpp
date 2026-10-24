@@ -22,6 +22,13 @@ Window::Window(const string& title, Uint32 width, Uint32 height, Window_Type typ
     }
 
     SDL_SyncWindow(m_window);
+
+    // The window can be maximized, so read the real size
+    int realWidth = 0, realHeight = 0;
+    SDL_GetWindowSize(m_window, &realWidth, &realHeight);
+    m_width = static_cast<Uint32>(realWidth);
+    m_height = static_cast<Uint32>(realHeight);
+
     m_ID = SDL_GetWindowID(m_window);
     SDL_StartTextInput(m_window);
 }
@@ -46,6 +53,7 @@ void Window::Draw(SDL_Renderer* renderer) const {
 void Window::PollEvents() {
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
+        SDL_ConvertEventToRenderCoordinates(m_renderer, &e);
         SDL_WindowEventCheck(e);
         SDL_KeyboardEventCheck(e);
         SDL_MouseEventCheck(e);
@@ -116,6 +124,7 @@ void Window::SDL_WindowEventCheck(SDL_Event &e) {
 
 void Window::SDL_MouseEventCheck(SDL_Event &e) {
     using namespace Galaktic::Core::Events;
+    SDL_ConvertEventToRenderCoordinates(m_renderer, &e);
     GKC_RELEASE_ASSERT(m_callback != nullptr,"Event callbacks are not registered, please register a callback function from the scene");
     switch (e.type) {
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
@@ -138,4 +147,26 @@ void Galaktic::Render::Window::SetIcon(const path &iconPath) {
     
     SDL_SetWindowIcon(m_window, surface);
     SDL_DestroySurface(surface);
+}
+
+void Window::SetPixelResolution(int width, int height) {
+    if (width <= 0 || height <= 0) {
+        GKC_ENGINE_ERROR("Pixel resolution must be bigger than 0 ({}x{})", width, height);
+        return;
+    }
+
+    if (!SDL_SetRenderLogicalPresentation(m_renderer, width, height,
+        SDL_LOGICAL_PRESENTATION_INTEGER_SCALE)) {
+        GKC_ENGINE_ERROR("Failed to set pixel resolution: {}", SDL_GetError());
+        return;
+    }
+
+    m_virtualWidth = static_cast<Uint32>(width);
+    m_virtualHeight = static_cast<Uint32>(height);
+}
+
+void Window::DisablePixelResolution() {
+    SDL_SetRenderLogicalPresentation(m_renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
+    m_virtualWidth = 0;
+    m_virtualHeight = 0;
 }

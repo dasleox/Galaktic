@@ -46,5 +46,7 @@ void Galaktic::Core::Managers::TextureManager::CreateMissingTexture(SDL_Renderer
     m_missingTexture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_DestroySurface(surface);
 
-    GKC_RELEASE_ASSERT(m_missingTexture != nullptr, "Even the missing texture failed to be created, you are fucked :)");
+    m_missingTexture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (m_missingTexture != nullptr)
+        SDL_SetTextureScaleMode(m_missingTexture, SDL_SCALEMODE_NEAREST);
 }

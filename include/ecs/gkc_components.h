@@ -33,6 +33,7 @@ namespace Galaktic::ECS {
         Render::Vec2 location{0.f, 0.f};
         Render::Vec2 size{50.f, 50.f};
         float rotation = 0.f;
+        int zIndex = 0;
     };
 
     struct HealthComponent {

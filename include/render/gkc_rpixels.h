@@ -103,8 +103,8 @@ namespace Galaktic::Render {
             string m_groupName;
             SDL_Color m_mainColor;
             EntityID m_parentEntityID = InvalidEntity;
-            size_t m_textureWidth = 0;
-            size_t m_textureHeight = 0;
+            Uint32 m_textureWidth = 0;
+            Uint32 m_textureHeight = 0;
             unordered_set<EntityID> m_affectedEntities;
             unordered_map<EntityID, const SDL_Texture*> m_paintedTextures;
             PixelMapping_List m_affectedPixels;

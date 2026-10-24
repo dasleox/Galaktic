@@ -22,6 +22,10 @@ Texture::Texture(const path &path, SDL_Renderer* renderer) {
         m_surface->w, m_surface->h
     );
     
+    if (m_texture != nullptr) {
+        SDL_SetTextureScaleMode(m_texture, SDL_SCALEMODE_NEAREST);
+    }
+
     if (m_texture == nullptr) {
         GKC_ENGINE_ERROR("failed to load texture!");
         return;

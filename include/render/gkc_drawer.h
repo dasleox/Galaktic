@@ -58,5 +58,10 @@ namespace Galaktic::Render {
             static void RenderTexture(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer);
             static void RenderAnimation(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer);
             static void CalculateVertices(SDL_FRect rect, float rotation, SDL_Color color, SDL_Vertex outVerts[4]);
+            static const std::vector<std::pair<EntityID, ECS::Entity>> OrderByZIndex(const unordered_map<EntityID, ECS::Entity>& list);
+            static inline float SnapToPixel(float value) { return std::floor(value); }
+            static inline float ToScreen(float world, float camera) {
+                return SnapToPixel(world) - SnapToPixel(camera);
+            }
     };
 }

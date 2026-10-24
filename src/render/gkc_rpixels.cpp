@@ -55,8 +55,8 @@ PixelColoredGroupInfo::PixelColoredGroupInfo(const string& name, SDL_Color mainC
 
     float width = 0.f, height = 0.f;
     SDL_GetTextureSize(sdlTexture, &width, &height);
-    m_textureWidth  = static_cast<size_t>(width);
-    m_textureHeight = static_cast<size_t>(height);
+    m_textureWidth  = static_cast<Uint32>(width);
+    m_textureHeight = static_cast<Uint32>(height);
 
     #if GKC_DEBUG
         GKC_ENGINE_INFO("RPixelGroup '{}', Width: {} | Height: {}", name, m_textureWidth, m_textureHeight);
@@ -97,8 +97,6 @@ void PixelColoredGroupInfo::DeleteEntityFromGroup(EntityID id) {
 }
 
 bool PixelColoredGroupInfo::HasSameTexture(EntityID id) const {
-    // Compare against the group's actual parent entity instead of an
-    // assumed, hardcoded ID - the parent is not always entity #2.
     auto& parentTextureComp = m_ecsManager.GetComponentOfEntity<ECS::TextureComponent>(m_parentEntityID);
     auto& textureComp = m_ecsManager.GetComponentOfEntity<ECS::TextureComponent>(id);
     return textureComp.id == parentTextureComp.id;
