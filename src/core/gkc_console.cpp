@@ -36,6 +36,14 @@ Console::Console(shared_ptr<Debug::ConsoleMutex_mt> sink)
     m_sink = sink;
 }
 
+void Console::ScrollBy(int lines)
+{
+    const int total = static_cast<int>(m_sink->GetLines().size());
+    const int maxOffset = std::max(0, total - m_visibleLines);
+    m_scrollOffset = std::clamp(m_scrollOffset + lines, 0, maxOffset);
+}
+
+
 void Console::Display(SDL_Renderer* renderer, TTF_Font* font, int windowWidth, int windowHeight) 
 {
     if(!m_isVisible)
@@ -56,7 +64,7 @@ void Console::Display(SDL_Renderer* renderer, TTF_Font* font, int windowWidth, i
         return;
     }
 
-    int lineHeight = TTF_GetFontHeight(font) + 2;
+    int lineHeight = TTF_GetFontHeight(font) + 4;
 
     // Bottom row of the panel is reserved for the input line; log lines
     // stack upward from just above it, most recent line closest to input.
@@ -67,21 +75,22 @@ void Console::Display(SDL_Renderer* renderer, TTF_Font* font, int windowWidth, i
     SDL_RenderLine(renderer, 0.f, inputRowY, consolePanel.w, inputRowY);
 
     auto& lines = m_sink->GetLines();
-    int maxLines = std::max(0, (int)((consolePanel.h - lineHeight) / lineHeight));
-    int startIdx = std::max(0, (int)lines.size() - maxLines);
+    const int visibleAboveInput = std::max(0, static_cast<int>(inputRowY / lineHeight));
+    const int total = static_cast<int>(lines.size());
 
-    float y = inputRowY - (float)lineHeight;
+    const int maxVisible = std::max(1, static_cast<int>(consolePanel.h / lineHeight) - 1);
+    m_visibleLines = maxVisible;
 
-    for (int i = (int)lines.size() - 1; i >= startIdx; i--, y -= lineHeight) {
-        SDL_Color color = LevelToColor(lines[i].m_level);
-        SDL_Surface* surf = TTF_RenderText_Blended(font, lines[i].m_text.c_str(), 0, color);
-        if (!surf) continue;
-        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
-        SDL_FRect dst = { 4.f, y, (float)surf->w, (float)surf->h };
-        SDL_RenderTexture(renderer, tex, NULL, &dst);
-        SDL_DestroySurface(surf);
-        SDL_DestroyTexture(tex);
+    // While scrolled up, keep the same text on screen as new lines arrive
+    if (m_scrollOffset > 0 && total > m_lastLineCount) {
+        m_scrollOffset += total - m_lastLineCount;
     }
+
+    m_lastLineCount = total;
+    m_scrollOffset = std::clamp(m_scrollOffset, 0, std::max(0, total - maxVisible));
+
+    const int newest = total - 1 - m_scrollOffset;                   // bottom-most visible line
+    const int oldest = std::max(0, newest - visibleAboveInput + 1);  // top-most visible line
 
     string promptLine = "> " + m_inputBuffer;
     SDL_Surface* promptSurf = TTF_RenderText_Blended(font, promptLine.c_str(), 0, WHITE_COLOR);
@@ -92,7 +101,21 @@ void Console::Display(SDL_Renderer* renderer, TTF_Font* font, int windowWidth, i
         SDL_DestroySurface(promptSurf);
         SDL_DestroyTexture(promptTex);
     }
+
+
+    float y = inputRowY - static_cast<float>(lineHeight);
+    for (int i = newest; i >= oldest; --i, y -= lineHeight) {
+        SDL_Color color = LevelToColor(lines[i].m_level);
+        SDL_Surface* surf = TTF_RenderText_Blended(font, lines[i].m_text.c_str(), 0, color);
+        if (!surf) continue;
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
+        SDL_FRect dst = { 4.f, y, (float)surf->w, (float)surf->h };
+        SDL_RenderTexture(renderer, tex, NULL, &dst);
+        SDL_DestroySurface(surf);
+        SDL_DestroyTexture(tex);
+    }
 }
+    
 
 void Console::GetSceneContext(Scene* scene) 
 {
@@ -107,6 +130,13 @@ void Console::OnEvent(Events::GKC_Event& e)
     using namespace Events;
     GKC_EventDispatcher dispatcher(e);
 
+
+    dispatcher.DispatchEvent<Events::MouseWheelEvent>(
+        [this](Events::MouseWheelEvent& e) {
+            ScrollBy(static_cast<int>(e.GetY() * m_wheelStep));
+            return true;
+        });
+
     dispatcher.DispatchEvent<TextInputEvent>(
         [this](TextInputEvent& textEvent) {
             if (!m_isVisible)
@@ -118,6 +148,17 @@ void Console::OnEvent(Events::GKC_Event& e)
     dispatcher.DispatchEvent<KeyPressedEvent>(
         [this](KeyPressedEvent& keyEvent) {
             Systems::Key key = GKC_SDLK_TO_ENUM(keyEvent);
+            // Scroll Buttons
+
+            switch (key) {
+                case Systems::Key::PageUp:   ScrollBy(m_visibleLines - 1); break;
+                case Systems::Key::PageDown: ScrollBy(-(m_visibleLines - 1)); break;
+                case Systems::Key::End:      ScrollToBottom(); break;
+                default: break;
+            }
+
+            // F3 Command
+
             if (key == Systems::Key::F3)
                 return false;
 
@@ -217,6 +258,8 @@ void Console::ClearConsole()
 
 void Console::ExecuteCommand(const string& command) 
 {
+    ScrollToBottom();
+    
     if (command.empty())
         return;
 
@@ -346,11 +389,11 @@ void Console::EntityCommands(const CommandWrapper& wrapper)
                     return;
                 }
                 if(!manager->EntityExists(args[0])) {
-                    GKC_ENGINE_ERROR("Source '{}' doesn't exist!", args[0]);
+                    Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Source '{}' doesn't exist!", args[0]);
                     return;
                 }
                 if(!manager->EntityExists(args[1])) {
-                    GKC_ENGINE_ERROR("Destination '{}' doesn't exist!", args[1]);
+                    Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Destination '{}' doesn't exist!", args[1]);
                     return;
                 }
 
@@ -372,7 +415,7 @@ void Console::EntityCommands(const CommandWrapper& wrapper)
             }
             catch(const std::out_of_range&)
             {
-                GKC_ENGINE_ERROR("coordinate out of range!");
+                Debug::Logger::LogErrorWithType(ErrorType::OutOfRange, "coordinate out of range!");
             }
             break;
         }
@@ -554,7 +597,7 @@ void Console::DebugCommands(const CommandWrapper& wrapper)
 
 void Console::InvalidArgumentError(const string& message)
 {
-    GKC_ENGINE_ERROR("Invalid Argument: '{}'" , message);
+    Debug::Logger::LogErrorWithType(ErrorType::InvalidArgument, "Invalid Argument: '{}'" , message);
 }
 
 vector<string> Console::GetListOfArguments(const string& args) {

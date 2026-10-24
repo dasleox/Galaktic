@@ -38,7 +38,7 @@ void Helpers::RPixelsHelper::AddEntityToGroup(const string& groupName, EntityID 
     GROUP_EXISTS(groupName);
     auto group = m_groupList.find(groupName)->second;
     if(group == nullptr) {
-        GKC_ENGINE_ERROR("Group '{}'is NULL!", groupName);
+        Debug::Logger::LogErrorWithType(ErrorType::AssetIsNull, "Group '{}'is NULL!", groupName);
         return;
     }
 
@@ -49,7 +49,7 @@ void Helpers::RPixelsHelper::DeleteEntityFromGroup(const string& groupName, Enti
     GROUP_EXISTS(groupName);
     auto group = m_groupList.find(groupName)->second;
     if(group == nullptr) {
-        GKC_ENGINE_ERROR("Group '{}'is NULL!", groupName);
+        Debug::Logger::LogErrorWithType(ErrorType::AssetIsNull, "Group '{}'is NULL!", groupName);
         return;
     }
 

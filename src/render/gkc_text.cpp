@@ -1,5 +1,6 @@
 #include <render/gkc_text.h>
 #include <render/gkc_font.h>
+#include <core/gkc_error.h>
 #include <core/gkc_logger.h>
 
 using namespace Galaktic::Render;
@@ -9,7 +10,7 @@ Text::Text(TTF_Font* font, const string& text, SDL_Color color)
     m_textSurface = TTF_RenderText_Solid(font, text.c_str(), 0, color);
     if(m_textSurface == nullptr)
     {
-        GKC_ENGINE_ERROR("Failed to create text label!");
+        Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "Failed to create text label!");
     }
 }
 

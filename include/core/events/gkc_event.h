@@ -65,6 +65,7 @@ namespace Galaktic::Core::Events {
         KeyHold,
         KeyUp,
         MouseClick,
+        MouseWheel,
         WindowResize,
         WindowClose,
         WindowMinimized,
@@ -184,6 +185,18 @@ namespace Galaktic::Core::Events {
             float m_x;
             float m_y;
             Uint32 m_button;
+    };
+
+    class MouseWheelEvent final : public GKC_Event {
+        public:
+            explicit MouseWheelEvent(float x, float y) : m_x(x), m_y(y) {}
+            GKC_WRITE_EVENT_FUNCS(MouseWheel, "MouseWheel", Input);
+
+            [[nodiscard]] float GetX() const { return m_x; }
+            [[nodiscard]] float GetY() const { return m_y; }
+        private:
+            float m_x;
+            float m_y;
     };
 }
 

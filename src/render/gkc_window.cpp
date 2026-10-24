@@ -1,6 +1,7 @@
 #include <render/gkc_window.h>
 #include <core/gkc_logger.h>
 #include <core/events/gkc_event.h>
+#include <core/gkc_error.h>
 #include <filesys/gkc_filesys.h>
 
 using namespace Galaktic::Render;
@@ -131,17 +132,21 @@ void Window::SDL_MouseEventCheck(SDL_Event &e) {
             MouseClickEvent event(e.button.x, e.button.y, e.button.button);
             m_callback(event); break;
         }
+        case SDL_EVENT_MOUSE_WHEEL: {
+            MouseWheelEvent event(e.wheel.x, e.wheel.y);
+            m_callback(event); break;
+        }
     }
 }
 
 void Galaktic::Render::Window::SetIcon(const path &iconPath) {
     if(!Filesystem::CheckFile(iconPath)) {
-        GKC_ENGINE_ERROR("Icon path doesn't exist");
+        Debug::Logger::LogErrorWithType(ErrorType::FileNotFound, "Icon path doesn't exist");
         return;
     }
     SDL_Surface* surface = IMG_Load(iconPath.string().c_str());
     if(surface == nullptr) {
-        GKC_ENGINE_ERROR("Failed to create icon!");
+        Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "Failed to create icon!");
         return;
     }
     
@@ -151,13 +156,15 @@ void Galaktic::Render::Window::SetIcon(const path &iconPath) {
 
 void Window::SetPixelResolution(int width, int height) {
     if (width <= 0 || height <= 0) {
-        GKC_ENGINE_ERROR("Pixel resolution must be bigger than 0 ({}x{})", width, height);
+        Debug::Logger::LogErrorWithType(ErrorType::OutOfRange,
+            "Pixel resolution must be bigger than 0 ({}x{})", width, height);
         return;
     }
 
     if (!SDL_SetRenderLogicalPresentation(m_renderer, width, height,
         SDL_LOGICAL_PRESENTATION_INTEGER_SCALE)) {
-        GKC_ENGINE_ERROR("Failed to set pixel resolution: {}", SDL_GetError());
+        Debug::Logger::LogErrorWithType(ErrorType::LibraryError,
+            "Failed to set pixel resolution: {}", SDL_GetError());
         return;
     }
 

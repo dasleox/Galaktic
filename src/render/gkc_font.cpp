@@ -1,6 +1,7 @@
 #include <render/gkc_font.h>
 #include "core/gkc_logger.h"
 #include "filesys/gkc_filesys.h"
+#include "core/gkc_error.h"
 
 using namespace Galaktic::Render;
 
@@ -44,7 +45,7 @@ TTF_HorizontalAlignment Galaktic::Render::FontAlignmentToTTF_HorizontalAlignment
 Font::Font(const path &path, SDL_Renderer* renderer, float size) {
     GKC_ENGINE_INFO("Loading {0}...", path.string());
     if (path.empty() || !Filesystem::CheckFile(path)) {
-        GKC_ENGINE_ERROR( "given path doesn't exists!");
+        Debug::Logger::LogErrorWithType(ErrorType::FileNotFound, "given path doesn't exists!");
         return;
     }
     
@@ -58,7 +59,7 @@ Font::Font(const path &path, SDL_Renderer* renderer, float size) {
 
     if(m_font == nullptr)
     {
-        GKC_ENGINE_ERROR("Failed to open font: '{}'", path.extension().string());
+        Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "Failed to open font: '{}'", path.extension().string());
     }
 }
 

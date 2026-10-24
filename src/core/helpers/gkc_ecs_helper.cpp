@@ -89,7 +89,7 @@ void Helpers::ECS_Helper::DeleteEntity(const string &name) {
 void Helpers::ECS_Helper::AddComponentToEntity(const string &name, const type_index &type, any& component) {
     auto it = m_ecsManager->GetNameToEntityList().find(name);
     if (it == m_ecsManager->GetNameToEntityList().end()) {
-        GKC_ENGINE_ERROR("Entity with name '{}' does not exist!", name);
+        Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Entity with name '{}' does not exist!", name);
         return;
     }
     EntityID id = it->second;
@@ -100,7 +100,7 @@ void Helpers::ECS_Helper::AddComponentToEntity(const string &name, const type_in
     }
 
     if(HasNameComponent(type)) {
-        GKC_ENGINE_ERROR("Entities already have a NameComponent '{}'", name);
+        Debug::Logger::LogErrorWithType(ErrorType::InvalidComponent, "Entities already have a NameComponent '{}'", name);
         return;
     }
 
@@ -114,7 +114,7 @@ void Helpers::ECS_Helper::AddComponentToEntity(const string &name, const type_in
 void Helpers::ECS_Helper::RemoveComponentFromEntity(const string &name, const type_index &type) {
     auto it = m_ecsManager->GetNameToEntityList().find(name);
     if (it == m_ecsManager->GetNameToEntityList().end()) {
-        GKC_ENGINE_ERROR("Entity with name '{}' does not exist!", name);
+        Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Entity with name '{}' does not exist!", name);
         return;
     }
     EntityID id = it->second;
@@ -130,21 +130,21 @@ ECS::Entity& Helpers::ECS_Helper::GetEntityByName(const string &name) {
 bool Helpers::ECS_Helper::ValidateComponentCompatibility(const string& name, const type_index& type) {
     // Return false when a component is not compatible with the entity's type, otherwise return true
     if(IsLightEntity(name) && !IsLightComponent(type)) {
-        GKC_ENGINE_ERROR("Attempted to add a non-compatible component to a Light entity '{}'", name);
+        Debug::Logger::LogErrorWithType(ErrorType::InvalidComponent, "Attempted to add a non-compatible component to a Light entity '{}'", name);
         return false;
     }
     else if (IsCameraEntity(name) && !IsCameraComponent(type)) {
-        GKC_ENGINE_ERROR("Attempted to add a non-compatible component to a Camera entity '{}'", name);
+        Debug::Logger::LogErrorWithType(ErrorType::InvalidComponentCombination, "Attempted to add a non-compatible component to a Camera entity '{}'", name);
         return false;
     }
     else if (IsPlayerEntity(name) && !IsPlayerComponent(type)) {
-        GKC_ENGINE_ERROR("Attempted to add a non-compatible component to a Player entity '{}'", name);
+        Debug::Logger::LogErrorWithType(ErrorType::InvalidComponentCombination, "Attempted to add a non-compatible component to a Player entity '{}'", name);
         return false;
     } else if (IsStaticObjectEntity(name) && !IsStaticObjectComponent(type)) {
-        GKC_ENGINE_ERROR("Attempted to add a non-compatible component to a Static Object entity '{}'", name);
+        Debug::Logger::LogErrorWithType(ErrorType::InvalidComponentCombination, "Attempted to add a non-compatible component to a Static Object entity '{}'", name);
         return false;
     } else if (IsPhysicsObjectEntity(name) && !IsPhysicsObjectComponent(type)) {
-        GKC_ENGINE_ERROR("Attempted to add a non-compatible component to a Physics Object entity '{}'", name);
+        Debug::Logger::LogErrorWithType(ErrorType::InvalidComponentCombination, "Attempted to add a non-compatible component to a Physics Object entity '{}'", name);
         return false;
     }
     return true; // If component is compatible, return true

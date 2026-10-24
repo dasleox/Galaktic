@@ -25,6 +25,7 @@
 #include <core/managers/gkc_ecs_man.h>
 #include <core/managers/gkc_texture_man.h>
 #include <render/gkc_texture.h>
+#include <core/gkc_error.h>
 
 using namespace Galaktic;
 using namespace Galaktic::Render;
@@ -36,20 +37,20 @@ PixelColoredGroupInfo::PixelColoredGroupInfo(const string& name, SDL_Color mainC
 {
     ECS::Entity* parentEntity = m_ecsManager.GetEntityByID(id);
     if (parentEntity == nullptr || !parentEntity->Has<ECS::TextureComponent>()) {
-        GKC_ENGINE_ERROR("Failed to create pixel group '{}': parent entity has no texture!", name);
+        Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "Failed to create pixel group '{}': parent entity has no texture!", name);
         return;
     }
 
     auto& textureComp = parentEntity->Get<ECS::TextureComponent>();
     auto* texture = Managers::TextureManager::GetAssetByID(textureComp.id);
     if (texture == nullptr) {
-        GKC_ENGINE_ERROR("Failed to create a pixel colored group for entity '{}'", m_ecsManager.GetEntityNameByID(id));
+        Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "Failed to create a pixel colored group for entity '{}'", m_ecsManager.GetEntityNameByID(id));
         return;
     }
 
     SDL_Texture* sdlTexture = texture->GetSDLTexture();
     if (sdlTexture == nullptr) {
-        GKC_ENGINE_ERROR("Failed to create a pixel colored group for entity '{}'", m_ecsManager.GetEntityNameByID(id));
+        Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "Failed to create a pixel colored group for entity '{}'", m_ecsManager.GetEntityNameByID(id));
         return;
     }
 
@@ -72,7 +73,8 @@ PixelColoredGroupInfo::PixelColoredGroupInfo(const string& name, SDL_Color mainC
 void PixelColoredGroupInfo::SetSelectedPixels(const PixelMapping_List& list) {
     bool widthMatches = list.empty() || list[0].size() == m_textureWidth;
     if (list.size() != m_textureHeight || !widthMatches) {
-        GKC_ENGINE_ERROR("Pixel mapping passed to group '{}' doesn't match its texture's dimensions!", m_groupName);
+        Debug::Logger::LogErrorWithType(ErrorType::RPixels_TextureMismatch,
+            "Pixel mapping passed to group '{}' doesn't match its texture's dimensions!", m_groupName);
         return;
     }
 
@@ -81,11 +83,11 @@ void PixelColoredGroupInfo::SetSelectedPixels(const PixelMapping_List& list) {
 
 void PixelColoredGroupInfo::AddEntityToGroup(EntityID id) {
     if (!m_ecsManager.EntityExists(id)) {
-        GKC_ENGINE_ERROR("Entity to add to this group '{}' doesn't exists!", m_groupName);
+        Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Entity to add to this group '{}' doesn't exists!", m_groupName);
         return;
     }
     if (!HasSameTexture(id)) {
-        GKC_ENGINE_ERROR("Entity doesn't have the same texture as the parent of the group '{}'!", m_groupName);
+        Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "Entity doesn't have the same texture as the parent of the group '{}'!", m_groupName);
         return;
     }
 
@@ -109,12 +111,14 @@ bool PixelColoredGroupInfo::MatchesTextureDimensions() const {
 
 void PixelColoredGroupInfo::ApplyColorToEntities() {
     if (m_affectedPixels.empty() || m_affectedPixels[0].empty()) {
-        GKC_ENGINE_ERROR("No pixel mapping set for group '{}'! Call SetSelectedPixels first.", m_groupName);
+        Debug::Logger::LogErrorWithType(ErrorType::RPixels_NotSet,
+            "No pixel mapping set for group '{}'! Call SetSelectedPixels first.", m_groupName);
         return;
     }
 
     if (!MatchesTextureDimensions()) {
-        GKC_ENGINE_ERROR("Pixel mapping for group '{}' no longer matches its texture!", m_groupName);
+        Debug::Logger::LogErrorWithType(ErrorType::RPixels_TextureMismatch,
+            "Pixel mapping for group '{}' no longer matches its texture!", m_groupName);
         return;
     }
 
@@ -165,7 +169,8 @@ void PixelColoredGroupInfo::ApplyColorToEntity(EntityID id) {
     if (surface->w != static_cast<int>(m_textureWidth) ||
         surface->h != static_cast<int>(m_textureHeight))
     {
-        GKC_ENGINE_ERROR("Texture of entity {} is {}x{}, but group '{}' expects {}x{}",
+        Debug::Logger::LogErrorWithType(ErrorType::RPixels_TextureMismatch,
+            "Texture of entity {} is {}x{}, but group '{}' expects {}x{}",
             id, surface->w, surface->h, m_groupName, m_textureWidth, m_textureHeight);
         m_paintedTextures[id] = sdlTexture; 
         return;
@@ -175,7 +180,7 @@ void PixelColoredGroupInfo::ApplyColorToEntity(EntityID id) {
     int pitch = 0;
     if (!SDL_LockTexture(sdlTexture, nullptr, &pixels, &pitch) || pixels == nullptr) 
     {
-        GKC_ENGINE_ERROR("Failed to lock texture! (ID: {})", id);
+        Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "Failed to lock texture! (ID: {})", id);
         return;
     }
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(Galaktic VERSION 0.5.1 LANGUAGES CXX)
+project(Galaktic VERSION 0.5.2 LANGUAGES CXX)
 
 include(GNUInstallDirs)  # <-- REQUIRED for INSTALL_INTERFACE
 

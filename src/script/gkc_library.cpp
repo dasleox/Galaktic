@@ -30,7 +30,7 @@ bool LuaGalaktic::Initialize() {
 
 void LuaGalaktic::AddLuaModulePath(const string& path) {
     if(m_luaState == nullptr) {
-        GKC_ENGINE_ERROR("Lua state hasn't been initialized!");
+        Debug::Logger::LogErrorWithType(ErrorType::LibraryError, "Lua state hasn't been initialized!");
         return;
     }
 
@@ -55,7 +55,7 @@ void LuaGalaktic::SetupModules(const path& scriptRootFolder) {
     string rootPath = scriptRootFolder.string();
     string modulesPath = rootPath + "/modules";
     if (rootPath.empty()) {
-        GKC_ENGINE_ERROR("Script root folder path is empty!");
+        Debug::Logger::LogErrorWithType(ErrorType::DirectoryNotFound, "Script root folder path is empty!");
         return;
     }
     

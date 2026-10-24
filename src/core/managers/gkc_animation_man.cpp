@@ -29,7 +29,7 @@ void AnimationManager::PlayAnimation(const string& name)
     auto animation = GetAssetByName(name);
     if(animation == nullptr)
     {
-        GKC_ENGINE_ERROR("'{}' animation is NULL!");
+        Debug::Logger::LogErrorWithType(ErrorType::AssetIsNull, "'{}' animation is NULL!", name);
         return;
     }
 
@@ -41,7 +41,7 @@ void AnimationManager::StopAnimation(const string& name)
     auto animation = GetAssetByName(name);
     if(animation == nullptr)
     {
-        GKC_ENGINE_ERROR("'{}' animation is NULL!");
+        Debug::Logger::LogErrorWithType(ErrorType::AssetIsNull, "'{}' animation is NULL!", name);
         return;
     }
 
@@ -53,7 +53,7 @@ void AnimationManager::PauseAnimation(const string& name)
     auto animation = GetAssetByName(name);
     if(animation == nullptr)
     {
-        GKC_ENGINE_ERROR("'{}' animation is NULL!");
+        Debug::Logger::LogErrorWithType(ErrorType::AssetIsNull, "'{}' animation is NULL!", name);
         return;
     }
 
@@ -64,7 +64,7 @@ void AnimationManager::SetLoopToAnimation(const string& name)
     auto animation = GetAssetByName(name);
     if(animation == nullptr)
     {
-        GKC_ENGINE_ERROR("'{}' animation is NULL!");
+        Debug::Logger::LogErrorWithType(ErrorType::AssetIsNull, "'{}' animation is NULL!", name);
         return;
     }
 

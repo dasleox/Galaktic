@@ -142,6 +142,11 @@ namespace Galaktic::Core {
             string m_inputBuffer;
 
             std::stack<string> m_commandHistory;
+
+            static constexpr int m_wheelStep = 3;
+            int m_scrollOffset = 0;     
+            int m_visibleLines = 0;     
+            int m_lastLineCount = 0; 
         public:
             Console(shared_ptr<Debug::ConsoleMutex_mt> sink);
 
@@ -192,6 +197,15 @@ namespace Galaktic::Core {
             void ToggleVisibility() { m_isVisible = !m_isVisible; }
             [[nodiscard]] bool IsVisible() const { return m_isVisible; }
 
+            /**
+                * @brief Scrolls the console's log output by a number of lines.
+                * @param lines positive = scroll up, negative = scroll down
+            */
+            void ScrollBy(int lines);
+
+            /// @brief Scrolls the console's log output to the bottom (most recent lines).
+            void ScrollToBottom() { m_scrollOffset = 0; }
+            
         private:
             /// @brief Runs every *Commands() handler; each ignores types it doesn't own.
             void CommandSwitch(const CommandWrapper& wrapper);

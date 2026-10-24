@@ -22,12 +22,12 @@ Managers::AudioManager::AudioManager(const string &folder) {
     SDL_PauseAudioDevice(m_deviceID);
 
     if (m_deviceID == 0) {
-        GKC_ENGINE_FATAL("failed to open audio device!");
+        Debug::Logger::LogFatalWithType(ErrorType::DeviceNotFound,"failed to open audio device!");
     }
 
     m_mixer = MIX_CreateMixerDevice(m_deviceID, &m_audioSpec);
     if (m_mixer == nullptr) {
-        GKC_ENGINE_FATAL("audio mixer is NULL!");
+        Debug::Logger::LogFatalWithType(ErrorType::NullPointer, "audio mixer is NULL!");
     }
 
 
@@ -85,7 +85,7 @@ void Managers::AudioManager::PlayMusicFile(const string &name) {
 
         m_activeTracks.emplace(id, track);
     } else {
-        GKC_ENGINE_ERROR("file doesn't exist!");
+        Debug::Logger::LogErrorWithType(ErrorType::AssetNotFound, "File '{}' doesn't exist!", name);
     }
 }
 

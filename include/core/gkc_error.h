@@ -36,10 +36,12 @@ namespace Galaktic
         NullPointer,
         IntegerOverflow,
         IntegerUnderflow,
+        InvalidArgument,
         DivisionByZero,
         LibraryError,
         EmptyString,
         InvalidVersionMatch,
+        DeviceNotFound,
 
         // Memory
         AllocationFailed,
@@ -61,6 +63,7 @@ namespace Galaktic
         InvalidComponentType,
         InvalidComponentCombination,
         ComponentNotFound,
+        ComponentAlreadyExists,
 
         // Entity
         InvalidEntity,
@@ -97,6 +100,7 @@ namespace Galaktic
 
         // Configuration
         BindNotFound,
+        ActionNotFound,
         InvalidKey,
         InvalidKeyCombination,
         NoConfigFileFound,
@@ -108,7 +112,11 @@ namespace Galaktic
         RenderError,
         WindowError,
         WritingError,
-        ReadingError
+        ReadingError,
+
+        // RPixels
+        RPixels_TextureMismatch,
+        RPixels_NotSet,
     };
 
     constexpr const char* ErrorTypeToDisplayString(ErrorType error)
@@ -124,7 +132,9 @@ namespace Galaktic
             CASE_ERROR_RETURN(DivisionByZero)
             CASE_ERROR_RETURN(LibraryError)
             CASE_ERROR_RETURN(InvalidVersionMatch)
-
+            CASE_ERROR_RETURN(InvalidArgument)
+            CASE_ERROR_RETURN(DeviceNotFound)
+            
             // Memory
             CASE_ERROR_RETURN(AllocationFailed)
             CASE_ERROR_RETURN(DoubleFree)
@@ -145,6 +155,7 @@ namespace Galaktic
             CASE_ERROR_RETURN(InvalidComponentType)
             CASE_ERROR_RETURN(InvalidComponentCombination)
             CASE_ERROR_RETURN(ComponentNotFound)
+            CASE_ERROR_RETURN(ComponentAlreadyExists)
 
             // Entity
             CASE_ERROR_RETURN(InvalidEntity)
@@ -181,6 +192,7 @@ namespace Galaktic
 
             // Configuration
             CASE_ERROR_RETURN(BindNotFound)
+            CASE_ERROR_RETURN(ActionNotFound)
             CASE_ERROR_RETURN(InvalidKey)
             CASE_ERROR_RETURN(InvalidKeyCombination)
             CASE_ERROR_RETURN(NoConfigFileFound)
@@ -193,6 +205,10 @@ namespace Galaktic
             CASE_ERROR_RETURN(WindowError)
             CASE_ERROR_RETURN(WritingError)
             CASE_ERROR_RETURN(ReadingError)
+
+            // RPixels
+            CASE_ERROR_RETURN(RPixels_TextureMismatch)
+            CASE_ERROR_RETURN(RPixels_NotSet)
 
             default: return "\033[31m [Unknown Error] \033[0m";
 

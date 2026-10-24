@@ -1,6 +1,7 @@
 #include "render/gkc_animation.h"
 #include <core/gkc_logger.h>
 #include "filesys/gkc_filesys.h"
+#include "core/gkc_error.h"
 
 using namespace Galaktic::Render;
 
@@ -8,7 +9,7 @@ Galaktic::Render::Animation::Animation(const path& path, SDL_Renderer* renderer)
     m_animation = IMG_LoadAnimation(path.string().c_str());
 
     if (m_animation == nullptr) {
-        GKC_ENGINE_ERROR("failed to load animaiton!");
+        Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "failed to load animaiton!");
         return;
     }
 
@@ -19,7 +20,7 @@ Galaktic::Render::Animation::Animation(const path& path, SDL_Renderer* renderer)
             SDL_SetTextureScaleMode(m_textures[i], SDL_SCALEMODE_NEAREST);
         }
         if (m_textures[i] == nullptr) {
-            GKC_ENGINE_ERROR("Failed to create texture for frame {0}: {1}", i, SDL_GetError());
+            Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "Failed to create texture for frame {0}: {1}", i, SDL_GetError());
         }
     }
 }

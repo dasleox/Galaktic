@@ -212,7 +212,7 @@ void Scene::Run()  {
     }
     if (consoleFont == nullptr)
     {
-        GKC_ENGINE_ERROR("No usable font is available; the console will render without text.");
+        Debug::Logger::LogErrorWithType(ErrorType::AssetNotFound, "No usable font is available; the console will render without text.");
     }
 
     Clock::Init();
@@ -267,10 +267,10 @@ void Scene::LoadRunAssets() {
 }
 
 TTF_Font* Scene::OpenConsoleFont() {
-    auto fontPath = m_appPath / "assets" / "fonts" / "minecraft.ttf";
+    auto fontPath = m_appPath / "assets" / "fonts" / "galaktic_font.ttf";
     TTF_Font* font = TTF_OpenFont(fontPath.string().c_str(), 12.f);
     if (font == nullptr) {
-        GKC_ENGINE_ERROR("Failed to open the debug console font at '{}'", fontPath.string());
+        Debug::Logger::LogErrorWithType(ErrorType::AssetNotLoaded, "Failed to open the debug console font at '{}'", fontPath.string());
     }
     return font;
 }

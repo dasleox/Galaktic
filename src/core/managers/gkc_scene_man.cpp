@@ -26,7 +26,7 @@ void Managers::SceneManager::DeleteScene(const string &name) {
 
 bool Managers::SceneManager::LoadSpecificScene(const string &name) const {
     if (!m_sceneList.contains(name)) {
-        GKC_ENGINE_ERROR("Scene not found!");
+        Debug::Logger::LogErrorWithType(ErrorType::AssetNotFound, "Scene '{}' not found!", name);
         return false;
     }
     m_sceneList.find(name)->second->Run();
@@ -41,7 +41,7 @@ bool Managers::SceneManager::LoadSpecificSceneFromFile(const path &filepath) {
     #endif
     
     if (!Filesystem::CheckFile(scenePath)) {
-        GKC_ENGINE_ERROR("Scene not found in the specified filepath!");
+        Debug::Logger::LogErrorWithType(ErrorType::AssetNotFound, "Scene '{}' not found in the specified filepath!", filepath.filename().string());
         return false;
     }
 
@@ -52,7 +52,7 @@ bool Managers::SceneManager::LoadSpecificSceneFromFile(const path &filepath) {
     m_sceneList.emplace(sceneName, std::move(m_scene));
     
     if(!LoadSpecificScene(sceneName)) {
-        GKC_ENGINE_ERROR("Failed to load scene: {}", sceneName);
+        Debug::Logger::LogErrorWithType(ErrorType::AssetNotFound, "Failed to load scene: {}", sceneName);
         return false;
     }
 

@@ -62,13 +62,13 @@ bool Filesystem::FileReader::ReadScene(const path& path, Core::Managers::ECS_Man
     file.read(GKC_READ_BINARY(sceneSize), sizeof(sceneSize));
     Read(file, version);
     if (version != GKC_VERSION_SCENE) {
-        GKC_ENGINE_ERROR("Scene version mismatch! Expected: {}, Found: {}", GKC_VERSION_SCENE, version);
+        Debug::Logger::LogErrorWithType(ErrorType::InvalidVersionMatch, "Scene version mismatch! Expected: {}, Found: {}", GKC_VERSION_SCENE, version);
         if (version < GKC_VERSION_SCENE) {
-            GKC_ENGINE_ERROR("This scene cannot be read by this function, use a newer version");
+            Debug::Logger::LogErrorWithType(ErrorType::InvalidFileVersion, "This scene cannot be read by this function, use a newer version");
             return false;
         }
         if (version > GKC_VERSION_SCENE) {
-            GKC_ENGINE_ERROR("This scene cannot be read by this function, use an older version");
+            Debug::Logger::LogErrorWithType(ErrorType::InvalidFileVersion, "This scene cannot be read by this function, use an older version");
             return false;
         }
     }

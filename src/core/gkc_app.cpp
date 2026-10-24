@@ -27,10 +27,10 @@ void App::ScreenStartup() {
     const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(display_id);
 
     if(display_id < 1) {
-        GKC_ENGINE_ERROR("Failed to get the primary display!");
+        Debug::Logger::LogErrorWithType(ErrorType::LibraryError, "Failed to get the primary display!");
     } 
     if (mode == nullptr) {
-        GKC_ENGINE_ERROR("Failed to get the display mode!");
+        Debug::Logger::LogErrorWithType(ErrorType::LibraryError, "Failed to get the display mode!");
         return;
     }
 

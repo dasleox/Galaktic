@@ -40,7 +40,7 @@ void BindConfigurator::DeleteBind(const string& bindName) {
         m_bindMap.erase(bindName);
         return;
     }
-    GKC_ENGINE_ERROR("Bind '{}' to delete doesn't exist!", bindName);
+    Debug::Logger::LogErrorWithType(ErrorType::BindNotFound, "Bind '{}' to delete doesn't exist!", bindName);
 }
 
 #define STR_TO_ACTION(actionStr, actionEnum)     \
@@ -194,13 +194,13 @@ void BindConfigurator::BindAction(const string& bindType, const string& actionNa
 
     if(eBindType.keyBind == Key::Unknown && eBindType.mouseClick == MouseClick::Unknown)
     {
-        GKC_ENGINE_ERROR("'{}' is not a recognized key or mouse click!", bindType);
+        Debug::Logger::LogErrorWithType(ErrorType::BindNotFound, "'{}' is not a recognized key or mouse click!", bindType);
         return;
     }
 
     if(type == ActionType::Unknown)
     {
-        GKC_ENGINE_ERROR("'{}' is not a recognized action!", actionName);
+        Debug::Logger::LogErrorWithType(ErrorType::ActionNotFound, "'{}' is not a recognized action!", actionName);
         return;
     }
 
@@ -228,7 +228,7 @@ void BindConfigurator::BindAction(const string& bindType, const string& actionNa
 
 Bind BindConfigurator::GetBind(const string& bindName) {
     if (CheckBindExists(bindName)) return m_bindMap.find(bindName)->second;
-    GKC_ENGINE_ERROR("Bind '{}' doesn't exist!", bindName);
+    Debug::Logger::LogErrorWithType(ErrorType::BindNotFound, "Bind '{}' doesn't exist!", bindName);
     return Bind(bindName, ActionType::Unknown, Key::Unknown);
 }
 
