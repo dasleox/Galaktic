@@ -258,20 +258,6 @@ namespace Galaktic::Core {
     };
 
     /**
-     * @brief Checks if the weak_ptr passed has expired
-     * @tparam T typename of weak_ptr
-     * @param ptr Weak pointer of type T
-     * @return true if the pointer expired, false otherwise
-     */
-    template <typename T>
-    bool IsWeakPtrExpired(const weak_ptr<T>& ptr) {
-        if (ptr.expired()) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * @brief Converts the SDL_Color struct to a HEX string
      * @param color SDL_Color
      * @return HEX string

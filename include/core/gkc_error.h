@@ -117,6 +117,10 @@ namespace Galaktic
         // RPixels
         RPixels_TextureMismatch,
         RPixels_NotSet,
+
+        // AudioGroup
+        AudioGroupNotFound,
+        AudioGroupElementNotFound
     };
 
     constexpr const char* ErrorTypeToDisplayString(ErrorType error)
@@ -209,6 +213,11 @@ namespace Galaktic
             // RPixels
             CASE_ERROR_RETURN(RPixels_TextureMismatch)
             CASE_ERROR_RETURN(RPixels_NotSet)
+
+            // AudioGroup
+
+            CASE_ERROR_RETURN(AudioGroupNotFound)
+            CASE_ERROR_RETURN(AudioGroupElementNotFound)
 
             default: return "\033[31m [Unknown Error] \033[0m";
 

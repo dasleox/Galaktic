@@ -2,6 +2,7 @@
 #include <core/managers/gkc_audio_man.h>
 #include "core/gkc_logger.h"
 #include "filesys/gkc_filesys.h"
+#include <audio/gkc_audio_group.h>
 
 using namespace Galaktic;
 using namespace Galaktic::Core;
@@ -12,11 +13,13 @@ std::multimap<AudioID, MIX_Track*> Managers::AudioManager::m_activeTracks;
 SDL_AudioSpec Managers::AudioManager::m_audioSpec{};
 SDL_AudioDeviceID Managers::AudioManager::m_deviceID;
 MIX_Mixer* Managers::AudioManager::m_mixer = nullptr;
+Managers::AudioManager::AudioGroup_List Managers::AudioManager::m_audioGroupList; 
+float Managers::AudioManager::m_maxVolume;
 
 Managers::AudioManager::AudioManager(const string &folder) {
     m_audioSpec.channels = 2;
     m_audioSpec.freq = 48000;
-    m_audioSpec.format = SDL_AUDIO_S16;
+    m_audioSpec.format = SDL_AUDIO_F32;
 
     m_deviceID = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &m_audioSpec);
     SDL_PauseAudioDevice(m_deviceID);
@@ -181,4 +184,115 @@ void Managers::AudioManager::ReloadAudioFiles() {
             ReloadAsset(id, m_mixer);
         }
     }
+}
+
+void Managers::AudioManager::SetVolumeByID(AudioID id, float volume)
+{
+    volume = ClampVolume(volume);
+    auto range = m_activeTracks.equal_range(id);
+    for (auto it = range.first; it != range.second; ++it)
+    {
+        if (it->second != nullptr)
+        {
+            MIX_SetTrackGain(it->second, volume);
+        }
+    }
+}
+
+void Managers::AudioManager::SetMasterVolume(float volume)
+{
+    if (volume > m_maxVolume)
+    {
+        return;
+    }
+
+    volume = ClampVolume(volume);
+    MIX_SetMixerGain(m_mixer, volume);
+}
+
+float Managers::AudioManager::ClampVolume(float volume)
+{
+    return std::clamp(volume, 0.f, 1.f);
+}
+
+void Managers::AudioManager::SetAudioChannels(int channels)
+{
+    if(!(channels < 0 && channels > 8))
+    {
+        m_audioSpec.channels = channels;
+    }
+}
+
+void Managers::AudioManager::SetAudioFrequency(int frequency)
+{
+    if(!(frequency < 0))
+    {
+        m_audioSpec.freq = frequency;
+    }
+}
+
+void Managers::AudioManager::SetAudioFormat(SDL_AudioFormat format)
+{
+    m_audioSpec.format = format;
+}
+
+void Managers::AudioManager::CreateAudioGroup(const string& name, float maxVolume)
+{
+    if(name.empty())
+    {
+        Debug::Logger::LogErrorWithType(ErrorType::EmptyString, "name for AudioGroup is empty!");
+        return;
+    }
+
+    Audio::AudioGroup group;
+    group.SetMaxVolume(maxVolume);
+}
+
+void Managers::AudioManager::SetAudioVolumeByGroup(const string& name, float volume)
+{
+    if(name.empty())
+    {
+        Debug::Logger::LogErrorWithType(ErrorType::EmptyString, "name for AudioGroup is empty!");
+        return;
+    }
+
+    if(!AudioGroupExists(name)) { return; }
+    
+    m_audioGroupList.at(name).SetVolume(volume);
+}
+
+void Managers::AudioManager::DeleteAudioGroup(const string& name)
+{
+    if(name.empty())
+    {
+        Debug::Logger::LogErrorWithType(ErrorType::EmptyString, "name to delete AudioGroup is empty!");
+        return;
+    }
+
+    if(!AudioGroupExists(name)) { return; }
+    m_audioGroupList.erase(name);
+}
+
+Audio::AudioGroup Managers::AudioManager::GetAudioGroupByName(const string& name)
+{
+    if(name.empty())
+    {
+        Debug::Logger::LogErrorWithType(ErrorType::EmptyString, "name to retrieve AudioGroup is empty!");
+        return {};
+    }
+
+    if(!AudioGroupExists(name)) { return {}; }
+
+    return m_audioGroupList.at(name);
+}
+
+bool Managers::AudioManager::AudioGroupExists(const string& name)
+{
+    auto it = m_audioGroupList.find(name);
+    if(it == m_audioGroupList.end())
+    {
+        Debug::Logger::LogErrorWithType(ErrorType::AudioGroupNotFound, "AudioGroup '{}' not found!", name);
+        return false;
+    }
+    return false;
 }
