@@ -18,7 +18,7 @@ bool ConfigParser::ParseFile(const path& filepath)
     m_bindEntryList.clear();
 
     ifstream file(filepath);
-    GKC_ENSURE_FILE_OPEN_BOOL(file, FileNotOpen);
+    GKC_ENSURE_FILE_OPEN_BOOL(file);
 
     string line;
     while(std::getline(file, line))

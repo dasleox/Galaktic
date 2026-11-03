@@ -183,3 +183,11 @@ spdlog::level::trace, __VA_ARGS__)
             return false;                                                    \
         }                                                              \
     } while (0)
+
+#define GKC_FILE_ALREADY_EXISTS_BOOL(filepath)                                  \
+    do {                                                               \
+        if (::Galaktic::Filesystem::CheckFile((filepath))) {                                       \
+            Debug::Logger::LogErrorWithType(ErrorType::FileAlreadyExists, "{} already exists!", (filepath.string())); \
+            return false;                                                                                           \
+        }                                                                                                           \
+    } while (0)

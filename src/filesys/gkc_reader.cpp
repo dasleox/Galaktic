@@ -7,7 +7,7 @@
 using namespace Galaktic;
 
 void Filesystem::FileReader::ReadString(ifstream &file, string &str) {
-    GKC_ENSURE_FILE_OPEN(file, ReadingError);
+    GKC_ENSURE_FILE_OPEN(file);
     using namespace ECS;
 
     size_t len = 0;
@@ -20,7 +20,7 @@ void Filesystem::FileReader::ReadString(ifstream &file, string &str) {
 
 void Filesystem::FileReader::ReadEntity(ifstream &file, Core::Managers::ECS_Manager& manager,
     ECS::Registry* registry) {
-    GKC_ENSURE_FILE_OPEN(file, ReadingError);
+    GKC_ENSURE_FILE_OPEN(file);
     using namespace ECS;
 
     size_t entitySize = 0;
@@ -53,7 +53,7 @@ bool Filesystem::FileReader::ReadScene(const path& path, Core::Managers::ECS_Man
 
     GKC_ENGINE_INFO("Reading scene from {}", path.string());
     ifstream file(path, std::ios::binary);
-    GKC_ENSURE_FILE_OPEN_BOOL(file, ReadingError);
+    GKC_ENSURE_FILE_OPEN_BOOL(file);
 
     size_t sceneSize = 0;
     unsigned int version = 0;

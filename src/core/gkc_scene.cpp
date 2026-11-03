@@ -34,6 +34,7 @@
 #include "render/gkc_rpixels.h"
 #include <core/helpers/gkc_rpixels_helper.h>
 #include "core/managers/gkc_font_man.h"
+#include <core/managers/gkc_config_manager.h>
 
 #include <numeric>
 #include <random>

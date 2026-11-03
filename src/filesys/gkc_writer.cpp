@@ -1,26 +1,3 @@
-/*
-  Galaktic Engine
-  Copyright (C) 2026 SummerChip
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
-*/
-
 #include <filesys/gkc_writer.h>
 #include "core/gkc_error.h"
 #include "core/gkc_logger.h"
@@ -37,7 +14,7 @@
 using namespace Galaktic;
 
 void Filesystem::FileWriter::WriteString(ofstream &file, const string &str) {
-    GKC_ENSURE_FILE_OPEN(file, WritingError);
+    GKC_ENSURE_FILE_OPEN(file);
     size_t len = str.size();
     file.write(GKC_WRITE_BINARY(len), sizeof(len));
     file.write(str.data(), len);
@@ -46,7 +23,7 @@ void Filesystem::FileWriter::WriteString(ofstream &file, const string &str) {
 void Filesystem::FileWriter::WriteEntity(ofstream &file, const ECS::Entity &entity,
                                          ECS::Registry* registry) {
     using namespace ECS;
-    GKC_ENSURE_FILE_OPEN(file, WritingError);
+    GKC_ENSURE_FILE_OPEN(file);
 
     size_t entitySize = 0;
     EntityID id = entity.GetID();
@@ -80,7 +57,7 @@ void Filesystem::FileWriter::WriteScene(const path& path, Core::Scene& scene, EC
     using namespace ECS;
     GKC_ENGINE_INFO("Writing scene {0} in {1}", scene.m_sceneInfo.scene_name_, path.string());
     ofstream file(path.filename(), std::ios::binary);
-    GKC_ENSURE_FILE_OPEN(file, WritingError);
+    GKC_ENSURE_FILE_OPEN(file);
 
     size_t sceneSize = scene.m_sceneInfo.scene_name_.length() + sizeof(GKC_VERSION_SCENE);
 

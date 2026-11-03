@@ -121,14 +121,14 @@ namespace Galaktic::ECS {
         string name = "";
 
         static void Write(ofstream& file, const NameComponent& comp) {
-            GKC_ENSURE_FILE_OPEN(file, WritingError);
+            GKC_ENSURE_FILE_OPEN(file);
             auto len = static_cast<Uint32>(comp.name.size());
             file.write(GKC_WRITE_BINARY(len), sizeof(len));
             file.write(comp.name.data(), len);
         }
 
         static void Read(ifstream& file, NameComponent& comp) {
-            GKC_ENSURE_FILE_OPEN(file, ReadingError);
+            GKC_ENSURE_FILE_OPEN(file);
             Uint32 len;
             file.read(GKC_READ_BINARY(len), sizeof(len));
             comp.name.resize(len);

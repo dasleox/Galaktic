@@ -89,8 +89,8 @@
 #endif
 
 #define GKC_MAJOR_VERSION 0
-#define GKC_MINOR_VERSION 5
-#define GKC_PATCH_VERSION 2
+#define GKC_MINOR_VERSION 6
+#define GKC_PATCH_VERSION 0
 #define GKC_SET_COLOR(color) (color.r), (color.g), (color.b), (color.a)
 
 // 'using' declarations
@@ -130,25 +130,15 @@ inline constexpr Uint32 MAX_FONT_QUANTITY = 1024;
 inline constexpr EntityID InvalidEntity = 0;
 inline constexpr double FIXED_DELTA_TIME = 1.0 / 60;
 
-#if GKC_OS_INT == 0
-    inline const path GKC_TEXTURE_PATH = "assets\\textures";
-    inline const path GKC_SOUND_PATH = "assets\\sounds";
-    inline const path GKC_ANIMATION_PATH = "assets\\animations";
-    inline const path GKC_SCENE_PATH = "scenes";
-    inline const path GKC_SCRIPT_PATH = "scripts";
-    inline const path GKC_CONFIG_PATH = "config";
+inline const path GKC_TEXTURE_PATH = "assets\\textures";
+inline const path GKC_SOUND_PATH = "assets\\sounds";
+inline const path GKC_ANIMATION_PATH = "assets\\animations";
+inline const path GKC_SCENE_PATH = "scenes";
+inline const path GKC_SCRIPT_PATH = "scripts";
+inline const path GKC_CONFIG_PATH = "config";
 
-    inline const path GKC_ARIAL_FONT = "C:\\Windows\\Fonts\\Arial.ttf";
-#else
-    inline const path GKC_TEXTURE_PATH = "assets/textures";
-    inline const path GKC_SOUND_PATH = "assets/sounds";
-    inline const path GKC_ANIMATION_PATH = "assets/animations";
-    inline const path GKC_SCENE_PATH = "assets/scenes";
-    inline const path GKC_SCRIPT_PATH = "scripts";
-    inline const path GKC_CONFIG_PATH = "config";
+inline const path GKC_ARIAL_FONT = "C:\\Windows\\Fonts\\Arial.ttf";
 
-    inline const path GKC_ARIAL_FONT = "/usr/share/fonts/truetype/Arial.ttf";
-#endif
 
 inline constexpr SDL_Color WHITE_COLOR = {255, 255, 255, 255};
 inline constexpr SDL_Color BLACK_COLOR = {0, 0, 0, 255};
@@ -256,21 +246,6 @@ namespace Galaktic::Core {
               return os_.empty() || arch_.empty() || width_ >= 16000 || height_ >= 16000;
           }
     };
-
-    /**
-     * @brief Checks if the weak_ptr passed has expired
-     * @tparam T typename of weak_ptr
-     * @param ptr Weak pointer of type T
-     * @return true if the pointer expired, false otherwise
-     */
-    template <typename T>
-    bool IsWeakPtrExpired(const weak_ptr<T>& ptr) {
-        if (ptr.expired()) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * @brief Converts the SDL_Color struct to a HEX string
      * @param color SDL_Color
@@ -468,18 +443,18 @@ namespace Galaktic::Filesystem {
 #define GKC_WRITE_BINARY(x) reinterpret_cast<const char*>(&x)
 #define GKC_READ_BINARY(x) reinterpret_cast<char*>(&x)
 
-#define GKC_ENSURE_FILE_OPEN(file, errorType)                          \
+#define GKC_ENSURE_FILE_OPEN(file)                          \
     do {                                                                \
         if (!(file).is_open()) {                                        \
-            Debug::Logger::LogErrorWithType(ErrorType::errorType, "file is not open!");       \
+            Debug::Logger::LogErrorWithType(ErrorType::FileNotOpen, "file is not open!");       \
             return;                                                    \
         }                                                               \
     } while (0)
 
-#define GKC_ENSURE_FILE_OPEN_BOOL(file, errorType)                          \
+#define GKC_ENSURE_FILE_OPEN_BOOL(file)                          \
     do {                                                                \
         if (!(file).is_open()) {                                        \
-            Debug::Logger::LogErrorWithType(ErrorType::errorType, "file is not open!");       \
+            Debug::Logger::LogErrorWithType(ErrorType::FileNotOpen, "file is not open!");       \
             return false;                                                    \
         }                                                               \
     } while (0)
@@ -489,3 +464,12 @@ namespace Galaktic::Filesystem {
     if(param == nullptr) {                                  \
         GKC_ENGINE_INFO("{} passed is NULL!", paramType);   \
     }
+
+
+#define GKC_EMPTY_STRING_RETURN(str, returnValue)                \
+    do {                                        \
+        if((str).empty()) {                     \
+            ::Galaktic::Debug::Logger::LogErrorWithType(ErrorType::EmptyString, "'{}' is empty!", str); \
+            return returnValue;         \
+        }                       \
+    } while(0)

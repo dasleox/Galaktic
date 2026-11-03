@@ -1,8 +1,12 @@
 #pragma once
 
 #include <audio/gkc_audio.h>
+#include <audio/gkc_audio_group.h>
 
 #include <config/gkc_config.h>
+#include <config/gkc_config_parser.h>
+#include <config/gkc_config_register.h>
+#include <config/gkc_config_file.h>
 
 #include <core/events/gkc_event.h>
 #include <core/events/gkc_dispatcher.h>
@@ -22,6 +26,7 @@
 #include <core/managers/gkc_manager.h>
 #include <core/managers/gkc_script_man.h>
 #include <core/managers/gkc_animation_man.h>
+#include <core/managers/gkc_config_manager.h>
 
 #include <core/systems/gkc_system.h>
 #include <core/systems/gkc_key.h>

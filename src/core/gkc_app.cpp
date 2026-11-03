@@ -9,8 +9,10 @@
 #include <core/managers/gkc_script_man.h>
 #include <core/gkc_console.h>
 #include <core/managers/gkc_animation_man.h>
+#include <core/managers/gkc_config_manager.h>
 #include <script/gkc_library.h>
 #include <config/gkc_config.h>
+#include <config/gkc_config_file.h>
 #include <core/gkc_console.h>
 
 using namespace Galaktic::Core;
@@ -64,10 +66,12 @@ App::App(const path& project_path, const string &title)
     GKC_RELEASE_ASSERT(Script::LuaGalaktic::Initialize(), "Failed to initialize Lua!");
     Script::LuaGalaktic::SetupModules(project_path / title / GKC_SCRIPT_PATH);
     Script::LuaGalaktic::BindGalaktic();
+    Managers::ConfigManager::SetFolder(project_path/ title / GKC_CONFIG_PATH);
     m_managersWrapper->m_scriptManager = new Managers::ScriptManager(path(project_path / title / GKC_SCRIPT_PATH).string(), Script::LuaGalaktic::GetLuaState());
 
     // The scene manager is created last: it owns scene creation/loading from
     // here on, and every manager it may hand to a scene already exists above.
     m_sceneManager = new Managers::SceneManager(project_path / title, m_managersWrapper.get(), m_deviceInfo);
     m_console->SetSceneManager(m_sceneManager);
+
 }

@@ -3,6 +3,7 @@
 #include <core/gkc_logger.h>
 #include <core/managers/gkc_script_man.h>
 #include <core/managers/gkc_scene_man.h>
+#include <core/managers/gkc_config_manager.h>
 #include <core/managers/gkc_audio_man.h>
 #include <config/gkc_config.h>
 #include <script/gkc_library.h>
@@ -238,7 +239,7 @@ void Console::DisplayHelp(const string& type)
     else if (type == "sound")
     {
         GKC_ENGINE_INFO("Sound commands:");
-        GKC_ENGINE_INFO(" play_sound <name> | stop_sound <name> | stop_all_sounds | print_sound_list");
+        GKC_ENGINE_INFO(" play_sound <name> | stop_sound <name> | stop_all_sounds | print_sound_list | set_master_volume <volume>");
     }
     else if (type == "debug")
     {
@@ -562,6 +563,25 @@ void Console::SoundCommands(const CommandWrapper& wrapper)
             Managers::AudioManager::PrintList();
             break;
         }
+        case CommandTypes::SetMasterVolume: {
+            if (wrapper.args.empty())
+            {
+                InvalidArgumentError("missing volume argument!, usage: set_master_volume <volume>");
+                return;
+            }
+
+            try 
+            {
+                float volume = std::stof(wrapper.args);
+                Managers::AudioManager::SetMasterVolume(volume);
+            } 
+            catch(const std::invalid_argument&) 
+            {   
+                INVALID_CONVERION_ERROR(float);
+            }
+         
+            break;
+        }
     }
 }
 
@@ -664,6 +684,7 @@ CommandWrapper Console::ArgumentCommands(const string& command, const string& ar
     COM_WRAPPER_RETURN("play_sound", CommandTypes::PlaySound);
     COM_WRAPPER_RETURN("stop_sound", CommandTypes::StopSound);
     COM_WRAPPER_RETURN("help", CommandTypes::HelpConsole);
+    COM_WRAPPER_RETURN("set_master_volume", CommandTypes::SetMasterVolume);
 
     return CommandWrapper{};
 }

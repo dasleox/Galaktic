@@ -336,7 +336,7 @@ void LuaGalaktic::CreateDefaultUpdateFile(const path& path) {
         return;
     
     ofstream file(path / "Player.lua");
-    GKC_ENSURE_FILE_OPEN(file, WritingError);
+    GKC_ENSURE_FILE_OPEN(file);
 
     const string PLAYER_LUA_CONTENT = 
         "-- Player.lua"

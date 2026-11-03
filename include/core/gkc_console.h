@@ -92,6 +92,8 @@ namespace Galaktic::Core {
         StopSound,
         StopAllSounds,
         PrintSoundList, 
+        SetMasterVolume,
+        
         
         // Debug
         ShowFPSToggle,

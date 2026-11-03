@@ -72,5 +72,7 @@ namespace Galaktic::Core {
              * @brief Get the screen information and set the width and height of the built window
              */
             void ScreenStartup();
+
+            void SetConfigurationVariables();
     };
 }
