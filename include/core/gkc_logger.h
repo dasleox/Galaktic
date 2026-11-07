@@ -70,10 +70,10 @@ namespace Galaktic
 namespace Galaktic::Debug {
     struct ConsoleLine
     {
-        string m_text;
-        spdlog::level::level_enum m_level;
+        string text;
+        spdlog::level::level_enum level;
+        Uint64 timestamp = 0;
     };
-
     template <typename Mutex>
     class ConsoleMutex : public spdlog::sinks::base_sink<Mutex>
     {
@@ -86,8 +86,8 @@ namespace Galaktic::Debug {
                 spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
 
                 ConsoleLine line;
-                line.m_text  = fmt::to_string(formatted);
-                line.m_level = msg.level;
+                line.text  = fmt::to_string(formatted);
+                line.level = msg.level;
 
                 m_lines.push_back(line);
                 if (m_lines.size() > m_MAXLINES) 

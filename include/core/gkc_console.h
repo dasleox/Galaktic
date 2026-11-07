@@ -125,6 +125,31 @@ namespace Galaktic::Core {
     };
 
     /**
+     * @brief Removes ANSI escape sequences from a log line, and trims trailing newlines.
+     * @param text 
+     * @return string Cleaned log line
+     */
+    inline string CleanLogText(const string& text)
+    {
+        string out;
+        out.reserve(text.size());
+
+        for (size_t i = 0; i < text.size(); ++i)
+        {
+            if (text[i] == '\033' && i + 1 < text.size() && text[i + 1] == '[')
+            {
+                i += 2;
+                while (i < text.size() && !std::isalpha(static_cast<unsigned char>(text[i]))) ++i;
+                continue;
+            }
+            out += text[i];
+        }
+
+        while (!out.empty() && (out.back() == '\n' || out.back() == '\r')) out.pop_back();
+        return out;
+    }
+
+    /**
      * @class Console
      * @brief In-game developer console: displays engine log output and lets
      *        the player type commands that reach the scene/ECS/scripting/
@@ -239,5 +264,7 @@ namespace Galaktic::Core {
             vector<string> GetListOfArguments(const string& args);
             /// @brief Maps a spdlog level to the color its line is drawn in.
             SDL_Color LevelToColor(spdlog::level::level_enum level);      
+
+            void DisplayErrors(SDL_Renderer* renderer, TTF_Font* font);
     };
 }
