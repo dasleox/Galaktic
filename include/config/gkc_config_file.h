@@ -27,6 +27,10 @@
 
 namespace Galaktic::Config
 {
+    /**
+     * @class ConfigFile
+     * @brief Reads and updates configuration variables while preserving other file lines.
+     */
     class ConfigFile
     {
         private:
@@ -34,6 +38,10 @@ namespace Galaktic::Config
             std::vector<std::string> m_lines;
             std::unordered_map<std::string, size_t> m_variableToLineMap;
         private:
+            /**
+             * @brief Converts a typed configuration value to the file's textual representation.
+             * @param value Value to convert, store or inspect
+             */
             template<typename T>
             std::string ToConfigString(const T& value)
             {
@@ -68,6 +76,10 @@ namespace Galaktic::Config
 
             }
             
+            /**
+             * @brief Parses a configuration value, returning std::nullopt on conversion failure.
+             * @param raw Raw configuration value
+             */
             template<typename T>
             static std::optional<T> FromConfigString(const string& raw)
             {
@@ -94,22 +106,59 @@ namespace Galaktic::Config
                 }
             }
 
+            /**
+             * @brief Adds or replaces a configuration variable in memory; Save writes it to disk.
+             * @param varName Configuration or Lua variable name
+             * @param value Value to convert, store or inspect
+             * @return true on success, false otherwise
+             */
             bool SetRaw(const string& varName, const string& value);
+            /**
+             * @brief Returns the trimmed raw variable value, or std::nullopt when absent.
+             * @param varName Configuration or Lua variable name
+             */
             std::optional<string> GetRaw(const string& varName) const;
 
         public:
+            /**
+             * @brief Stores the configuration filepath and attempts to load its contents.
+             * @param filepath Filepath to load or store
+             */
             explicit ConfigFile(const path& filepath);
             
+            /**
+             * @brief Loads configuration lines and rebuilds the variable-name lookup map.
+             * @return true on success, false otherwise
+             */
             bool Load();
+            /**
+             * @brief Writes the stored configuration lines to the configured filepath.
+             * @return true on success, false otherwise
+             */
             bool Save() const;
+            /**
+             * @brief Checks whether the requested component or configuration variable exists.
+             * @param varName Configuration or Lua variable name
+             * @return true on success, false otherwise
+             */
             bool Has(const string& varName) const;
 
+            /**
+             * @brief Converts and stores a configuration value in memory; Save writes it to disk.
+             * @param varName Configuration or Lua variable name
+             * @param value Value to convert, store or inspect
+             * @return true on success, false otherwise
+             */
             template<typename T>
             bool SetValue(const string& varName, const T& value)
             {
                 return SetRaw(varName, ToConfigString(value));
             }
 
+            /**
+             * @brief Returns a converted configuration value, or std::nullopt if absent or unparseable.
+             * @param varName Configuration or Lua variable name
+             */
             template<typename T>
             std::optional<T> GetValue(const string& varName) const
             {

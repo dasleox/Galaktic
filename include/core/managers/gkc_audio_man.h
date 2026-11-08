@@ -110,6 +110,9 @@ namespace Galaktic::Core::Managers {
             static void StopAllSounds(Sint64 fadeOutMs = 0);
 
 
+            /**
+             * @brief Reloads changed audio assets when their tracks are not playing.
+             */
             static void ReloadAudioFiles();
 
             /**
@@ -134,6 +137,10 @@ namespace Galaktic::Core::Managers {
              */
             static void SetVolumeByID(AudioID id, float volume);
         
+            /**
+             * @brief Clamps a gain value to the supported range [0, 1].
+             * @param volume Requested audio gain in the range [0, 1]
+             */
             static float ClampVolume(float volume) {
                 return std::clamp(volume, 0.f, 1.f);
             }
@@ -154,15 +161,48 @@ namespace Galaktic::Core::Managers {
              */
             static void SetAudioChannels(int channels);
 
+            /**
+             * @brief Updates the requested audio frequency and restarts the audio device.
+             * @param frequency Frequency
+             */
             static void SetAudioFrequency(int frequency);
+            /**
+             * @brief Updates the requested audio format and restarts the audio device.
+             * @param format Format
+             */
             static void SetAudioFormat(SDL_AudioFormat format);
 
+            /**
+             * @brief Creates a named group with the requested volume limit.
+             * @param name Name used to identify the requested entry
+             * @param maxVolume Maximum allowed audio gain
+             */
             static void CreateAudioGroup(const string& name, float maxVolume);
+            /**
+             * @brief Applies volume to the active tracks of a named audio group.
+             * @param name Name used to identify the requested entry
+             * @param volume Requested audio gain in the range [0, 1]
+             */
             static void SetAudioVolumeByGroup(const string& name, float volume);
+            /**
+             * @brief Removes a named audio group.
+             * @param name Name used to identify the requested entry
+             */
             static void DeleteAudioGroup(const string& name);
+            /**
+             * @brief Returns a copy of the named audio group, or a default group when absent.
+             * @param name Name used to identify the requested entry
+             */
             static Audio::AudioGroup GetAudioGroupByName(const string& name);
 
+            /**
+             * @brief Sets the maximum allowed volume.
+             * @param volume Requested audio gain in the range [0, 1]
+             */
             static void SetMaxVolume(float volume) { m_maxVolume = volume; }
+            /**
+             * @brief Returns the configured volume limit.
+             */
             static float GetMaxVolume() { return m_maxVolume; }
         private:    
             static std::multimap<AudioID, MIX_Track*> m_activeTracks;
@@ -179,6 +219,9 @@ namespace Galaktic::Core::Managers {
              */
             static void RegisterTrack(AudioID id, MIX_Track* track);
 
+            /**
+             * @brief Stops tracks and recreates the mixer using the current audio specification.
+             */
             static void RestartAudioDevice();
 
             /**

@@ -32,17 +32,51 @@ namespace Galaktic::Core::Managers {
 }
 
 namespace Galaktic::Core::Helpers {
+    /**
+     * @class RPixelsHelper
+     * @brief Owns named pixel-color groups associated with an ECS manager.
+     */
     class RPixelsHelper {
         public:
+            /**
+             * @brief Stores the borrowed ECS manager used by this helper.
+             * @param manager Borrowed ECS manager that must outlive this helper
+             */
             RPixelsHelper(Managers::ECS_Manager& manager);
+             /**
+              * @brief Creates a named pixel-color group using the entity's texture dimensions.
+              * @param groupName Name identifying the pixel or audio group
+              * @param id Entity or asset ID used by this operation
+              */
              void CreatePixelGroup(const string& groupName, EntityID id);
+             /**
+              * @brief Removes the named pixel-color group from the helper.
+              * @param groupName Name identifying the pixel or audio group
+              */
              void DeletePixelGroup(const string& groupName);
 
+             /**
+              * @brief Adds an entity to the named group after validating texture compatibility.
+              * @param groupName Name identifying the pixel or audio group
+              * @param id Entity or asset ID used by this operation
+              */
              void AddEntityToGroup(const string& groupName, EntityID id);
+             /**
+              * @brief Removes an entity from the group and forgets its painted texture.
+              * @param groupName Name identifying the pixel or audio group
+              * @param id Entity or asset ID used by this operation
+              */
              void DeleteEntityFromGroup(const string& groupName, EntityID id);
             
+             /**
+              * @brief Refreshes changed textures in every owned pixel group.
+              */
              void DrawAllGroups();
 
+             /**
+              * @brief Returns shared ownership of the named pixel group, or nullptr when unavailable.
+              * @param groupName Name identifying the pixel or audio group
+              */
              shared_ptr<Render::PixelColoredGroupInfo> GetPixelGroup(const string& groupName);
         private:
              unordered_map<string, shared_ptr<Render::PixelColoredGroupInfo>> m_groupList; 

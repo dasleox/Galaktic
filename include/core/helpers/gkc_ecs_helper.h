@@ -99,11 +99,29 @@ namespace Galaktic::Core::Helpers {
                 }
             }
 
+            /**
+             * @brief Deletes the named entity through the ECS manager and its deletion checks.
+             * @param name Name used to identify the requested entry
+             */
             static void DeleteEntity(const string& name);
 
+            /**
+             * @brief Adds a runtime-typed component to the named entity after compatibility checks.
+             * @param name Name used to identify the requested entry
+             * @param type Engine type identifier used by this operation
+             * @param component Component value to store
+             */
             static void AddComponentToEntity(const string& name, const type_index& type, any& component);
+            /**
+             * @brief Removes a runtime-typed component from the named entity.
+             * @param name Name used to identify the requested entry
+             * @param type Engine type identifier used by this operation
+             */
             static void RemoveComponentFromEntity(const string& name, const type_index& type);
 
+            /**
+             * @brief Returns the player entity handle; the ECS manager retains its components.
+             */
             static ECS::Entity GetPlayer();
 
             /**
@@ -116,19 +134,80 @@ namespace Galaktic::Core::Helpers {
             static Galaktic::Core::Managers::ECS_Manager* m_ecsManager;
             static EntityID m_id;
 
+            /**
+             * @brief Checks whether the supplied name or type identifies a light entity.
+             * @param name Name used to identify the requested entry
+             * @return true if the supplied name or type identifies a light entity, false otherwise
+             */
             static bool IsLightEntity(const string& name);
+            /**
+             * @brief Checks whether the supplied name or type identifies a camera entity.
+             * @param name Name used to identify the requested entry
+             * @return true if the supplied name or type identifies a camera entity, false otherwise
+             */
             static bool IsCameraEntity(const string& name);
+            /**
+             * @brief Checks whether the supplied name or type identifies a player entity.
+             * @param name Name used to identify the requested entry
+             * @return true if the supplied name or type identifies a player entity, false otherwise
+             */
             static bool IsPlayerEntity(const string& name);
+            /**
+             * @brief Checks whether the supplied name or type identifies a static object entity.
+             * @param name Name used to identify the requested entry
+             * @return true if the supplied name or type identifies a static object entity, false otherwise
+             */
             static bool IsStaticObjectEntity(const string& name);
+            /**
+             * @brief Checks whether the supplied name or type identifies a physics object entity.
+             * @param name Name used to identify the requested entry
+             * @return true if the supplied name or type identifies a physics object entity, false otherwise
+             */
             static bool IsPhysicsObjectEntity(const string& name);
+            /**
+             * @brief Checks whether the supplied type identifies NameComponent.
+             * @param type Engine type identifier used by this operation
+             * @return true if the supplied type identifies NameComponent, false otherwise
+             */
             static bool HasNameComponent(const type_index& type);
 
+            /**
+             * @brief Checks whether the supplied name or type identifies a light component.
+             * @param type Engine type identifier used by this operation
+             * @return true if the supplied name or type identifies a light component, false otherwise
+             */
             static bool IsLightComponent(const type_index& type);
+            /**
+             * @brief Checks whether the supplied name or type identifies a camera component.
+             * @param type Engine type identifier used by this operation
+             * @return true if the supplied name or type identifies a camera component, false otherwise
+             */
             static bool IsCameraComponent(const type_index& type);
+            /**
+             * @brief Checks whether the supplied name or type identifies a player component.
+             * @param type Engine type identifier used by this operation
+             * @return true if the supplied name or type identifies a player component, false otherwise
+             */
             static bool IsPlayerComponent(const type_index& type);
+            /**
+             * @brief Checks whether the supplied name or type identifies a static object component.
+             * @param type Engine type identifier used by this operation
+             * @return true if the supplied name or type identifies a static object component, false otherwise
+             */
             static bool IsStaticObjectComponent(const type_index& type);
+            /**
+             * @brief Checks whether the supplied name or type identifies a physics object component.
+             * @param type Engine type identifier used by this operation
+             * @return true if the supplied name or type identifies a physics object component, false otherwise
+             */
             static bool IsPhysicsObjectComponent(const type_index& type);
 
+            /**
+             * @brief Checks the helper's allowed component combinations for the named entity category.
+             * @param name Name used to identify the requested entry
+             * @param type Engine type identifier used by this operation
+             * @return true on success, false otherwise
+             */
             static bool ValidateComponentCompatibility(const string& name, const type_index& type);
     };
 }

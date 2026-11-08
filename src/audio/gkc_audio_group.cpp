@@ -24,7 +24,7 @@ void AudioGroup::DeleteAudioFromGroup(AudioID id)
     if(it == m_audioList.end())
     {
         Debug::Logger::LogErrorWithType(ErrorType::AudioGroupElementNotFound,
-            "audio with ID: '{}' not found in this AudioGroup!");
+            "audio with ID: '{}' not found in this AudioGroup!", id);
     }
 
     m_audioList.erase(id);
@@ -32,26 +32,18 @@ void AudioGroup::DeleteAudioFromGroup(AudioID id)
 
 void AudioGroup::SetVolume(float volume)
 {
-    if(!(volume > m_maxVolume))
-    {
-        volume = Managers::AudioManager::ClampVolume(volume);
-        for(auto id : m_audioList)
-        {
-            Managers::AudioManager::SetVolumeByID(id, volume);
-        }
-    }
+    m_currentVolume = std::min(Managers::AudioManager::ClampVolume(volume), m_maxVolume);
+    for (auto id : m_audioList)
+        Managers::AudioManager::SetVolumeByID(id, m_currentVolume);
 }
 
 void AudioGroup::Mute()
 {
-    for(auto id : m_audioList)
-    {
-        Managers::AudioManager::SetVolumeByID(id, 0.f);
-    }
+    SetVolume(0.f);
 }
 
 void AudioGroup::SetMaxVolume(float volume)
 {
-    m_maxVolume = volume; 
-    SetVolume(volume); 
+    m_maxVolume = Managers::AudioManager::ClampVolume(volume);
+    SetVolume(m_currentVolume);
 }

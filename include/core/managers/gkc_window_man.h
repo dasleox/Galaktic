@@ -76,6 +76,9 @@ namespace Galaktic::Core::Managers {
              */
             static shared_ptr<Render::Window> GetWindow(GKC_WindowID id);
 
+            /**
+             * @brief Returns mutable access to the window manager's shared window entries.
+             */
             static unordered_map<GKC_WindowID, shared_ptr<Render::Window>>& GetWindowList() {
                 return m_windowList;
             }

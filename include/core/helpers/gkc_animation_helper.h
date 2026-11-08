@@ -28,9 +28,22 @@ namespace Galaktic::Core::Managers {
     class ECS_Manager;
 }
 namespace Galaktic::Core::Helpers {
+    /**
+     * @class AnimationHelper
+     * @brief Assigns registered animation assets through a borrowed ECS manager.
+     */
     class AnimationHelper {
         public:
+            /**
+             * @brief Stores the borrowed ECS manager used by this helper.
+             * @param ecsManager Borrowed ECS manager that must outlive this helper
+             */
             AnimationHelper(Managers::ECS_Manager& ecsManager);
+            /**
+             * @brief Assigns a registered animation asset to an existing entity.
+             * @param id Entity or asset ID used by this operation
+             * @param animationName Registered animation filename, including its extension
+             */
             void SetAnimationToEntity(EntityID id, const string& animationName);
         private:
             Managers::ECS_Manager& m_ecsManager;

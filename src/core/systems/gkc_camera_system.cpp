@@ -1,4 +1,5 @@
 #include <core/systems/gkc_camera_system.h>
+#include <algorithm>
 #include "ecs/gkc_components.h"
 #include "core/gkc_logger.h"
 #include "ecs/gkc_entity.h"
@@ -32,9 +33,9 @@ void Systems::CameraSystem::Update(const ECS::Entity_List& list, float dt,
             desiredLocation.y = transform.location.y - static_cast<float>(height) * 0.5f;
 
             cameraComp.location.x = std::lerp(cameraComp.location.x, desiredLocation.x,
-                cameraComp.smoothing * dt);
+                std::clamp(cameraComp.smoothing * dt, 0.f, 1.f));
             cameraComp.location.y = std::lerp(cameraComp.location.y, desiredLocation.y,
-                cameraComp.smoothing * dt);
+                std::clamp(cameraComp.smoothing * dt, 0.f, 1.f));
         }
     }
 }

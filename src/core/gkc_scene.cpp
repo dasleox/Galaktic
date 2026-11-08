@@ -36,41 +36,11 @@
 #include "core/managers/gkc_font_man.h"
 #include <core/managers/gkc_config_manager.h>
 
-#include <numeric>
-#include <random>
+#include <algorithm>
+#include <cmath>
 
 using namespace Galaktic::Core;
 using namespace Galaktic::Filesystem;
-
-namespace {
-    /**
-     * @brief Builds a pixel mask with a given fraction of its pixels selected at random
-     * @param width Width of the mask to build
-     * @param height Height of the mask to build
-     * @param selectedRatio Fraction of pixels (0-1) that should be selected
-     * @return A width x height mask, addressed as mask[y][x]
-     */
-    Galaktic::Render::PixelMapping_List BuildRandomPixelMask(size_t width, size_t height, float selectedRatio) {
-        Galaktic::Render::PixelMapping_List mask(height, std::vector<bool>(width, false));
-
-        const size_t total = width * height;
-        const size_t selectedCount = static_cast<size_t>(static_cast<float>(total) * selectedRatio);
-
-        std::vector<size_t> indices(total);
-        std::iota(indices.begin(), indices.end(), 0);
-
-        std::mt19937 rng(std::random_device{}());
-        std::shuffle(indices.begin(), indices.end(), rng);
-
-        for (size_t i = 0; i < selectedCount; ++i) {
-            size_t row = indices[i] / width;
-            size_t col = indices[i] % width;
-            mask[row][col] = true;
-        }
-
-        return mask;
-    }
-}
 
 Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformation& device_information, const path& path)
     : m_sceneInfo({name, sizeof(Scene)}), m_managerWrapper(wrapper) {
@@ -230,7 +200,7 @@ void Scene::Run()  {
     GKC_RELEASE_ASSERT(movementSystem != nullptr, "MovementSystem is NULL!");
     GKC_RELEASE_ASSERT(entityEventSystem != nullptr, "EntityEventSystem is NULL!");
 
-    SpawnDebugDemoEntities();
+    SpawnDebugEntities();
 
     while (m_isRunning) 
     {
@@ -276,22 +246,70 @@ TTF_Font* Scene::OpenConsoleFont() {
     return font;
 }
 
-void Scene::SpawnDebugDemoEntities() {
+void Scene::SpawnDebugEntities() {
+    // This development sandbox intentionally uses a small logical resolution.
+    SetPixelResolution(320, 180, false);
+    SetAmbientLight(0.15f);
+
     auto& player = m_ecsHelper->GetEntityByName("Player");
-    ECS::Entity testObject = m_ecsHelper->CreateStaticObject("myObject");
-
+    auto& playerTransform = player.Get<ECS::TransformComponent>();
+    playerTransform.location = {150.f, 92.f};
+    playerTransform.size = {24.f, 24.f};
+    playerTransform.zIndex = 2;
     m_textureHelper->SetTextureToEntity(player.GetID(), "cat.png");
-    m_textureHelper->SetTextureToEntity(testObject.GetID(), "cat.png");
+    m_ecsManager->AddComponentToEntity<ECS::ShadowComponent>(player.GetID());
 
-    // The helper owns the group, so it lives as long as the scene
-    m_rPixelsHelper->CreatePixelGroup("group", player.GetID());
-    auto group = m_rPixelsHelper->GetPixelGroup("group");
-    if (group == nullptr)
-        return;
 
-    group->SetColor({123, 42, 11, 255});
-    group->AddEntityToGroup(testObject.GetID());
-    group->SetSelectedPixels(BuildRandomPixelMask(group->GetWidth(), group->GetHeight(), 0.2f));
+    auto floor = m_ecsHelper->CreateStaticObject("ShadowDemoFloor");
+    auto& floorTransform = floor.Get<ECS::TransformComponent>();
+    floorTransform.location = {-1024.f, -1024.f};
+    floorTransform.size = {2048.f, 2048.f};
+    floorTransform.zIndex = -10;
+    floor.Get<ECS::ColorComponent>().color = {210, 210, 200, 255};
+    floor.Get<ECS::CollisionComponent>().collidable = false;
+    // No ShadowComponent: the floor receives lighting without blocking it.
+
+    auto wall = m_ecsHelper->CreateStaticObject("ShadowDemoWall");
+    auto& wallTransform = wall.Get<ECS::TransformComponent>();
+    wallTransform.location = {106.f, 52.f};
+    wallTransform.size = {12.f, 48.f};
+    wallTransform.zIndex = 1;
+    wall.Get<ECS::ColorComponent>().color = {170, 120, 65, 255};
+    m_ecsManager->AddComponentToEntity<ECS::ShadowComponent>(wall.GetID());
+
+    auto rotated = m_ecsHelper->CreateStaticObject("ShadowDemoRotatedBlock");
+    auto& rotatedTransform = rotated.Get<ECS::TransformComponent>();
+    rotatedTransform.location = {212.f, 105.f};
+    rotatedTransform.size = {26.f, 12.f};
+    rotatedTransform.rotation = 35.f;
+    rotatedTransform.zIndex = 1;
+    rotated.Get<ECS::ColorComponent>().color = {110, 155, 175, 255};
+    m_ecsManager->AddComponentToEntity<ECS::ShadowComponent>(rotated.GetID());
+
+    auto sprite = m_ecsHelper->CreateStaticObject("ShadowDemoPng");
+    auto& spriteTransform = sprite.Get<ECS::TransformComponent>();
+    spriteTransform.location = {174.f, 44.f};
+    spriteTransform.size = {32.f, 32.f};
+    spriteTransform.zIndex = 1;
+    m_textureHelper->SetTextureToEntity(sprite.GetID(), "cat.png");
+    m_ecsManager->AddComponentToEntity<ECS::ShadowComponent>(sprite.GetID());
+
+    auto warmLight = m_ecsHelper->CreateLightEntity("ShadowDemoWarmLight");
+    auto& warm = warmLight.Get<ECS::LightComponent>();
+    warm.location = {65.f, 72.f};
+    warm.radius = 5.f; // 160 logical pixels.
+    warm.watts = 140.f;
+    warm.color = {255, 190, 115, 255};
+
+    auto coolLight = m_ecsHelper->CreateLightEntity("ShadowDemoCoolLight");
+    auto& cool = coolLight.Get<ECS::LightComponent>();
+    cool.location = {264.f, 54.f};
+    cool.radius = 4.f;
+    cool.watts = 120.f;
+    cool.color = {100, 170, 255, 255};
+
+    GKC_ENGINE_INFO("Shadow demo: ambient 0.15, warm/cool lights, solid and PNG blockers. "
+        "Move the player to test its shadow; cat.png must be a transparent texture asset.");
 }
 
 void Scene::FixedUpdate(float deltaTime, const shared_ptr<Systems::BaseSystem>& movementSystem,
@@ -304,11 +322,19 @@ void Scene::FixedUpdate(float deltaTime, const shared_ptr<Systems::BaseSystem>& 
 void Scene::RenderFrame(float deltaTime, TTF_Font* consoleFont, Console* console,
     const shared_ptr<Systems::CameraSystem>& cameraSystem) {
 
+    // Update textures and animation before either the visible or shadow pass.
+    m_rPixelsHelper->DrawAllGroups();
+    m_managerWrapper->m_animationManager->UpdateAll(deltaTime);
     m_window->Draw(GKC_GET_RENDERER(m_window));
     Render::Drawer::DrawEntities(m_ecsManager->GetEntityList(), GKC_GET_RENDERER(m_window), *cameraSystem);
 
-    m_rPixelsHelper->DrawAllGroups();
-    m_managerWrapper->m_animationManager->UpdateAll(deltaTime);
+    const bool lightingSucceeded = Render::Drawer::DrawLighting(
+        m_ecsManager->GetEntityList(), GKC_GET_RENDERER(m_window), *cameraSystem,
+        m_lighting, static_cast<int>(m_window->GetViewWidth()),
+        static_cast<int>(m_window->GetViewHeight()), m_ambientLight);
+    if (!lightingSucceeded && !m_lightingFailed)
+        GKC_ENGINE_WARNING("Lighting failed: {}", SDL_GetError());
+    m_lightingFailed = !lightingSucceeded;
 
     if (m_bShowWireframe) {
         Render::Drawer::DrawWireframes(m_ecsManager->GetEntityList(), GKC_GET_RENDERER(m_window), *cameraSystem);
@@ -393,12 +419,22 @@ void Scene::Close() {
     m_isRunning = false;
 }
 
-void Scene::SetPixelResolution(int width, int height)
+void Scene::SetPixelResolution(int width, int height, bool integerScale)
 {
-    m_window->SetPixelResolution(width, height);
+    m_window->SetPixelResolution(width, height, integerScale);
 }
 
 void Scene::SetFullscreen()
 {
     m_window->SetFullScreen();
+}
+
+void Scene::SetAmbientLight(float value)
+{
+    if (std::isfinite(value)) m_ambientLight = std::clamp(value, 0.f, 1.f);
+}
+
+float Scene::GetAmbientLight() const
+{
+    return m_ambientLight;
 }

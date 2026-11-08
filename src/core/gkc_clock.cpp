@@ -9,6 +9,10 @@ void Clock::Init() {
 }
 
 void Clock::Update() {
+    if (m_frequency <= 0.0) {
+        Init();
+        return;
+    }
     Uint64 current = SDL_GetPerformanceCounter();
     m_deltaTime = static_cast<double>(current - m_lastCounter) / m_frequency;
     m_lastCounter = current;

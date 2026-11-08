@@ -116,8 +116,8 @@ void Managers::AudioManager::StopSound(const string &name, Sint64 fadeOutMs) {
 }
 
 bool Managers::AudioManager::IsTrackActive(AudioID id) {
-    auto trackIt = m_activeTracks.find(id);
-    if (trackIt != m_activeTracks.end()) 
+    const auto range = m_activeTracks.equal_range(id);
+    for (auto trackIt = range.first; trackIt != range.second; ++trackIt)
     {
         MIX_Track* track = trackIt->second;
         if (track != nullptr && MIX_TrackPlaying(track)) {

@@ -200,10 +200,28 @@ namespace Galaktic::Core::Systems {
             unordered_map<Key, bool> m_keyState;
     };
 
+    /**
+     * @class Keyboard
+     * @brief Exposes the keyboard system assigned to the static input interface.
+     */
     class Keyboard {
         public:
+            /**
+             * @brief Assigns the input system used by the static input queries.
+             * @param keySystem Keyboard system used by the static input interface
+             */
             Keyboard(KeySystem* keySystem) { m_keySystem = keySystem; }
+            /**
+             * @brief Checks whether the assigned keyboard system reports the key as pressed; false before assignment.
+             * @param type Engine type identifier used by this operation
+             * @return true if the assigned keyboard system reports the key as pressed; false before assignment, false otherwise
+             */
             static bool IsKeyDown(Key type);
+            /**
+             * @brief Checks a Lua key code through the assigned keyboard system.
+             * @param key Key
+             * @return true on success, false otherwise
+             */
             static bool IsKeyDownLua(lua_Integer key);
         private:
            static KeySystem* m_keySystem;

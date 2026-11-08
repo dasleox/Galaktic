@@ -37,6 +37,9 @@ namespace Galaktic::ECS {
      */
     class Entity {
         public:
+            /**
+             * @brief Creates an invalid entity handle; assign a registry-backed handle before adding components.
+             */
             Entity() = default;
 
             /**
@@ -45,38 +48,73 @@ namespace Galaktic::ECS {
              */
             Entity(EntityID id, Registry* registry): m_ID(id), m_registry(registry) {}
 
+            /**
+             * @brief Returns the ID stored in this handle.
+             */
             [[nodiscard]] EntityID GetID() const { return m_ID; }
-            [[nodiscard]] bool IsValid() const { return m_ID != InvalidEntity; }
+            /**
+             * @brief Checks whether this handle or underlying resource is initialized for use.
+             * @return true if this handle or underlying resource is initialized for use, false otherwise
+             */
+            [[nodiscard]] bool IsValid() const { return m_ID != InvalidEntity && m_registry != nullptr; }
 
+            /**
+             * @brief Changes the entity handle's stored ID; does not move registry data.
+             * @param id Entity or asset ID used by this operation
+             */
             void SetID(EntityID id) { m_ID = id; }
             // Components Interface
 
+            /**
+             * @brief Adds or replaces a component through the entity's borrowed registry.
+             * @param args Arguments forwarded to the requested operation
+             */
             template<typename T, typename... Args>
             T& Add(Args&&... args) {
                 return m_registry->Add<T>(
                     m_ID, std::forward<Args>(args)...);
             }
 
+            /**
+             * @brief Retrieves the requested component or singleton instance.
+             */
             template<typename T>
             T& Get() {
                 return m_registry->Get<T>(m_ID);
             }
 
+            /**
+             * @brief Checks whether the requested component or configuration variable exists.
+             * @return true if the requested component or configuration variable exists, false otherwise
+             */
             template<typename T>
             [[nodiscard]] bool Has() const {
-                return m_registry->Has<T>(m_ID);
+                return m_registry != nullptr && m_registry->Has<T>(m_ID);
             }
 
+            /**
+             * @brief Removes the requested component from the entity's registry.
+             */
             template<typename T>
             void Remove() const {
-                m_registry->Remove<T>(m_ID);
+                if (m_registry != nullptr) m_registry->Remove<T>(m_ID);
             }
 
             // Comparison Operators
+            /**
+             * @brief Compares both entity ID and registry identity.
+             * @param other Object to compare or copy
+             * @return true on success, false otherwise
+             */
             bool operator==(const Entity& other) const {
                 return m_ID == other.m_ID && m_registry == other.m_registry;
             }
 
+            /**
+             * @brief Checks whether entity ID or registry identity differs.
+             * @param other Object to compare or copy
+             * @return true if entity ID or registry identity differs, false otherwise
+             */
             bool operator!=(const Entity& other) const {
                 return !(*this == other);
             }

@@ -50,8 +50,15 @@ namespace Galaktic::Core::Managers {
             TextureManager(const string& path);
 
 
+            /**
+             * @brief Returns the borrowed fallback texture, or nullptr before successful creation.
+             */
             static SDL_Texture* GetMissingTexture();
 
+            /**
+             * @brief Creates an opaque checkerboard fallback and replaces the old fallback only on success.
+             * @param renderer SDL_Renderer used for drawing; ownership stays with the caller
+             */
             static void CreateMissingTexture(SDL_Renderer* renderer);
             /**
              * @brief Destroys the missing texture to free memory

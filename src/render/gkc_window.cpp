@@ -47,7 +47,8 @@ void Window::Draw(SDL_Renderer* renderer) const {
         SDL_SetWindowFullscreen(m_window, 0);
     }
     
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+    // Clear the entire output, including unused integer-scale borders.
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 }
 
@@ -98,7 +99,7 @@ void Window::SDL_KeyboardEventCheck(SDL_Event &e) {
             m_callback(event); break;
         }
         case SDL_EVENT_KEY_UP: {    
-            KeyHoldEvent event(e.key.key);
+            KeyUpEvent event(e.key.key);
             m_callback(event); break;
         }
         case SDL_EVENT_TEXT_INPUT: {
@@ -125,11 +126,12 @@ void Window::SDL_WindowEventCheck(SDL_Event &e) {
 
 void Window::SDL_MouseEventCheck(SDL_Event &e) {
     using namespace Galaktic::Core::Events;
-    SDL_ConvertEventToRenderCoordinates(m_renderer, &e);
     GKC_RELEASE_ASSERT(m_callback != nullptr,"Event callbacks are not registered, please register a callback function from the scene");
     switch (e.type) {
-        case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-            MouseClickEvent event(e.button.x, e.button.y, e.button.button);
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        case SDL_EVENT_MOUSE_BUTTON_UP: {
+            MouseClickEvent event(e.button.x, e.button.y, e.button.button,
+                e.type == SDL_EVENT_MOUSE_BUTTON_DOWN);
             m_callback(event); break;
         }
         case SDL_EVENT_MOUSE_WHEEL: {
@@ -154,15 +156,16 @@ void Galaktic::Render::Window::SetIcon(const path &iconPath) {
     SDL_DestroySurface(surface);
 }
 
-void Window::SetPixelResolution(int width, int height) {
+void Window::SetPixelResolution(int width, int height, bool integerScale) {
     if (width <= 0 || height <= 0) {
         Debug::Logger::LogErrorWithType(ErrorType::OutOfRange,
             "Pixel resolution must be bigger than 0 ({}x{})", width, height);
         return;
     }
 
-    if (!SDL_SetRenderLogicalPresentation(m_renderer, width, height,
-        SDL_LOGICAL_PRESENTATION_INTEGER_SCALE)) {
+    const auto presentation = integerScale ? SDL_LOGICAL_PRESENTATION_INTEGER_SCALE
+        : SDL_LOGICAL_PRESENTATION_LETTERBOX;
+    if (!SDL_SetRenderLogicalPresentation(m_renderer, width, height, presentation)) {
         Debug::Logger::LogErrorWithType(ErrorType::LibraryError,
             "Failed to set pixel resolution: {}", SDL_GetError());
         return;

@@ -24,7 +24,7 @@ void Console::ScrollBy(int lines)
 
 void Console::DisplayErrors(SDL_Renderer* renderer, TTF_Font* font)
 {
-    if(!m_sink)
+    if(!m_sink || font == nullptr)
     {
         return;
     }
@@ -51,7 +51,7 @@ void Console::DisplayErrors(SDL_Renderer* renderer, TTF_Font* font)
     float y = 8.f;
     for(auto it = recent.rbegin(); it != recent.rend(); ++it)
     {
-        SDL_Surface* surf = TTF_RenderText_Blended(font, (*it)->text.c_str(), 0, RED_COLOR);
+        SDL_Surface* surf = TTF_RenderText_Blended(font, CleanLogText((*it)->text).c_str(), 0, RED_COLOR);
         if(!surf)
         {
             continue;
@@ -70,6 +70,46 @@ void Console::DisplayErrors(SDL_Renderer* renderer, TTF_Font* font)
 }
 
 void Console::Display(SDL_Renderer* renderer, TTF_Font* font, int windowWidth, int windowHeight) 
+{
+    if (renderer == nullptr) return;
+
+    int logicalWidth = 0, logicalHeight = 0;
+    SDL_RendererLogicalPresentation presentation;
+    SDL_Rect viewport{}, clip{};
+    float scaleX = 1.f, scaleY = 1.f;
+    SDL_BlendMode blendMode;
+    SDL_Color drawColor{};
+    if (!SDL_GetRenderLogicalPresentation(renderer, &logicalWidth, &logicalHeight, &presentation) ||
+        !SDL_GetRenderViewport(renderer, &viewport) ||
+        !SDL_GetRenderClipRect(renderer, &clip) ||
+        !SDL_GetRenderScale(renderer, &scaleX, &scaleY) ||
+        !SDL_GetRenderDrawBlendMode(renderer, &blendMode) ||
+        !SDL_GetRenderDrawColor(renderer, &drawColor.r, &drawColor.g, &drawColor.b, &drawColor.a))
+        return;
+    const bool viewportSet = SDL_RenderViewportSet(renderer);
+    const bool clipEnabled = SDL_RenderClipEnabled(renderer);
+
+    // Text and panel both use native output pixels. Restore world coordinates
+    // before the caller presents the frame, including all early-return paths
+    // inside DisplayContents (closed console, missing font, etc.).
+    if (SDL_SetRenderLogicalPresentation(renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED) &&
+        SDL_SetRenderScale(renderer, 1.f, 1.f) &&
+        SDL_SetRenderViewport(renderer, nullptr) &&
+        SDL_SetRenderClipRect(renderer, nullptr) &&
+        SDL_GetCurrentRenderOutputSize(renderer, &windowWidth, &windowHeight))
+    {
+        DisplayContents(renderer, font, windowWidth, windowHeight);
+    }
+
+    SDL_SetRenderLogicalPresentation(renderer, logicalWidth, logicalHeight, presentation);
+    SDL_SetRenderScale(renderer, scaleX, scaleY);
+    SDL_SetRenderViewport(renderer, viewportSet ? &viewport : nullptr);
+    SDL_SetRenderClipRect(renderer, clipEnabled ? &clip : nullptr);
+    SDL_SetRenderDrawBlendMode(renderer, blendMode);
+    SDL_SetRenderDrawColor(renderer, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
+}
+
+void Console::DisplayContents(SDL_Renderer* renderer, TTF_Font* font, int windowWidth, int windowHeight)
 {
     if(!m_isVisible)
     {
@@ -95,7 +135,6 @@ void Console::Display(SDL_Renderer* renderer, TTF_Font* font, int windowWidth, i
     // stack upward from just above it, most recent line closest to input.
     float inputRowY = consolePanel.h - (float)lineHeight;
 
-    SDL_SetRenderLogicalPresentation(renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
     SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255);
     SDL_RenderLine(renderer, 0.f, inputRowY, consolePanel.w, inputRowY);
 
@@ -131,7 +170,7 @@ void Console::Display(SDL_Renderer* renderer, TTF_Font* font, int windowWidth, i
     float y = inputRowY - static_cast<float>(lineHeight);
     for (int i = newest; i >= oldest; --i, y -= lineHeight) {
         SDL_Color color = LevelToColor(lines[i].level);
-        SDL_Surface* surf = TTF_RenderText_Blended(font, lines[i].text.c_str(), 0, color);
+        SDL_Surface* surf = TTF_RenderText_Blended(font, CleanLogText(lines[i].text).c_str(), 0, color);
         if (!surf) continue;
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
         SDL_FRect dst = { 4.f, y, (float)surf->w, (float)surf->h };

@@ -28,11 +28,22 @@
 
 namespace Galaktic::Core::Managers
 {
+    /**
+     * @class TextManager
+     * @brief Stores text assets and manages the renderer text engine.
+     */
     class TextManager : public BaseManager<Render::Text, Render::TextInfo, Render::Text_List,
         MAX_ENTITY_QUANTITY, true>
     {
         public:
+            /**
+             * @brief Creates the renderer text engine used by the text manager.
+             * @param renderer SDL_Renderer used for drawing; ownership stays with the caller
+             */
             static void StartTextEngine(SDL_Renderer* renderer);
+            /**
+             * @brief Returns the borrowed renderer text engine owned by the manager.
+             */
             static TTF_TextEngine* GetTextEngine() { return m_textEngine; }
         private:
             static inline TTF_TextEngine* m_textEngine = nullptr;

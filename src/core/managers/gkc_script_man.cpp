@@ -89,9 +89,13 @@ void ScriptManager::RunScript(const string &scriptName) {
 }
 
 void ScriptManager::ExecuteGalakticModule() {
-    auto galakticFile = m_scriptList.find("Galaktic.lua");
-    auto gkcConstantsFile = m_scriptList.find("GlobalConstants.lua");
-
-    galakticFile->second.script_->RunScript();
-    gkcConstantsFile->second.script_->RunScript();
+    for (const auto* name : {"Galaktic.lua", "GlobalConstants.lua"}) {
+        const auto entry = m_scriptList.find(name);
+        if (entry == m_scriptList.end() || !entry->second.script_) {
+            Debug::Logger::LogErrorWithType(ErrorType::ScriptNotFound,
+                "Engine module '{}' is not registered", name);
+            continue;
+        }
+        entry->second.script_->RunScript();
+    }
 }

@@ -18,27 +18,7 @@ void MouseSystem::OnEvent(Events::GKC_Event &e) {
 
     dispatcher.DispatchEvent<Events::MouseClickEvent>(
         [this](Events::MouseClickEvent& e) {
-            if (GKC_SDLMOUSE_TO_ENUM(e) == MouseClick::LeftClick) {
-                m_mouseState[GKC_SDLMOUSE_TO_ENUM(e)] = true;
-            }
-            return false;
-        }
-    );
-
-    dispatcher.DispatchEvent<Events::MouseClickEvent>(
-        [this](Events::MouseClickEvent& e) {
-            if (GKC_SDLMOUSE_TO_ENUM(e) == MouseClick::RightClick) {
-                m_mouseState[GKC_SDLMOUSE_TO_ENUM(e)] = true;
-            }
-            return false;
-        }
-    );
-
-    dispatcher.DispatchEvent<Events::MouseClickEvent>(
-        [this](Events::MouseClickEvent& e) {
-            if (GKC_SDLMOUSE_TO_ENUM(e) == MouseClick::MiddleClick) {
-                m_mouseState[GKC_SDLMOUSE_TO_ENUM(e)] = true;
-            }
+            m_mouseState[GKC_SDLMOUSE_TO_ENUM(e)] = e.IsPressed();
             return false;
         }
     );
@@ -50,11 +30,11 @@ Mouse::Mouse(MouseSystem* mouseSystem) {
 }
 
 bool Mouse::IsMouseDown(MouseClick click) {
-    return m_mouseSystem->IsMouseClick(click);
+    return m_mouseSystem != nullptr && m_mouseSystem->IsMouseClick(click);
 }
 bool Mouse::IsMouseDownLua(Uint32 click) {
     auto validClick = static_cast<Uint32>(click);
-    return m_mouseSystem->IsMouseClick(static_cast<MouseClick>(validClick));
+    return IsMouseDown(static_cast<MouseClick>(validClick));
 }
 
 MouseClick Mouse::StringToMouseClick(const string& type) {

@@ -61,7 +61,18 @@ namespace Galaktic::Render {
              */
             Window(const string& title, Uint32 width, Uint32 height, Window_Type type);
 
+            /**
+             * @brief Releases the resources owned by this object.
+             */
             ~Window();
+            /**
+             * @brief Disables copying to keep ownership and lifetime tied to one instance.
+             */
+            Window(const Window&) = delete;
+            /**
+             * @brief Disables copying to keep ownership and lifetime tied to one instance.
+             */
+            Window& operator=(const Window&) = delete;
 
             /**
              * @brief Draws the window
@@ -69,10 +80,25 @@ namespace Galaktic::Render {
              */
             void Draw(SDL_Renderer* renderer) const;
 
+            /**
+             * @brief Returns the stored window title.
+             */
             [[nodiscard]] string GetTitle() const { return m_title; }
+            /**
+             * @brief Returns the native SDL window ID.
+             */
             [[nodiscard]] SDL_WindowID GetSDLWindowID() const { return SDL_GetWindowID(m_window); }
+            /**
+             * @brief Returns the engine window ID stored in this object or event.
+             */
             [[nodiscard]] GKC_WindowID GetWindowID() const { return m_windowID; }
+            /**
+             * @brief Returns the width in pixels.
+             */
             [[nodiscard]] Uint32 GetWidth() const { return m_width; }
+            /**
+             * @brief Returns the height in pixels.
+             */
             [[nodiscard]] Uint32 GetHeight() const { return m_height; }
 
             /**
@@ -81,21 +107,58 @@ namespace Galaktic::Render {
              * the real window size. Cameras and UI should use this, not GetWidth().
              */
             [[nodiscard]] Uint32 GetViewWidth() const { return HasPixelResolution() ? m_virtualWidth : m_width; }
+            /** @brief Returns logical view height, or native window height when pixel resolution is disabled. */
             [[nodiscard]] Uint32 GetViewHeight() const { return HasPixelResolution() ? m_virtualHeight : m_height; }
+            /** @brief Checks whether the window has a fixed logical pixel resolution. */
             [[nodiscard]] bool HasPixelResolution() const { return m_virtualWidth > 0 && m_virtualHeight > 0; }
+            /** @brief Returns the stored window type. */
             [[nodiscard]] Window_Type GetType() const { return m_type; }
+            /** @brief Returns the borrowed native SDL window owned by this object. */
             [[nodiscard]] SDL_Window* GetWindow() const { return m_window; }
+            /** @brief Returns the borrowed renderer owned by this window. */
             [[nodiscard]] SDL_Renderer* GetRenderer() const { return m_renderer; }
+            /** @brief Checks whether a window-close request has been recorded. */
             [[nodiscard]] bool ShouldClose() const { return m_requestedClose; }
 
-            void SetTitle(const string& title) { m_title = title; }
+            /**
+             * @brief Updates the native SDL window title and stores it when the operation succeeds.
+             * @param title Title
+             */
+            void SetTitle(const string& title) { if (SDL_SetWindowTitle(m_window, title.c_str())) m_title = title; }
+            /**
+             * @brief Updates the stored window width; does not resize the native window.
+             * @param width Width in pixels
+             */
             void SetWidth(Uint32 width) { m_width = width; }
+            /**
+             * @brief Updates the stored SDL window ID.
+             * @param id Entity or asset ID used by this operation
+             */
             void SetSDLWindowID(SDL_WindowID id) { m_ID = id; }
+            /**
+             * @brief Sets the engine window ID assigned by WindowManager.
+             * @param id Entity or asset ID used by this operation
+             */
             void SetWindowID(GKC_WindowID id) { m_windowID = id; }
+            /**
+             * @brief Updates the stored window height; does not resize the native window.
+             * @param height Height in pixels
+             */
             void SetHeight(Uint32 height) { m_height = height; }
+            /**
+             * @brief Updates the stored window type; does not recreate the native window.
+             * @param type Engine type identifier used by this operation
+             */
             void SetType(Window_Type type) { m_type = type; }
+            /**
+             * @brief Stores the event callback used by this window.
+             * @param callback Callback
+             */
             void SetCallback(const EventCallback& callback) { m_callback = callback; }
 
+            /**
+             * @brief Toggles the shared fullscreen request applied by Window::Draw.
+             */
             static void SetFullScreen() {
                 if (m_isFullscreen)
                     m_isFullscreen = false;
@@ -127,15 +190,17 @@ namespace Galaktic::Render {
             void SetIcon(const path& iconPath);
 
             /**
-             * Draws the scene at a small fixed size (for example 320x180) and scales it
-             * to the window by whole numbers (x1, x2, x3...), with black bars when the
-             * window does not fit exactly.
+             * Draws the scene at a small fixed size (for example 320x180).
+             * Integer scaling keeps pixel sizes uniform, leaving unused borders.
+             * Fractional scaling fits proportionally, leaving borders only when
+             * the window and scene have different aspect ratios.
              * 
              * @warning Do not combine with SDL_SetRenderScale.
              * @param width Virtual width in pixels (> 0)
              * @param height Virtual height in pixels (> 0)
+             * @param integerScale Use whole-number scaling; false allows fractional scaling
              */
-            void SetPixelResolution(int width, int height);
+            void SetPixelResolution(int width, int height, bool integerScale = true);
 
             /**
              * Goes back to drawing at the real window size

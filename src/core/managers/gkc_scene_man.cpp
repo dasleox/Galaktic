@@ -47,8 +47,8 @@ bool Managers::SceneManager::LoadSpecificSceneFromFile(const path &filepath) {
 
     string sceneName = StripExtension(filepath.filename().string());
     auto m_scene = make_unique<Scene>(sceneName, m_managersWrapper, m_deviceInfo, m_folder);
-    Filesystem::FileReader::ReadScene(scenePath, *m_scene.get()->GetECSManager(),
-        m_scene.get()->GetRegistry(), *m_scene);
+    if (!Filesystem::FileReader::ReadScene(scenePath, *m_scene.get()->GetECSManager(),
+        m_scene.get()->GetRegistry(), *m_scene)) return false;
     m_sceneList.emplace(sceneName, std::move(m_scene));
     
     if(!LoadSpecificScene(sceneName)) {
@@ -71,7 +71,9 @@ void Managers::SceneManager::ShowSceneList()
 unique_ptr<Scene> Managers::SceneManager::GetScene(const string &name) {
     auto it = m_sceneList.find(name);
     if (it != m_sceneList.end()) {
-        return std::move(it->second);
+        auto scene = std::move(it->second);
+        m_sceneList.erase(it);
+        return scene;
     }
     GKC_ENGINE_WARNING("Scene not found!");
     return nullptr;

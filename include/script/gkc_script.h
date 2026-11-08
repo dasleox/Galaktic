@@ -32,19 +32,49 @@ extern "C" {
 #include <LuaBridge/LuaBridge.h>
 
 namespace Galaktic::Script {
+    /**
+     * @class GKC_Script
+     * @brief Borrows a Lua state to load a script and invoke its named entry point.
+     */
     class GKC_Script {
         public:
+            /**
+             * @brief Loads and executes Lua source using the borrowed Lua state.
+             * @param scriptPath Lua script filepath
+             * @param luaState Borrowed Lua state used to load and execute the script
+             */
             explicit GKC_Script(const path& scriptPath, lua_State* luaState);
+            /**
+             * @brief Loads and executes Lua source using the borrowed Lua state.
+             * @param scriptName Name identifying the Lua script
+             * @param scriptString Lua source code
+             * @param luaState Borrowed Lua state used to load and execute the script
+             */
             explicit GKC_Script(const string& scriptName, const string& scriptString, lua_State* luaState);
 
+            /**
+             * @brief Invokes the script's named global entry-point function.
+             */
             void RunScript();
+            /**
+             * @brief Returns the borrowed Lua state used by this script or scripting interface.
+             */
             lua_State* GetLuaState() { return m_luaState; }
             
+            /**
+             * @brief Reads a typed global value from the borrowed Lua state.
+             * @param name Name used to identify the requested entry
+             */
             template<typename T>
             T GetGlobal(const string& name) {
                 return luabridge::getGlobal(m_luaState, name.c_str());
             }
 
+            /**
+             * @brief Writes a typed global value into the borrowed Lua state.
+             * @param name Name used to identify the requested entry
+             * @param value Value to convert, store or inspect
+             */
             template<typename T>
             void SetGlobal(const string& name, const T& value) {
                 luabridge::setGlobal(m_luaState, value, name.c_str());
@@ -55,11 +85,19 @@ namespace Galaktic::Script {
             string m_scriptName;
     };
 
+    /**
+     * @enum ScriptType
+     * @brief Identifies whether a script comes from a file or an inline string.
+     */
     enum class ScriptType {
         InlineScript,
         FileScript
     };
 
+    /**
+     * @struct ScriptInfo
+     * @brief Stores a script's ID, type and shared ownership.
+     */
     struct ScriptInfo {
         ScriptID scriptID_;
         shared_ptr<Script::GKC_Script> script_;
@@ -68,5 +106,10 @@ namespace Galaktic::Script {
     
     typedef unordered_map<string, ScriptInfo> Script_List;
 
+    /**
+     * @brief Checks whether the filepath exists and has the supported .lua extension.
+     * @param path Source asset filepath
+     * @return true if the filepath exists and has the supported .lua extension, false otherwise
+     */
     extern bool CheckScriptExtension(const path& path);
 }

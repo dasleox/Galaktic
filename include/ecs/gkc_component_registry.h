@@ -128,22 +128,41 @@ namespace Galaktic::ECS {
                 m_compTypes.emplace(typeIndex, info);
             }
 
+            /**
+             * @brief Returns registered serialization metadata; the type must already be registered.
+             * @param type Engine type identifier used by this operation
+             */
             static const ComponentTypeInfo& Get(const type_index& type) {
                 return m_compTypes.find(type)->second;
             }
 
+            /**
+             * @brief Checks that serialization metadata already exists for the runtime component type.
+             * @param type Engine type identifier used by this operation
+             * @param id Entity or asset ID used by this operation
+             * @param isTag Is tag
+             */
             static void RegisterComponentByType(const type_index& type, EntityID id, bool isTag) {
                 auto it = m_compTypes.find(type);
                 if (it == m_compTypes.end())
                     Debug::Logger::LogFatalWithType(ErrorType::InvalidComponent, "Attempted to deserialize unregistered component type");
             }
             
+            /**
+             * @brief Removes the shared serialization metadata for a component type.
+             * @param type Engine type identifier used by this operation
+             */
             static void UnregisterComponentByType(const type_index& type) {
                 if(m_compTypes.contains(type)) {
                     m_compTypes.erase(type);
                 }
             }
 
+            /**
+             * @brief Checks whether the component type has serialization metadata.
+             * @param type Engine type identifier used by this operation
+             * @return true if the component type has serialization metadata, false otherwise
+             */
             static bool IsRegistered(const type_index& type) {
                 return m_compTypes.contains(type);
             }
@@ -156,6 +175,9 @@ namespace Galaktic::ECS {
                 m_compTypes.clear();
             }
 
+            /**
+             * @brief Returns mutable access to registered component-type metadata.
+             */
             static unordered_map<type_index, ComponentTypeInfo>& GetComponentTypes() {
                 return m_compTypes;
             }

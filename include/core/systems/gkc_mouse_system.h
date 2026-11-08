@@ -79,15 +79,37 @@ namespace Galaktic::Core::Systems {
         return static_cast<MouseClick>(button);
     }
 
+    /**
+     * @class Mouse
+     * @brief Exposes the mouse system assigned to the static input interface.
+     */
     class Mouse {
         public:
+            /**
+             * @brief Assigns the input system used by the static input queries.
+             * @param mouseSystem Mouse system used by the static input interface
+             */
             Mouse(MouseSystem* mouseSystem);
 
+            /**
+             * @brief Checks whether the assigned mouse system reports the button as pressed; false before assignment.
+             * @param click Click
+             * @return true if the assigned mouse system reports the button as pressed; false before assignment, false otherwise
+             */
             static bool IsMouseDown(MouseClick click);
+            /**
+             * @brief Checks a Lua mouse-button number through the assigned mouse system.
+             * @param click Click
+             * @return true on success, false otherwise
+             */
             static bool IsMouseDownLua(Uint32 click);
         private:
             static MouseSystem* m_mouseSystem ;
             static unordered_map<string, MouseClick> m_clickMap;
+            /**
+             * @brief Converts a known mouse-button name; falls back to the left button for unknown names.
+             * @param type Engine type identifier used by this operation
+             */
             static MouseClick StringToMouseClick(const string& type);
     };
 

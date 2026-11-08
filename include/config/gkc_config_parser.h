@@ -26,6 +26,10 @@
 
 namespace Galaktic::Config
 {
+    /**
+     * @struct BindEntry
+     * @brief Stores the key, action and callback parsed from one binding directive.
+     */
     struct BindEntry
     {
         string bindKey;
@@ -34,16 +38,36 @@ namespace Galaktic::Config
         string callbackName;
     };  
 
+    /**
+     * @class ConfigParser
+     * @brief Parses input-binding directives from configuration files.
+     */
     class ConfigParser
     {
         private:
             static path m_configFilepath;
             static vector<BindEntry> m_bindEntryList;
         private:
+            /**
+             * @brief Parses a binding directive into its key, action and callback fields.
+             * @param line Configuration line to parse
+             */
             static BindEntry ParseLine(const string& line);
+            /**
+             * @brief Removes leading and trailing whitespace from a string.
+             * @param str String to convert or inspect
+             */
             static std::string Trim(const string& str);
         public:
+            /**
+             * @brief Reads binding directives from a configuration file.
+             * @param filepath Filepath to load or store
+             * @return true on success, false otherwise
+             */
             static bool ParseFile(const path& filepath);
+            /**
+             * @brief Returns mutable access to the parsed binding entries.
+             */
             static vector<BindEntry>& GetBindEntryList() { return m_bindEntryList; }
     };
 }

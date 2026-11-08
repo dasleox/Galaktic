@@ -43,6 +43,12 @@ namespace Galaktic::Core::Managers
     class SceneManager 
     {
         public:
+            /**
+             * @brief Initializes this manager using the supplied project context.
+             * @param folder Folder containing the managed files
+             * @param wrapper Borrowed application asset-manager pointers
+             * @param info Device information used when creating scenes
+             */
             SceneManager(const path& folder, ManagersWrapper* wrapper, const DeviceInformation& info);
 
             /**
@@ -85,9 +91,9 @@ namespace Galaktic::Core::Managers
             bool SceneExists(const string& name);
 
             /**
-             * Gets the scene pointer if it exists on the list
-             * @param name 
-             * @return unique_ptr<Scene> if the scene exists, nullptr otherwise
+             * Transfers scene ownership to the caller and removes its manager entry.
+             * @param name Name of the scene to extract
+             * @return Owned scene if it exists, nullptr otherwise
              */
             unique_ptr<Scene> GetScene(const string& name);
         private:

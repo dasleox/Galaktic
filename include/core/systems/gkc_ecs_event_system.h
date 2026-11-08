@@ -41,6 +41,10 @@ namespace Galaktic::Core::Systems {
      */
     class ECS_EventSystem : public BaseSystem {
         public:
+            /**
+             * @brief Stores the entity or system dependencies used by this engine system.
+             * @param manager Borrowed ECS manager that must outlive this helper
+             */
             explicit ECS_EventSystem(Managers::ECS_Manager& manager);
 
             /**

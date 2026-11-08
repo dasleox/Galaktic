@@ -26,6 +26,10 @@
 
 namespace Galaktic::Render
 {
+    /**
+     * @enum FontDirection
+     * @brief Identifies the writing direction used for font shaping.
+     */
     enum class FontDirection
     {
         Invalid     = TTF_DIRECTION_INVALID,        
@@ -35,6 +39,10 @@ namespace Galaktic::Render
         BottomToTop = TTF_DIRECTION_BTT             /**< Bottom to Top */
     };
 
+    /**
+     * @enum FontStyle
+     * @brief Identifies font style flags supported by SDL_ttf.
+     */
     enum class FontStyle
     {
         Normal          = TTF_STYLE_NORMAL,
@@ -44,6 +52,10 @@ namespace Galaktic::Render
         StrikeThrough   = TTF_STYLE_STRIKETHROUGH
     };
 
+    /**
+     * @enum FontAlignment
+     * @brief Identifies horizontal alignment for wrapped font rendering.
+     */
     enum class FontAlignment
     {
         Invalid = TTF_HORIZONTAL_ALIGN_INVALID,
@@ -52,28 +64,87 @@ namespace Galaktic::Render
         Right   = TTF_HORIZONTAL_ALIGN_RIGHT
     };
 
+    /**
+     * @class Font
+     * @brief Owns a TTF_Font and exposes font settings. The font must outlive text that borrows it.
+     */
     class Font
     {
         public:
+            /**
+             * @brief Opens a font at the requested size; check IsValid before using it.
+             * @param path Source asset filepath
+             * @param renderer SDL_Renderer used for drawing; ownership stays with the caller
+             * @param size Font size in points
+             */
             Font(const path& path, SDL_Renderer* renderer, float size);
+            /**
+             * @brief Releases the resources owned by this object.
+             */
             ~Font();
+            /**
+             * @brief Disables copying to keep ownership and lifetime tied to one instance.
+             */
+            Font(const Font&) = delete;
+            /**
+             * @brief Disables copying to keep ownership and lifetime tied to one instance.
+             */
+            Font& operator=(const Font&) = delete;
+            /**
+             * @brief Returns the borrowed TTF_Font; nullptr if loading failed.
+             */
             [[nodiscard]] TTF_Font* GetFont() const { return m_font; }
+            /**
+             * @brief Returns the last successfully applied font size in points.
+             */
             [[nodiscard]] float GetFontSize() const { return m_fontSize; }
+            /**
+             * @brief Checks whether this handle or underlying resource is initialized for use.
+             * @return true if this handle or underlying resource is initialized for use, false otherwise
+             */
             bool IsValid() const { return m_font != nullptr; }
 
+            /**
+             * @brief Sets the font's shaping direction.
+             * @param direction Text shaping direction
+             */
             void SetFontDirection(FontDirection direction);
+            /**
+             * @brief Sets the font outline thickness in pixels.
+             * @param outline Font outline thickness in pixels
+             */
             void SetOutline(int outline);
+            /**
+             * @brief Applies a finite positive font size and updates the cached size on success.
+             * @param fontSize Font size in points
+             */
             void SetSize(float fontSize);
+            /**
+             * @brief Sets horizontal alignment for wrapped font rendering.
+             * @param alignment Horizontal wrapped-text alignment
+             */
             void SetAlignment(FontAlignment alignment);
 
         private:
             TTF_Font* m_font = nullptr;
-            float m_fontSize;
+            float m_fontSize = 12.f;
     };
 
 
+    /**
+     * @brief Converts an engine font direction to the corresponding SDL_ttf value.
+     * @param direction Text shaping direction
+     */
     extern TTF_Direction FontDirectionToTTF_Direction(FontDirection direction);
+    /**
+     * @brief Converts an engine font style to the corresponding SDL_ttf flags.
+     * @param style Style
+     */
     extern TTF_FontStyleFlags FontStyleToTTF_FontStyle(FontStyle style);
+    /**
+     * @brief Converts an engine font alignment to the corresponding SDL_ttf value.
+     * @param alignment Horizontal wrapped-text alignment
+     */
     extern TTF_HorizontalAlignment FontAlignmentToTTF_HorizontalAlignment(FontAlignment alignment);
     
     /**

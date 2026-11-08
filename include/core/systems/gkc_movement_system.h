@@ -56,7 +56,17 @@ namespace Galaktic::Core::Systems {
         private:
             KeySystem& m_keySystem;
 
+            /**
+             * @brief Adds the configured jump amount to the eligible player's vertical force.
+             * @param entity Entity
+             */
             void ApplyJump(ECS::Entity& entity);
+            /**
+             * @brief Checks the configured keyboard binding, falling back to the supplied key when no binding exists.
+             * @param action Engine action to query
+             * @param fallbackKey Key used when no configured binding exists
+             * @return true on success, false otherwise
+             */
             bool IsActionDown(Config::ActionType action, Key fallbackKey) const;
     };
 }

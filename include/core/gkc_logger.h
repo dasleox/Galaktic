@@ -64,22 +64,38 @@ spdlog::level::critical, __VA_ARGS__)
 namespace Galaktic
 {
     enum class ErrorType;
+    /**
+     * @brief Returns the diagnostic name corresponding to an engine error category.
+     * @param error Engine error category
+     */
     constexpr const char* ErrorTypeToDisplayString(ErrorType error);
 }
 
 namespace Galaktic::Debug {
+    /**
+     * @struct ConsoleLine
+     * @brief Stores a formatted log message, severity and SDL timestamp for console display.
+     */
     struct ConsoleLine
     {
         string text;
         spdlog::level::level_enum level;
         Uint64 timestamp = 0;
     };
+    /**
+     * @class ConsoleMutex
+     * @brief Collects recent log messages through spdlog's synchronized sink interface.
+     */
     template <typename Mutex>
     class ConsoleMutex : public spdlog::sinks::base_sink<Mutex>
     {
         private:
             vector<ConsoleLine> m_lines;
         protected:
+            /**
+             * @brief Formats and appends a log line, discarding the oldest lines when the console limit is reached.
+             * @param msg Log message or format string
+             */
             void sink_it_(const spdlog::details::log_msg& msg) override
             {
                 spdlog::memory_buf_t formatted;
@@ -95,10 +111,19 @@ namespace Galaktic::Debug {
                     m_lines.erase(m_lines.begin());
                 }
             }
+            /**
+             * @brief Implements the in-memory sink's no-op flush hook.
+             */
             void flush_() override {} 
         public:
             static constexpr size_t m_MAXLINES = 256;
+            /**
+             * @brief Returns borrowed chronological log lines; the sink owns their storage.
+             */
             const vector<ConsoleLine>& GetLines() const { return m_lines; }
+            /**
+             * @brief Clears the stored entries.
+             */
             void Clear() { m_lines.clear(); };
     };
     using ConsoleMutex_mt = ConsoleMutex<std::mutex>;
@@ -113,8 +138,17 @@ namespace Galaktic::Debug {
             static shared_ptr<spdlog::logger> m_clientLogger;
             static shared_ptr<ConsoleMutex_mt> m_mutexSink;
         public:
+            /**
+             * @brief Returns access to the shared engine logger initialized by Logger::Init.
+             */
             static shared_ptr<spdlog::logger>& GetEngineLogger()   { return m_engineLogger; }
+            /**
+             * @brief Returns access to the shared client logger initialized by Logger::Init.
+             */
             static shared_ptr<spdlog::logger>& GetClientLogger()   { return m_clientLogger; }
+            /**
+             * @brief Returns access to the shared synchronized console log sink.
+             */
             static shared_ptr<ConsoleMutex_mt>& GetConsoleMutex()     { return m_mutexSink;    }
 
             /**
@@ -127,10 +161,28 @@ namespace Galaktic::Debug {
              */
             static void PrintEngineInformation();
         
+            /**
+             * @brief Logs an informational Lua message with its script call context.
+             * @param msg Log message or format string
+             */
             static void LogInfoLua(const string& msg);
+            /**
+             * @brief Logs a Lua warning with its script call context.
+             * @param msg Log message or format string
+             */
             static void LogWarningLua(const string& msg);
+            /**
+             * @brief Logs a Lua error with its script call context.
+             * @param msg Log message or format string
+             */
             static void LogErrorLua(const string& msg);
 
+            /**
+             * @brief Formats an error message and appends its engine error category.
+             * @param type Engine type identifier used by this operation
+             * @param msg Log message or format string
+             * @param args Arguments forwarded to the requested operation
+             */
             template <typename ...Args>
             static void LogErrorWithType(ErrorType type, const string& msg, Args&&... args)
             {
@@ -141,6 +193,12 @@ namespace Galaktic::Debug {
                     std::forward<Args>(args)...
                 );
             }
+            /**
+             * @brief Formats a critical error message and appends its engine error category.
+             * @param type Engine type identifier used by this operation
+             * @param msg Log message or format string
+             * @param args Arguments forwarded to the requested operation
+             */
             template <typename ...Args>
             static void LogFatalWithType(ErrorType type, const string& msg, Args&&... args)
             {

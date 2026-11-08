@@ -43,10 +43,11 @@ void Galaktic::Core::Managers::TextureManager::CreateMissingTexture(SDL_Renderer
     }
 
     SDL_Surface* surface = SDL_CreateSurfaceFrom(size, size, SDL_PIXELFORMAT_RGBA8888, pixels.data(), size * 4);
-    m_missingTexture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (surface == nullptr) return;
+    SDL_Texture* replacement = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_DestroySurface(surface);
-
-    m_missingTexture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (m_missingTexture != nullptr)
-        SDL_SetTextureScaleMode(m_missingTexture, SDL_SCALEMODE_NEAREST);
+    if (replacement == nullptr) return;
+    SDL_SetTextureScaleMode(replacement, SDL_SCALEMODE_NEAREST);
+    SDL_DestroyTexture(m_missingTexture);
+    m_missingTexture = replacement;
 }

@@ -219,19 +219,14 @@ namespace Galaktic::Core::Managers
                     return;
                 }
 
-                std::error_code errorCode;
-                assetInfo->lastWriteTime = std::filesystem::last_write_time(assetInfo->GetFilepath(), errorCode);
-                
-                // Make a fresh instance of the asset to replace the old one, forwarding any additional arguments
-                auto freshAsset = make_unique<AssetType>(assetInfo->GetFilepath(), std::forward<Args>(args)...);
-                if(freshAsset == nullptr)
+                // LoadAsset validates the replacement before releasing the old asset.
+                if (!assetInfo->LoadAsset(assetInfo->GetFilepath(), std::forward<Args>(args)...))
                 {
                     Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError,
                         "Failed to reload asset: {}", assetInfo->GetFilepath());
                     return;
                 }
 
-                assetInfo->asset = std::move(freshAsset);   
                 GKC_ENGINE_INFO("Asset '{}' reloaded successfully!", assetInfo->GetFilepath());
             }
 
@@ -327,11 +322,21 @@ namespace Galaktic::Core::Managers
             }
 
 
+            /**
+             * @brief Checks whether the asset filename is registered, regardless of load state.
+             * @param name Name used to identify the requested entry
+             * @return true if the asset filename is registered, regardless of load state, false otherwise
+             */
             static bool AssetExistsByName(const string& name)
             {
                 return m_NameToIDList.contains(name);
             }
 
+            /**
+             * @brief Checks whether the asset ID is registered, regardless of whether loading succeeded.
+             * @param id Entity or asset ID used by this operation
+             * @return true if the asset ID is registered, regardless of whether loading succeeded, false otherwise
+             */
             static bool AssetExistsByID(uint32_t id)
             {
                 return m_assetList.contains(id);
@@ -510,8 +515,17 @@ namespace Galaktic::Core::Managers
                 PrintList();
             }
 
+            /**
+             * @brief Returns mutable access to the manager's owned asset entries.
+             */
             static TypeList& GetAssetList() { return m_assetList; }
+            /**
+             * @brief Returns the read-only asset-filename to ID lookup map.
+             */
             static const unordered_map<string, uint32_t>& GetNameToIDList() { return m_NameToIDList; }
+            /**
+             * @brief Returns the read-only asset-ID to filename lookup map.
+             */
             static const unordered_map<uint32_t, string>& GetIDToNameList() { return m_IDToNameList; } 
     };
 }

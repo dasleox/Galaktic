@@ -23,6 +23,7 @@
 
 #pragma once
 #include <pch.hpp>
+#include <ecs/gkc_entity.h>
 #include <core/systems/gkc_system.h>
 
 namespace Galaktic::Core::Systems {
@@ -44,6 +45,10 @@ namespace Galaktic::Core::Systems {
      */
     class CameraSystem final : public BaseSystem {
         public:
+            /**
+             * @brief Stores the entity or system dependencies used by this engine system.
+             * @param camera Camera entity or coordinate used by this operation
+             */
             explicit CameraSystem(ECS::Entity& camera);
 
             /**
@@ -62,6 +67,9 @@ namespace Galaktic::Core::Systems {
             void Update(const unordered_map<EntityID, ECS::Entity> &list, float dt, Uint32 width,
                 Uint32 height) override;
 
+            /**
+             * @brief Returns the active camera handle without transferring registry ownership.
+             */
             ECS::Entity& GetActiveCamera() { return m_activeCamera; }
 
             /**
@@ -82,6 +90,6 @@ namespace Galaktic::Core::Systems {
              */
             void FindPrimaryCamera(const unordered_map<EntityID, ECS::Entity>& list);
             
-            ECS::Entity& m_activeCamera;
+            ECS::Entity m_activeCamera;
     };
 }

@@ -41,20 +41,50 @@ namespace Galaktic::Render
             SDL_Texture* m_texture = nullptr;
             SDL_Surface* m_surface = nullptr;
         public:
+            /**
+             * @brief Loads an image, retains an RGBA32 source surface and creates a nearest-scaled streaming texture.
+             * @param path Source asset filepath
+             * @param renderer SDL_Renderer used for drawing; ownership stays with the caller
+             */
             Texture(const path& path, SDL_Renderer* renderer);
+            /**
+             * @brief Releases the resources owned by this object.
+             */
             ~Texture();
+            /**
+             * @brief Disables copying to keep ownership and lifetime tied to one instance.
+             */
+            Texture(const Texture&) = delete;
+            /**
+             * @brief Disables copying to keep ownership and lifetime tied to one instance.
+             */
+            Texture& operator=(const Texture&) = delete;
+            /**
+             * @brief Returns the borrowed renderer texture; nullptr if loading or upload failed.
+             */
             [[nodiscard]] SDL_Texture* GetSDLTexture() const { 
                 if(IsValid()) 
                     return m_texture; 
                 return nullptr;
             }
+            /**
+             * @brief Returns the borrowed RGBA32 source surface; its lifetime belongs to the texture asset.
+             */
             [[nodiscard]] SDL_Surface* GetSDLSurface() const { 
                 if(IsSurfaceValid()) 
                     return m_surface; 
                 return nullptr; 
             }
             
+            /**
+             * @brief Checks whether this handle or underlying resource is initialized for use.
+             * @return true if this handle or underlying resource is initialized for use, false otherwise
+             */
             bool IsValid() const { return m_texture != nullptr; }
+            /**
+             * @brief Checks whether the texture retains a CPU source surface.
+             * @return true if the texture retains a CPU source surface, false otherwise
+             */
             bool IsSurfaceValid() const { return m_surface != nullptr; }
     };
 

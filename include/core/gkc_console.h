@@ -48,6 +48,9 @@ namespace Galaktic::Core {
         float m_playerXCoordinate = 0.f;
         float m_playerYCoordinate = 0.f;
 
+        /**
+         * @brief Initializes the diagnostic snapshot with its default values.
+         */
         DebugInformation() = default;
     };
 
@@ -56,6 +59,10 @@ namespace Galaktic::Core {
         class SceneManager;
     }
 
+    /**
+     * @enum CommandTypes
+     * @brief Identifies the operation requested by a console command.
+     */
     enum class CommandTypes : uint32_t {
         // Scene Related
         Unknown = 0,
@@ -102,9 +109,22 @@ namespace Galaktic::Core {
         ShowDebugInformationToggle,
     };
 
+    /**
+     * @struct CommandWrapper
+     * @brief Stores a parsed console command, its arguments and its operation type.
+     */
     struct CommandWrapper   
     {
+        /**
+         * @brief Initializes a parsed command and its argument string.
+         */
         CommandWrapper() {}
+        /**
+         * @brief Initializes a parsed command and its argument string.
+         * @param command Console command name
+         * @param args Arguments forwarded to the requested operation
+         * @param type Engine type identifier used by this operation
+         */
         CommandWrapper(const string& command, const string& args, CommandTypes type)
         {
             this->command = command;
@@ -112,9 +132,17 @@ namespace Galaktic::Core {
             this->type = type;
         }
 
+        /**
+         * @brief Checks whether the parsed command has no recognized name or operation type.
+         * @return true if the parsed command has no recognized name or operation type, false otherwise
+         */
         constexpr bool IsEmpty() {
             return command.empty() || type == CommandTypes::Unknown; 
         }
+        /**
+         * @brief Checks whether the parsed command contains an argument string.
+         * @return true if the parsed command contains an argument string, false otherwise
+         */
         constexpr bool HasArguments()
         {
             return !args.empty();
@@ -157,6 +185,15 @@ namespace Galaktic::Core {
      */
     class Console {
         private:
+            // Called by Display with native-pixel coordinates; may return early.
+            /**
+             * @brief Draws console content in the native-pixel coordinate system established by Display.
+             * @param renderer SDL_Renderer used for drawing; ownership stays with the caller
+             * @param font Borrowed TTF_Font, which must outlive the text using it
+             * @param windowWidth Window width used for panel layout
+             * @param windowHeight Window height used for panel layout
+             */
+            void DisplayContents(SDL_Renderer* renderer, TTF_Font* font, int windowWidth, int windowHeight);
             Scene* m_currentScene = nullptr;
             Managers::SceneManager* m_sceneManager = nullptr;
             unique_ptr<DebugInformation> m_pDebugInfo = nullptr;
@@ -175,11 +212,15 @@ namespace Galaktic::Core {
             int m_visibleLines = 0;     
             int m_lastLineCount = 0; 
         public:
+            /**
+             * @brief Stores the shared log sink used to display console messages.
+             * @param sink Shared console log sink
+             */
             Console(shared_ptr<Debug::ConsoleMutex_mt> sink);
 
             /**
-             * @brief Draws the console panel, its recent log lines, and the
-             *        input line. Does nothing while `IsVisible()` is false.
+             * @brief Draws the console in native output pixels and restores the
+             *        caller's renderer state. Shows recent errors while closed.
              * @param renderer SDL_Renderer to draw with
              * @param font Font used for every line; if null, only the panel
              *        background is drawn (no text)
@@ -221,7 +262,14 @@ namespace Galaktic::Core {
             void OnEvent(Events::GKC_Event& e);
 
             /// @brief Flips whether the console panel is drawn and captures input.
+            /**
+             * @brief Toggles whether the console panel and input line are visible.
+             */
             void ToggleVisibility() { m_isVisible = !m_isVisible; }
+            /**
+             * @brief Checks whether the console panel is visible.
+             * @return true if the console panel is visible, false otherwise
+             */
             [[nodiscard]] bool IsVisible() const { return m_isVisible; }
 
             /**
@@ -231,40 +279,110 @@ namespace Galaktic::Core {
             void ScrollBy(int lines);
 
             /// @brief Scrolls the console's log output to the bottom (most recent lines).
+            /**
+             * @brief Resets console scrolling to the newest log messages.
+             */
             void ScrollToBottom() { m_scrollOffset = 0; }
             
         private:
             /// @brief Runs every *Commands() handler; each ignores types it doesn't own.
+            /**
+             * @brief Dispatches a parsed command to its command category handler.
+             * @param wrapper Parsed console command and its arguments
+             */
             void CommandSwitch(const CommandWrapper& wrapper);
 
             /// @brief Resolves a bare, argument-less command (e.g. "help").
+            /**
+             * @brief Classifies a console command that does not take arguments.
+             * @param command Console command name
+             */
             CommandWrapper NoArgumentCommands(const string& command);
             /// @brief Resolves a command with a trailing argument string (e.g. "load myscene").
+            /**
+             * @brief Classifies a console command and stores its argument string.
+             * @param command Console command name
+             * @param args Arguments forwarded to the requested operation
+             */
             CommandWrapper ArgumentCommands(const string& command, const string& args);
 
+            /**
+             * @brief Executes scene-management console commands.
+             * @param wrapper Parsed console command and its arguments
+             */
             void SceneCommands(const CommandWrapper& wrapper);
+            /**
+             * @brief Executes entity-management console commands.
+             * @param wrapper Parsed console command and its arguments
+             */
             void EntityCommands(const CommandWrapper& wrapper);
+            /**
+             * @brief Executes script-management console commands.
+             * @param wrapper Parsed console command and its arguments
+             */
             void ScriptCommands(const CommandWrapper& wrapper);
+            /**
+             * @brief Executes application and console-control commands.
+             * @param wrapper Parsed console command and its arguments
+             */
             void AppCommands(const CommandWrapper& wrapper);
+            /**
+             * @brief Executes audio playback and volume console commands.
+             * @param wrapper Parsed console command and its arguments
+             */
             void SoundCommands(const CommandWrapper& wrapper);
+            /**
+             * @brief Executes diagnostic and rendering-overlay console commands.
+             * @param wrapper Parsed console command and its arguments
+             */
             void DebugCommands(const CommandWrapper& wrapper);
 
             /// @brief Clears all buffered log lines (`clear`).
+            /**
+             * @brief Clears the console's log sink.
+             */
             void ClearConsole();
             /// @brief Prints the list of available commands (`help`).
+            /**
+             * @brief Logs help for the requested console command section.
+             * @param type Engine type identifier used by this operation
+             */
             void DisplayHelp(const string& type);
             /// @brief Prints the current frame rate, derived from Clock (`show_fps`).
+            /**
+             * @brief Logs frames per second calculated from the last clock delta.
+             */
             void ShowFPS();
             /// @brief Prints basic engine/display info (`show_debug_info`).
+            /**
+             * @brief Logs the engine's diagnostic information.
+             */
             void ShowDebugInformation();
 
+            /**
+             * @brief Logs a console argument error.
+             * @param message Diagnostic message
+             */
             void InvalidArgumentError(const string& message);
 
             /// @brief Splits a command's argument string on whitespace.
+            /**
+             * @brief Splits a console argument string into individual arguments.
+             * @param args Arguments forwarded to the requested operation
+             */
             vector<string> GetListOfArguments(const string& args);
             /// @brief Maps a spdlog level to the color its line is drawn in.
+            /**
+             * @brief Returns the console text color associated with a log severity.
+             * @param level Log severity
+             */
             SDL_Color LevelToColor(spdlog::level::level_enum level);      
 
+            /**
+             * @brief Draws recent error messages when a usable font and log sink are available.
+             * @param renderer SDL_Renderer used for drawing; ownership stays with the caller
+             * @param font Borrowed TTF_Font, which must outlive the text using it
+             */
             void DisplayErrors(SDL_Renderer* renderer, TTF_Font* font);
     };
 }

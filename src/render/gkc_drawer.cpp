@@ -23,6 +23,10 @@ void Drawer::DrawEntities(const ECS::Entity_List& list, SDL_Renderer *renderer,
         if (entity.Has<ECS::LightTag>() || entity.Has<ECS::CameraComponent>()
             || id == InvalidEntity) continue;
 
+        if (!entity.Has<ECS::TransformComponent>()) continue;
+        if (entity.Has<ECS::VisibilityComponent>() &&
+            !entity.Get<ECS::VisibilityComponent>().visible) continue;
+
         auto& transform = entity.Get<ECS::TransformComponent>();
         SDL_FRect rect;
         rect.w = transform.size.x;
@@ -73,9 +77,15 @@ void Drawer::CalculateVertices(SDL_FRect rect, float rotation, SDL_Color color, 
 void Drawer::RenderColor(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer) {
     static const int indices[6] = { 0, 1, 2, 0, 2, 3 };
     SDL_Vertex verts[4];
+    const SDL_Color color = entity.Has<ECS::ColorComponent>()
+        ? entity.Get<ECS::ColorComponent>().color : GREY_COLOR;
     CalculateVertices(rect, entity.Get<ECS::TransformComponent>().rotation,
-        entity.Get<ECS::ColorComponent>().color, verts);
+        color, verts);
+    SDL_BlendMode previousBlendMode = SDL_BLENDMODE_NONE;
+    SDL_GetRenderDrawBlendMode(renderer, &previousBlendMode);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_RenderGeometry(renderer, NULL, verts, 4, indices, 6);
+    SDL_SetRenderDrawBlendMode(renderer, previousBlendMode);
 }
 
 void Drawer::RenderTexture(SDL_FRect rect, ECS::Entity& entity, SDL_Renderer* renderer) {
@@ -123,7 +133,7 @@ void Drawer::DrawWireframes(const ECS::Entity_List& list, SDL_Renderer* renderer
     auto& entityOrderedList = OrderByZIndex(list);
     
     for (auto [id, entity] : entityOrderedList) {
-        if (entity.Has<ECS::LightTag>() || entity.Has<ECS::CameraComponent>()
+        if (!entity.Has<ECS::TransformComponent>() || entity.Has<ECS::LightTag>() || entity.Has<ECS::CameraComponent>()
             || id == InvalidEntity) continue;
 
         auto& transform = entity.Get<ECS::TransformComponent>();
@@ -154,7 +164,7 @@ void Drawer::DrawColliders(const ECS::Entity_List& list, SDL_Renderer* renderer,
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     for (auto [id, entity] : entityOrderedList) {
-        if (entity.Has<ECS::LightTag>() || entity.Has<ECS::CameraComponent>()
+        if (!entity.Has<ECS::TransformComponent>() || entity.Has<ECS::LightTag>() || entity.Has<ECS::CameraComponent>()
             || id == InvalidEntity) continue;
 
         if (!entity.Has<ECS::CollisionComponent>()) continue;
@@ -189,10 +199,13 @@ const std::vector<std::pair<EntityID, ECS::Entity>> Drawer::OrderByZIndex(const 
     std::vector<std::pair<EntityID, ECS::Entity>> orderedList(list.begin(), list.end());
     std::sort(orderedList.begin(), orderedList.end(),
         [](std::pair<EntityID, ECS::Entity>& a, std::pair<EntityID, ECS::Entity>& b) {
-            if(!a.second.Has<ECS::TransformComponent>() || !b.second.Has<ECS::TransformComponent>()) {
-                return false;
-            }
-            return a.second.Get<ECS::TransformComponent>().zIndex < b.second.Get<ECS::TransformComponent>().zIndex;
+            const bool aHasTransform = a.second.Has<ECS::TransformComponent>();
+            const bool bHasTransform = b.second.Has<ECS::TransformComponent>();
+            if (aHasTransform != bHasTransform) return aHasTransform;
+            if (!aHasTransform) return a.first < b.first;
+            const int aZ = a.second.Get<ECS::TransformComponent>().zIndex;
+            const int bZ = b.second.Get<ECS::TransformComponent>().zIndex;
+            return aZ == bZ ? a.first < b.first : aZ < bZ;
         });
         
     return orderedList;

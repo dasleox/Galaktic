@@ -57,8 +57,14 @@ namespace Galaktic::Core {
              */
             App(const path& project_path, const string& title);
 
+            /**
+             * @brief Returns access to the application's scene-manager pointer.
+             */
             Managers::SceneManager*& GetSceneManager() { return m_sceneManager; }
 
+            /**
+             * @brief Returns the application's console pointer without transferring ownership.
+             */
             static Console* GetConsole() { return m_console.get(); }
         private:
             Managers::SceneManager* m_sceneManager;                 // Scene Manager
@@ -73,6 +79,9 @@ namespace Galaktic::Core {
              */
             void ScreenStartup();
 
+            /**
+             * @brief Applies the application's configuration variables during startup.
+             */
             void SetConfigurationVariables();
     };
 }

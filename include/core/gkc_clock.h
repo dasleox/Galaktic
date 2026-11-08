@@ -40,6 +40,9 @@ namespace Galaktic::Core {
              * @brief Updates delta time
              */
             static void Update();
+            /**
+             * @brief Returns the elapsed time in seconds measured by the last clock update.
+             */
             static double GetDeltaTime() { return m_deltaTime; }
         private:
             static inline Uint64 m_lastCounter;

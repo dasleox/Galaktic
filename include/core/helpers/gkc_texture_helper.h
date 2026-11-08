@@ -30,10 +30,23 @@ namespace Galaktic::Core::Managers {
 }
 
 namespace Galaktic::Core::Helpers {
+    /**
+     * @class TextureHelper
+     * @brief Assigns registered texture assets through a borrowed ECS manager.
+     */
     class TextureHelper {
         public:
+            /**
+             * @brief Stores the borrowed ECS manager used by this helper.
+             * @param ecsManager Borrowed ECS manager that must outlive this helper
+             */
             TextureHelper(Managers::ECS_Manager& ecsManager);
 
+            /**
+             * @brief Assigns a registered texture asset to an existing entity.
+             * @param id Entity or asset ID used by this operation
+             * @param textureName Registered texture filename, including its extension
+             */
             void SetTextureToEntity(EntityID id, const string& textureName);
         private:
             Managers::ECS_Manager& m_ecsManager;

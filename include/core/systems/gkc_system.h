@@ -47,6 +47,9 @@ namespace Galaktic::Core::Systems {
      */
     class BaseSystem {
         public:
+            /**
+             * @brief Destroys this object; borrowed entities and external resources remain owned by their callers.
+             */
             virtual ~BaseSystem() = default;
 
             /**
@@ -55,6 +58,11 @@ namespace Galaktic::Core::Systems {
              * @param dt Delta time
              */
             virtual void Update(float dt) {}
+            /**
+             * @brief Provides the optional per-frame system update hook.
+             * @param list Entity handles to inspect or draw
+             * @param dt Elapsed time in seconds
+             */
             virtual void Update(const unordered_map<EntityID, ECS::Entity>& list, float dt) {}
 
             /**

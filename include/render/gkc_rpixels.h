@@ -63,6 +63,9 @@ namespace Galaktic::Render {
             PixelColoredGroupInfo(const string& name, SDL_Color mainColor, EntityID id,
                 Core::Managers::ECS_Manager& ecsManager);
 
+            /**
+             * @brief Destroys this object; borrowed entities and external resources remain owned by their callers.
+             */
             ~PixelColoredGroupInfo() = default;
 
             /**
@@ -72,13 +75,36 @@ namespace Galaktic::Render {
              */
             void SetSelectedPixels(const PixelMapping_List& list);
 
+            /**
+             * @brief Changes the stored name.
+             * @param newName Replacement name
+             */
             void SetName(const string& newName) { m_groupName = newName; }
-            void SetColor(SDL_Color newColor) { m_mainColor = newColor; }
+            /**
+             * @brief Stores a new group color and marks painted textures for refresh.
+             * @param newColor New color
+             */
+            void SetColor(SDL_Color newColor) { m_mainColor = newColor; m_paintedTextures.clear(); }
 
+            /**
+             * @brief Returns the name identifying this object or event.
+             */
             [[nodiscard]] const string& GetName() const { return m_groupName; }
+            /**
+             * @brief Returns the RGBA color stored by this object.
+             */
             [[nodiscard]] SDL_Color GetColor() const { return m_mainColor; }
+            /**
+             * @brief Returns the width in pixels.
+             */
             [[nodiscard]] size_t GetWidth() const { return m_textureWidth; }
+            /**
+             * @brief Returns the height in pixels.
+             */
             [[nodiscard]] size_t GetHeight() const { return m_textureHeight; }
+            /**
+             * @brief Returns the number of entities stored in this manager or group.
+             */
             [[nodiscard]] size_t GetEntityCount() const { return m_affectedEntities.size(); }
 
             /**
@@ -98,6 +124,9 @@ namespace Galaktic::Render {
              */
             void ApplyColorToEntities();
             
+            /**
+             * @brief Reapplies selected pixel colors after group edits or texture replacement.
+             */
             void RefreshChangedTextures();
         private:
             string m_groupName;
@@ -110,8 +139,21 @@ namespace Galaktic::Render {
             PixelMapping_List m_affectedPixels;
             Core::Managers::ECS_Manager& m_ecsManager;
 
+            /**
+             * @brief Copies source pixels and recolors the selected pixels of a compatible entity texture.
+             * @param id Entity or asset ID used by this operation
+             */
             void ApplyColorToEntity(EntityID id);
+            /**
+             * @brief Checks whether the group parent and candidate still exist and reference the same texture asset.
+             * @param id Entity or asset ID used by this operation
+             * @return true if the group parent and candidate still exist and reference the same texture asset, false otherwise
+             */
             bool HasSameTexture(EntityID id) const;
+            /**
+             * @brief Checks the height and every row width of the selected-pixel mask.
+             * @return true on success, false otherwise
+             */
             bool MatchesTextureDimensions() const;
     };
 }

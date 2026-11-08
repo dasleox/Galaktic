@@ -40,7 +40,22 @@ namespace Galaktic::Audio
              * @param mixer MIX_Mixer
              */
             explicit AudioFile(const path &filepath, MIX_Mixer* mixer);
+            /**
+             * @brief Releases the resources owned by this object.
+             */
+            ~AudioFile();
+            /**
+             * @brief Disables copying to keep ownership and lifetime tied to one instance.
+             */
+            AudioFile(const AudioFile&) = delete;
+            /**
+             * @brief Disables copying to keep ownership and lifetime tied to one instance.
+             */
+            AudioFile& operator=(const AudioFile&) = delete;
 
+            /**
+             * @brief Returns the borrowed mixer audio sample; nullptr if loading failed.
+             */
             MIX_Audio* GetAudioSample() { return m_audio; }
 
             /**
@@ -53,6 +68,10 @@ namespace Galaktic::Audio
             }
     };
     
+    /**
+     * @struct AudioInfo
+     * @brief Stores metadata and unique ownership of an audio asset.
+     */
     struct AudioInfo : public AssetInfo<AudioFile>
     {
         using AssetInfo<AudioFile>::AssetInfo;

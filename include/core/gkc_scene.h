@@ -25,6 +25,7 @@
 #include <pch.hpp>
 #include <core/systems/gkc_system.h>
 #include "ecs/gkc_registry.h"
+#include <render/gkc_shadow.h>
 
 namespace Galaktic::Core::Helpers {
     class ECS_Helper;
@@ -69,6 +70,10 @@ namespace Galaktic::Core {
         size_t scene_size_ = 0;
     };
 
+    /**
+     * @class ManagersWrapper
+     * @brief Passes borrowed application asset-manager pointers to scenes.
+     */
     class ManagersWrapper {
         public:
             Managers::TextureManager* m_textureManager = nullptr;
@@ -101,8 +106,14 @@ namespace Galaktic::Core {
              */
             void Run();
 
+            /**
+             * @brief Writes the stored configuration lines to the configured filepath.
+             */
             void Save();
 
+            /**
+             * @brief Pauses animation playback without resetting its frame.
+             */
             void Pause();
 
             /**
@@ -156,26 +167,53 @@ namespace Galaktic::Core {
              */
             void CreateCamera(const string &name);
 
+            /**
+             * @brief Toggles the scene's entity-outline debug overlay.
+             */
             void ToggleWireframes()
             {
                 m_bShowWireframe = !m_bShowWireframe;
             }
+            /**
+             * @brief Toggles the scene's collision-box debug overlay.
+             */
             void ToggleColliders()
             {
                 m_bShowColliders = !m_bShowColliders;
             }
 
+            /**
+             * @brief Toggles the window's fullscreen request.
+             */
             void SetFullscreen();
 
             /**
-             * Draws the scene at a small fixed size (for example 320x180) scaled by
-             * whole numbers to the window. Call it before \c Run()
+             * Draws at a fixed logical size. Integer scaling preserves uniform
+             * pixel sizes; pass false to fit proportionally using fractional scaling.
+             * Call it before \c Run().
              */
-            void SetPixelResolution(int width, int height);
+            void SetPixelResolution(int width, int height, bool integerScale = true);
 
+            /** Ambient scene brightness, clamped to [0, 1]. Default: full light. */
+            void SetAmbientLight(float value);
+            /**
+             * @brief Returns the scene's ambient brightness in the range [0, 1].
+             */
+            [[nodiscard]] float GetAmbientLight() const;
+
+            /**
+             * @brief Checks for changed scene assets when the reload interval has elapsed.
+             * @param deltaTime Elapsed time in seconds
+             */
             void ReloadAssets(double deltaTime);
             
+            /**
+             * @brief Returns access to the borrowed ECS registry pointer.
+             */
             ECS::Registry*& GetRegistry() { return m_registry; }
+            /**
+             * @brief Returns access to the scene's ECS manager pointer.
+             */
             Managers::ECS_Manager*& GetECSManager() { return m_ecsManager; }
             SceneInformation m_sceneInfo;
         private:
@@ -187,6 +225,10 @@ namespace Galaktic::Core {
             double m_hotReloadTimer = 0.0;
 
             shared_ptr<Render::Window> m_window;
+            // Declared after the window so its texture is destroyed first.
+            Render::LightingState m_lighting;
+            float m_ambientLight = 1.f;
+            bool m_lightingFailed = false;
             Systems::System_List m_systemList;
             ECS::Registry* m_registry = nullptr;
             Managers::ECS_Manager* m_ecsManager = nullptr;
@@ -216,12 +258,12 @@ namespace Galaktic::Core {
             /** @brief Opens the debug console's font; returns nullptr and logs on failure */
             TTF_Font* OpenConsoleFont();
             /**
-             * @brief Spawns the sandbox entities used to exercise texture and pixel-group
-             *        features while the engine is under development.
+             * @brief Spawns a pixel-art lighting sandbox with colored lights,
+             *        solid/rotated blockers and a textured shadow caster.
              * @todo  Move this into the sandbox project once a scene-scripting entry point
              *        exists - Scene::Run() should not be authoring test content.
              */
-            void SpawnDebugDemoEntities();
+            void SpawnDebugEntities();
             /** @brief Advances gameplay systems by one fixed timestep */
             void FixedUpdate(float deltaTime, const shared_ptr<Systems::BaseSystem>& movementSystem,
                 const shared_ptr<Systems::CameraSystem>& cameraSystem);

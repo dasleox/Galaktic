@@ -53,7 +53,13 @@ namespace Galaktic::ECS {
             ~Registry() = default;
             
             // Prevent copying (m_pools contain pointers/references)
+            /**
+             * @brief Disables copying to keep ownership and lifetime tied to one instance.
+             */
             Registry(const Registry&) = delete;
+            /**
+             * @brief Disables copying to keep ownership and lifetime tied to one instance.
+             */
             Registry& operator=(const Registry&) = delete;
             
             // Allow moving
@@ -62,7 +68,7 @@ namespace Galaktic::ECS {
              * @param other Registry to move from
              */
             Registry(Registry&& other) noexcept {
-                m_pools = move(other.m_pools);
+                m_pools = std::move(other.m_pools);
             }
             
             /**
@@ -72,7 +78,7 @@ namespace Galaktic::ECS {
              */
             Registry& operator=(Registry&& other) noexcept {
                 if (this != &other) {
-                    m_pools = move(other.m_pools);
+                    m_pools = std::move(other.m_pools);
                 }
                 return *this;
             }
@@ -100,7 +106,7 @@ namespace Galaktic::ECS {
              */
             template<typename T, typename... Args>
             T& Add(EntityID id, Args&&... args) {
-                if(m_pools.size() >= MAX_COMPONENT_QUANTITY) {
+                if(m_pools.size() >= MAX_COMPONENT_QUANTITY && !m_pools.contains(typeid(T))) {
                     Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max component quantity reached!");
                     static T dummy{};
                     return dummy;
@@ -110,6 +116,7 @@ namespace Galaktic::ECS {
                 unique_ptr<IComponentPool>& pool = m_pools[typeid(T)];
                 
                 if (!pool) {
+                    ComponentRegistry::RegisterComponent<T>(id, IsTag<T>);
                     // Create new pool based on whether it's a tag or regular component
                     if constexpr (IsTag<T>) {
                         pool = make_unique<TagPool>();
@@ -124,7 +131,7 @@ namespace Galaktic::ECS {
                 } else {
                     // Regular components - store in efficient pool
                     auto* componentPool = static_cast<ComponentPool<T>*>(pool.get());
-                    componentPool->Set(id, T{forward<Args>(args)...});
+                    componentPool->Set(id, T{std::forward<Args>(args)...});
                 }
                 
                 return Get<T>(id);
@@ -146,6 +153,7 @@ namespace Galaktic::ECS {
                 unique_ptr<IComponentPool>& pool = m_pools[typeid(T)];
                 
                 if (!pool) {
+                    ComponentRegistry::RegisterComponent<T>(id, IsTag<T>);
                     if constexpr (IsTag<T>) {
                         pool = make_unique<TagPool>();
                     } else {
@@ -158,7 +166,7 @@ namespace Galaktic::ECS {
                     tagPool->Set(id);
                 } else {
                     auto* componentPool = static_cast<ComponentPool<T>*>(pool.get());
-                    componentPool->Set(id, move(component));
+                    componentPool->Set(id, std::move(component));
                 }
                 
                 return Get<T>(id);

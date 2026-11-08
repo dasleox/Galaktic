@@ -5,6 +5,7 @@
 
 using namespace Galaktic;
 
+
 Script::GKC_Script::GKC_Script(const path& scriptPath, lua_State* luaState) 
     : m_scriptName(Core::StripExtension(scriptPath.filename().string())) {
 

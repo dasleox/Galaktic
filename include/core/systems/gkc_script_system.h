@@ -30,10 +30,22 @@ namespace Galaktic::Core::Managers {
 }
 
 namespace Galaktic::Core::Systems {
+    /**
+     * @class ScriptSystem
+     * @brief Dispatches script-related ECS events through its borrowed entity manager.
+     */
     class ScriptSystem final : public BaseSystem {
         public:
+            /**
+             * @brief Stores the entity or system dependencies used by this engine system.
+             * @param manager Borrowed ECS manager that must outlive this helper
+             */
             ScriptSystem(Managers::ECS_Manager& manager);
 
+            /**
+             * @brief Handles engine events relevant to this system.
+             * @param event Event
+             */
             void OnEvent(Events::GKC_Event& event) override;
         private:
             Managers::ECS_Manager& m_ecsManager;

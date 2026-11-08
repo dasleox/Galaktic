@@ -31,17 +31,47 @@ namespace Galaktic::Config
 
 namespace Galaktic::Core::Managers
 {
+    /**
+     * @class ConfigManager
+     * @brief Creates and retrieves the project's named configuration files.
+     */
     class ConfigManager
     {
         private:
             static std::filesystem::path m_folderPath;
             static std::unordered_map<std::string, Config::ConfigFile> m_configFileMap;
+            /**
+             * @brief Creates the default audio configuration file.
+             * @return true on success, false otherwise
+             */
             static bool CreateAudioConfigFile();
+            /**
+             * @brief Creates the default input-binding configuration file.
+             * @return true on success, false otherwise
+             */
             static bool CreateBindConfigFile();
+            /**
+             * @brief Creates the default general configuration file.
+             * @return true on success, false otherwise
+             */
             static bool CreateGeneralConfigFile();
         public:
+            /**
+             * @brief Sets the configuration folder and initializes its standard files.
+             * @param folderPath Folder containing the managed files
+             * @return true on success, false otherwise
+             */
             static bool SetFolder(const std::filesystem::path& folderPath);
+            /**
+             * @brief Loads and registers a configuration file.
+             * @param filepath Filepath to load or store
+             * @return true on success, false otherwise
+             */
             static bool AddConfigFile(const std::filesystem::path& filepath);
+            /**
+             * @brief Returns a copy of a registered configuration file; changes to the copy do not update the manager.
+             * @param filename Filename, including its extension when present
+             */
             static Config::ConfigFile GetConfigFile(const std::string& filename);
     };
 }

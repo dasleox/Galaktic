@@ -24,6 +24,8 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
+#include <cctype>
 #include <memory>
 #include <map>
 #include <unordered_map>
@@ -89,8 +91,8 @@
 #endif
 
 #define GKC_MAJOR_VERSION 0
-#define GKC_MINOR_VERSION 6
-#define GKC_PATCH_VERSION 1
+#define GKC_MINOR_VERSION 7
+#define GKC_PATCH_VERSION 0
 #define GKC_SET_COLOR(color) (color.r), (color.g), (color.b), (color.a)
 
 // 'using' declarations
@@ -152,9 +154,17 @@ inline constexpr SDL_Color GREY_COLOR = {128, 128, 128, 255};
 
 namespace Galaktic
 {
+    /**
+     * @struct AssetInfo
+     * @brief Stores an asset's filepath, ownership, load state and last successful file timestamp.
+     */
     template<typename AssetType>
     struct AssetInfo 
     {
+        /**
+         * @brief Stores the asset filepath without loading the asset yet.
+         * @param filepath Filepath to load or store
+         */
         AssetInfo(const string& filepath) 
             : filepath(filepath) {}
 
@@ -163,41 +173,67 @@ namespace Galaktic
         bool isLoaded = false;
         std::filesystem::file_time_type lastWriteTime{};
 
+        /**
+         * @brief Loads a replacement asset, retaining the old asset if validation fails.
+         * @param filepath Filepath to load or store
+         * @param args Arguments forwarded to the requested operation
+         * @return true on success, false otherwise
+         */
         template<typename... Args>
         bool LoadAsset(const string& filepath, Args&& ...args)
         {
-            asset = make_unique<AssetType>(filepath, std::forward<Args>(args)...);
-            if(asset == nullptr)
-            {
-                return false;
+            auto replacement = make_unique<AssetType>(filepath, std::forward<Args>(args)...);
+            if constexpr (requires { replacement->IsValid(); }) {
+                if (!replacement->IsValid()) return false;
             }
-
+            asset = std::move(replacement);
+            std::error_code error;
+            lastWriteTime = std::filesystem::last_write_time(filepath, error);
             isLoaded = true;
             return true;
         }
 
+        /**
+         * @brief Checks whether the asset has been successfully loaded.
+         * @return true if the asset has been successfully loaded, false otherwise
+         */
         bool IsLoaded() const
         {
             return isLoaded;
         } 
 
+        /**
+         * @brief Returns the stored asset filepath.
+         */
         const string& GetFilepath() const { return filepath; }
 
+        /**
+         * @brief Returns access to the asset's owning unique_ptr.
+         */
         unique_ptr<AssetType>& GetAsset()
         {
             return asset;
         }
 
+        /**
+         * @brief Returns access to the asset's owning unique_ptr.
+         */
         const unique_ptr<AssetType>& GetAsset() const
         {
             return asset;
         }
 
+        /**
+         * @brief Returns a borrowed asset pointer; ownership remains in AssetInfo.
+         */
         AssetType* GetRawAsset() 
         {
             return asset.get();
         }
 
+        /**
+         * @brief Returns a borrowed asset pointer; ownership remains in AssetInfo.
+         */
         const AssetType* GetRawAsset() const 
         {
             return asset.get();
@@ -210,22 +246,42 @@ namespace Galaktic::Render {
      * @brief Vector with X,Y values (2D)
      */
     struct Vec2 {
-        float x;
-        float y;
+        float x = 0.f;
+        float y = 0.f;
 
+        /**
+         * @brief Returns the component-wise sum of two vectors.
+         * @param o Vector or scalar operand
+         */
         Vec2 operator + (const Vec2& o) const {
             return {x + o.x, y + o.y};
         }
+        /**
+         * @brief Returns the component-wise difference of two vectors.
+         * @param o Vector or scalar operand
+         */
         Vec2 operator - (const Vec2& o) const {
             return {x - o.x, y - o.y};
         }
+        /**
+         * @brief Returns the vector scaled by a scalar.
+         * @param o Vector or scalar operand
+         */
         Vec2 operator * (const float o) const {
             return { x * o, y * o};
         }
+        /**
+         * @brief Returns the vector divided by a nonzero scalar.
+         * @param o Vector or scalar operand
+         */
         Vec2 operator / (const float o) const {
             return {x / o, y/ o};
         }
 
+        /**
+         * @brief Adds the vector operand to this vector and returns this instance.
+         * @param o Vector or scalar operand
+         */
         Vec2& operator += (const Vec2 o) {
             x += o.x, y += o.y; return *this;
         };
@@ -240,10 +296,14 @@ namespace Galaktic::Core {
     struct DeviceInformation {
           string os_;         // Operating system of the computer
           string arch_;       // Architecture of the computer
-          Uint32 width_;      // Width of the screen
-          Uint32 height_;     // Height of the screen
+          Uint32 width_ = 0;      // Width of the screen
+          Uint32 height_ = 0;     // Height of the screen
+          /**
+           * @brief Checks for missing device identifiers or unsupported display dimensions.
+           * @return true on success, false otherwise
+           */
           [[nodiscard]] bool IsCorrupted() const {
-              return os_.empty() || arch_.empty() || width_ >= 16000 || height_ >= 16000;
+              return os_.empty() || arch_.empty() || width_ == 0 || height_ == 0 || width_ >= 16000 || height_ >= 16000;
           }
     };
     /**
@@ -272,10 +332,12 @@ namespace Galaktic::Core {
 
         if (!s.empty() && s[0] == '#')
             s.erase(0, 1);
-        else if (!s.empty() && s[0] == '0' && (s[1] == 'x' || s[1] == 'X'))
+        else if (s.size() >= 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X'))
             s.erase(0, 2);
 
         if (s.length() != 6 && s.length() != 8)
+            return WHITE_COLOR;
+        if (!std::all_of(s.begin(), s.end(), [](unsigned char ch) { return std::isxdigit(ch) != 0; }))
             return WHITE_COLOR;
 
         SDL_Color color;
@@ -308,6 +370,10 @@ namespace Galaktic::Core {
         return "X: " + std::to_string(vec.x) + "," + " Y: " + std::to_string(vec.y);
     }
     
+    /**
+     * @brief Removes the filename's final extension.
+     * @param filename Filename, including its extension when present
+     */
     inline std::string StripExtension(const std::string& filename) {
         size_t pos = filename.find_last_of(".");
         if (pos == std::string::npos)
@@ -315,6 +381,11 @@ namespace Galaktic::Core {
         return filename.substr(0, pos);
     }
 
+    /**
+     * @brief Appends a numeric suffix until the name is absent from the supplied map.
+     * @param map Lookup map containing names already in use
+     * @param baseName Preferred name before adding a unique suffix
+     */
     template<typename Key, typename Value>
     inline string GenerateUniqueName(const unordered_map<Key, Value>& map, const string& baseName) {
         string uniqueName = baseName;
@@ -326,6 +397,10 @@ namespace Galaktic::Core {
         return uniqueName;
     }
 
+    /**
+     * @brief Converts bytes to whole mebibytes using integer division.
+     * @param bytes Memory size in bytes
+     */
     inline constexpr uint64_t BytesToMegabytes(uint64_t bytes) 
     {
         return (bytes / 1024) / 1024;
@@ -340,6 +415,9 @@ namespace Galaktic::Core {
 
 namespace Galaktic::Debug {
     #if GKC_OS_INT == 0
+        /**
+         * @brief Returns this process's working-set memory usage in whole mebibytes on Windows.
+         */
         inline size_t GetGalakticRAMUsage() {
             PROCESS_MEMORY_COUNTERS pmc{};
             if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc)))
@@ -349,6 +427,9 @@ namespace Galaktic::Debug {
             return 0;
         }
 
+        /**
+         * @brief Returns the system's total physical memory in whole mebibytes on Windows.
+         */
         inline size_t GetSystemRAM() {
             MEMORYSTATUSEX mem{};
             mem.dwLength = sizeof(mem);
@@ -419,6 +500,10 @@ namespace Galaktic::Debug {
         return (status == 0) ? res.get() : name;
     }
 
+    /**
+     * @brief Returns a readable type name with implementation-specific prefixes removed.
+     * @param name Name used to identify the requested entry
+     */
     inline string GetCleanTypename(const char* name)
     {
         string demangled = DemangleTypename(name);
@@ -429,6 +514,9 @@ namespace Galaktic::Debug {
         return demangled;
     }
 
+    /**
+     * @brief Returns a readable type name with implementation-specific prefixes removed.
+     */
     template<typename T>
     inline string GetCleanTypename()
     {
@@ -437,7 +525,7 @@ namespace Galaktic::Debug {
 }
 
 namespace Galaktic::Filesystem {
-    constexpr unsigned int GKC_VERSION_SCENE = 2;
+    constexpr unsigned int GKC_VERSION_SCENE = 3;
 }
 
 #define GKC_WRITE_BINARY(x) reinterpret_cast<const char*>(&x)

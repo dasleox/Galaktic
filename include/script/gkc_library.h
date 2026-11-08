@@ -164,6 +164,9 @@ namespace Galaktic::Script {
              */
             static void Shutdown();
 
+            /**
+             * @brief Returns the borrowed Lua state used by this script or scripting interface.
+             */
             static lua_State* GetLuaState() { return m_luaState; }
 
             /**
@@ -193,6 +196,9 @@ namespace Galaktic::Script {
              */
             static void CreateDefaultPlayerFile(const path& path);
 
+            /**
+             * @brief Logs the contents of the current Lua stack.
+             */
             static void PrintLuaStack();
         private:
             static lua_State* m_luaState;
@@ -200,16 +206,43 @@ namespace Galaktic::Script {
 
         private:
             // Global constants (Keys and Click types)
+            /**
+             * @brief Exports engine key identifiers to Lua.
+             */
             static void SetKeysToLua();
+            /**
+             * @brief Exports engine mouse-button identifiers to Lua.
+             */
             static void SetMouseClicksToLua();
 
             // Galaktic's API binding helpers
+            /**
+             * @brief Registers the engine's audio functions in Lua.
+             */
             static void BindAudioFunctions();
+            /**
+             * @brief Registers the engine's animation functions in Lua.
+             */
             static void BindAnimationFunctions();
+            /**
+             * @brief Registers the engine's script functions in Lua.
+             */
             static void BindScriptFunctions();
+            /**
+             * @brief Registers the engine's entity functions in Lua.
+             */
             static void BindEntityFunctions();
+            /**
+             * @brief Registers the engine's keyboard functions in Lua.
+             */
             static void BindKeyboardFunctions();
+            /**
+             * @brief Registers the engine's mouse functions in Lua.
+             */
             static void BindMouseFunctions();
+            /**
+             * @brief Registers the engine's logging functions in Lua.
+             */
             static void BindLoggingFunctions();
 
             /**

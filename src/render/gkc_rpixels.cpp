@@ -22,6 +22,7 @@
 */
 
 #include <render/gkc_rpixels.h>
+#include <algorithm>
 #include <core/managers/gkc_ecs_man.h>
 #include <core/managers/gkc_texture_man.h>
 #include <render/gkc_texture.h>
@@ -71,7 +72,8 @@ PixelColoredGroupInfo::PixelColoredGroupInfo(const string& name, SDL_Color mainC
 }
 
 void PixelColoredGroupInfo::SetSelectedPixels(const PixelMapping_List& list) {
-    bool widthMatches = list.empty() || list[0].size() == m_textureWidth;
+    bool widthMatches = std::all_of(list.begin(), list.end(),
+        [this](const auto& row) { return row.size() == m_textureWidth; });
     if (list.size() != m_textureHeight || !widthMatches) {
         Debug::Logger::LogErrorWithType(ErrorType::RPixels_TextureMismatch,
             "Pixel mapping passed to group '{}' doesn't match its texture's dimensions!", m_groupName);
@@ -79,6 +81,7 @@ void PixelColoredGroupInfo::SetSelectedPixels(const PixelMapping_List& list) {
     }
 
     m_affectedPixels = list;
+    m_paintedTextures.clear();
 }
 
 void PixelColoredGroupInfo::AddEntityToGroup(EntityID id) {
@@ -96,17 +99,24 @@ void PixelColoredGroupInfo::AddEntityToGroup(EntityID id) {
 
 void PixelColoredGroupInfo::DeleteEntityFromGroup(EntityID id) {
     m_affectedEntities.erase(id);
+    m_paintedTextures.erase(id);
 }
 
 bool PixelColoredGroupInfo::HasSameTexture(EntityID id) const {
-    auto& parentTextureComp = m_ecsManager.GetComponentOfEntity<ECS::TextureComponent>(m_parentEntityID);
-    auto& textureComp = m_ecsManager.GetComponentOfEntity<ECS::TextureComponent>(id);
-    return textureComp.id == parentTextureComp.id;
+    const auto& entities = m_ecsManager.GetEntityList();
+    const auto parent = entities.find(m_parentEntityID);
+    const auto child = entities.find(id);
+    if (parent == entities.end() || child == entities.end() ||
+        !parent->second.Has<ECS::TextureComponent>() || !child->second.Has<ECS::TextureComponent>()) return false;
+    auto parentEntity = parent->second;
+    auto childEntity = child->second;
+    return parentEntity.Get<ECS::TextureComponent>().id == childEntity.Get<ECS::TextureComponent>().id;
 }
 
 bool PixelColoredGroupInfo::MatchesTextureDimensions() const {
     return m_affectedPixels.size() == m_textureHeight
-        && (m_affectedPixels.empty() || m_affectedPixels[0].size() == m_textureWidth);
+        && std::all_of(m_affectedPixels.begin(), m_affectedPixels.end(),
+            [this](const auto& row) { return row.size() == m_textureWidth; });
 }
 
 void PixelColoredGroupInfo::ApplyColorToEntities() {

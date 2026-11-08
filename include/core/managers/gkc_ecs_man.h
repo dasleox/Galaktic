@@ -150,6 +150,11 @@ namespace Galaktic::Core::Managers {
                 pools[type]->SetFromAny(id, std::move(comp));
             }
 
+            /**
+             * @brief Removes one entity's component while preserving metadata shared by other entities.
+             * @param id Entity or asset ID used by this operation
+             * @param type Engine type identifier used by this operation
+             */
             void DeleteRawComponentFromEntity(EntityID id, const type_index& type) {
                 auto it = m_entityList.find(id);
                 if (it == m_entityList.end())
@@ -159,12 +164,15 @@ namespace Galaktic::Core::Managers {
                 auto poolIt = pools.find(type);
                 if (poolIt != pools.end() && ECS::ComponentRegistry::IsRegistered(type)) {
                     if (poolIt->second->Contains(id)) {
-                        ECS::ComponentRegistry::UnregisterComponentByType(type);
                         poolIt->second->Remove(id);
                     }
                 }
             }
 
+            /**
+             * @brief Returns the ID mapped to the entity name, or InvalidEntity when absent.
+             * @param name Name used to identify the requested entry
+             */
             EntityID GetEntityIDByName(const string& name) const {
                 auto it = m_nameToEntityList.find(name);
                 if (it != m_nameToEntityList.end()) {
@@ -393,6 +401,10 @@ namespace Galaktic::Core::Managers {
                     it->second.Remove<T>();
             }
 
+            /**
+             * @brief Returns the entity's name, or UnknownName when unavailable.
+             * @param id Entity or asset ID used by this operation
+             */
             string GetEntityNameByID(EntityID id) {
                 auto it = m_entityList.find(id);
                 string nameFound = "UnknownName";
@@ -421,19 +433,23 @@ namespace Galaktic::Core::Managers {
                         GKC_ENGINE_ERROR("The Camera entity cannot be deleted!");
                         return;
                     }
-                    // Remove all components from the registry before deleting entity
-                    m_registry->RemoveAllComponents(id);
-                
+                    // Remove the name lookup before removing its component.
                     if(it != m_entityList.end()) {
                         if(it->second.Has<ECS::NameComponent>()) {
                             auto& nameComp = it->second.Get<ECS::NameComponent>();
                             m_nameToEntityList.erase(nameComp.name);
                         }
                     }
+                    m_registry->RemoveAllComponents(id);
                     m_entityList.erase(id);
                 }
             }
 
+            /**
+             * @brief Copies an eligible entity and assigns a unique name to the copy.
+             * @param sourceID Entity's ID to copy from
+             * @param newName Replacement name
+             */
             void CopyEntity(EntityID sourceID, const string& newName) {
                 if (!m_entityList.contains(sourceID)) {
                     Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Source entity does not exist!");
@@ -460,6 +476,11 @@ namespace Galaktic::Core::Managers {
                 m_nameToEntityList.emplace(uniqueName, newID);
             }
 
+            /**
+             * @brief Copies an entity and returns the manager-owned copy, or nullptr on failure.
+             * @param sourceID Entity's ID to copy from
+             * @param newName Replacement name
+             */
             ECS::Entity* CopyAndGetEntity(EntityID sourceID, const string& newName) {
                 if (!m_entityList.contains(sourceID)) {
                     Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Source entity does not exist!");
@@ -487,6 +508,10 @@ namespace Galaktic::Core::Managers {
                 return &m_entityList[newID];
             }
 
+            /**
+             * @brief Deletes the named entity through the manager's normal deletion checks.
+             * @param name Name used to identify the requested entry
+             */
             void DeleteEntityByName(const string& name) {
                 auto it = m_nameToEntityList.find(name);
                 if (it != m_nameToEntityList.end()) {
@@ -494,18 +519,34 @@ namespace Galaktic::Core::Managers {
                 }
             }
 
+            /**
+             * @brief Returns the number of entities stored in this manager or group.
+             */
             size_t GetEntityCount() {
                 return m_entityList.size();
             }
 
+            /**
+             * @brief Returns the number of allocated component-type pools, not the number of component instances.
+             */
             size_t GetComponentsCount() {
                 return m_registry->GetComponentPools().size();
             }
 
+            /**
+             * @brief Checks whether the manager contains the requested entity ID or name.
+             * @param id Entity or asset ID used by this operation
+             * @return true if the manager contains the requested entity ID or name, false otherwise
+             */
             bool EntityExists(EntityID id) const {
                 return m_entityList.contains(id);
             }
 
+            /**
+             * @brief Checks whether the manager contains the requested entity ID or name.
+             * @param name Name used to identify the requested entry
+             * @return true if the manager contains the requested entity ID or name, false otherwise
+             */
             bool EntityExists(const string& name)
             {
                 auto it = m_nameToEntityList.find(name);
@@ -516,6 +557,12 @@ namespace Galaktic::Core::Managers {
                 return false;
             }
 
+            /**
+             * @brief Sets the named entity's world position if it has a transform.
+             * @param name Name used to identify the requested entry
+             * @param x Horizontal coordinate or amount
+             * @param y Vertical coordinate or amount
+             */
             void TeleportEntityByName(const string& name, float x, float y)
             {
                 if(EntityExists(name))
@@ -529,6 +576,11 @@ namespace Galaktic::Core::Managers {
                 }
             }
 
+            /**
+             * @brief Copies the target entity's world position to the named entity.
+             * @param name Name used to identify the requested entry
+             * @param targetName Target name
+             */
             void TeleportEntityToEntityByName(const string& name, const string& targetName)
             {
                 if(EntityExists(name) && EntityExists(targetName))
@@ -556,6 +608,11 @@ namespace Galaktic::Core::Managers {
                 }
             }
 
+            /**
+             * @brief Sets the named entity's transform rotation in degrees.
+             * @param name Name used to identify the requested entry
+             * @param degrees Degrees
+             */
             void RotateEntityByName(const string& name, float degrees)
             {
                 if(EntityExists(name))
@@ -568,6 +625,10 @@ namespace Galaktic::Core::Managers {
                 }
             }
 
+            /**
+             * @brief Logs the named entity's component information.
+             * @param name Name used to identify the requested entry
+             */
             void DisplayEntityInformation(const string& name)
             {
                 if(EntityExists(name))
@@ -585,6 +646,9 @@ namespace Galaktic::Core::Managers {
                 }
             }
 
+            /**
+             * @brief Logs the names and IDs of the managed entities.
+             */
             void PrintEntityList()
             {
                 for(auto& [name, id] : m_nameToEntityList)
@@ -593,8 +657,17 @@ namespace Galaktic::Core::Managers {
                 }
             }
 
+            /**
+             * @brief Returns mutable access to the manager's entity-handle map.
+             */
             ECS::Entity_List& GetEntityList() { return m_entityList; }
+            /**
+             * @brief Returns mutable access to the entity-name lookup map.
+             */
             ECS::NameToEntity_List& GetNameToEntityList() { return m_nameToEntityList; }
+            /**
+             * @brief Returns access to the borrowed ECS registry pointer.
+             */
             ECS::Registry*& GetRegistry() { return m_registry; }
         private:
             ECS::Entity_List m_entityList;

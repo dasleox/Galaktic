@@ -39,6 +39,9 @@ namespace Galaktic::Config
         public:
             using Callback = function<void()>;
             
+            /**
+             * @brief Returns the callback registry singleton.
+             */
             static CallbackRegister& Get() 
             {
                 static CallbackRegister instance;

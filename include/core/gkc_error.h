@@ -28,6 +28,10 @@
 
 namespace Galaktic
 {
+    /**
+     * @enum ErrorType
+     * @brief Identifies engine errors for logging and diagnostics.
+     */
     enum class ErrorType 
     {
         // General
@@ -125,6 +129,10 @@ namespace Galaktic
         AudioGroupElementNotFound
     };
 
+    /**
+     * @brief Returns the diagnostic name corresponding to an engine error category.
+     * @param error Engine error category
+     */
     constexpr const char* ErrorTypeToDisplayString(ErrorType error)
     {
         switch (error)

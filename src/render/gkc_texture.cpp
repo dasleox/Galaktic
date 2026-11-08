@@ -19,7 +19,16 @@ Texture::Texture(const path &path, SDL_Renderer* renderer) {
         return;
     }
     
-    m_texture = SDL_CreateTexture(renderer, m_surface->format, 
+    // Pixel groups address four RGBA bytes per pixel. Normalize indexed/RGB
+    // images once at load time instead of writing past their pixel buffers.
+    if (m_surface->format != SDL_PIXELFORMAT_RGBA32) {
+        SDL_Surface* converted = SDL_ConvertSurface(m_surface, SDL_PIXELFORMAT_RGBA32);
+        SDL_DestroySurface(m_surface);
+        m_surface = converted;
+        if (m_surface == nullptr) return;
+    }
+
+    m_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
         SDL_TEXTUREACCESS_STREAMING,
         m_surface->w, m_surface->h
     );
@@ -33,24 +42,14 @@ Texture::Texture(const path &path, SDL_Renderer* renderer) {
         return;
     }
 
-    void* pixels;
-    int pitch;
-    SDL_LockTexture(m_texture, NULL, &pixels, &pitch);
-    SDL_ConvertPixels(m_surface->w, m_surface->h,
-        m_surface->format,
-        m_surface->pixels, m_surface->pitch,
-        m_surface->format,
-        pixels, pitch
-    );
-    
-    SDL_UnlockTexture(m_texture);
+    if (!SDL_UpdateTexture(m_texture, nullptr, m_surface->pixels, m_surface->pitch)) {
+        Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "Failed to upload texture: {}", SDL_GetError());
+        SDL_DestroyTexture(m_texture);
+        m_texture = nullptr;
+    }
 }
 
 Texture::~Texture() {
-    if (m_texture != nullptr) {
-        SDL_DestroyTexture(m_texture);
-        SDL_DestroySurface(m_surface);
-        m_texture = nullptr;
-        m_surface = nullptr;
-    }
+    SDL_DestroyTexture(m_texture);
+    SDL_DestroySurface(m_surface);
 }

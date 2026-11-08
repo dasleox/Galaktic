@@ -11,3 +11,7 @@ Audio::AudioFile::AudioFile(const path &filepath, MIX_Mixer* mixer) {
         Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "failed to load audio!");
     }
 }
+
+Audio::AudioFile::~AudioFile() {
+    MIX_DestroyAudio(m_audio);
+}

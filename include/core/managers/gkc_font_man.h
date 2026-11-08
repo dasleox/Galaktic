@@ -28,13 +28,27 @@
 
 namespace Galaktic::Core::Managers
 {
+    /**
+     * @class FontManager
+     * @brief Registers font assets and provides the engine's fallback font.
+     */
     class FontManager : public BaseManager<Render::Font, Render::FontInfo, Render::Font_List,
         MAX_FONT_QUANTITY, true>
     {
         public:
+            /**
+             * @brief Initializes this manager using the supplied project context.
+             * @param folder Folder containing the managed files
+             */
             explicit FontManager(const path& folder);
+            /**
+             * @brief Returns the borrowed engine fallback font.
+             */
             static TTF_Font* GetDefaultFont() { return m_defaultFont; }
         private:
+            /**
+             * @brief Opens the engine fallback font for console and default text rendering.
+             */
             static void SetBackupFont();
             static inline TTF_Font* m_defaultFont = nullptr;
     };

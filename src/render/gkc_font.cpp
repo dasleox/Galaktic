@@ -1,4 +1,5 @@
 #include <render/gkc_font.h>
+#include <cmath>
 #include "core/gkc_logger.h"
 #include "filesys/gkc_filesys.h"
 #include "core/gkc_error.h"
@@ -49,7 +50,7 @@ Font::Font(const path &path, SDL_Renderer* renderer, float size) {
         return;
     }
     
-    if(size <= 0)
+    if(!std::isfinite(size) || size <= 0)
     {
         size = 12.f;
     }
@@ -82,7 +83,8 @@ void Font::SetOutline(int outline)
 
 void Font::SetSize(float fontSize)
 {
-    TTF_SetFontSize(m_font, fontSize);
+    if (std::isfinite(fontSize) && fontSize > 0.f && TTF_SetFontSize(m_font, fontSize))
+        m_fontSize = fontSize;
 }
 
 void Font::SetAlignment(FontAlignment alignment)

@@ -1,4 +1,6 @@
 #include "render/gkc_animation.h"
+#include <algorithm>
+#include <cmath>
 #include <core/gkc_logger.h>
 #include "filesys/gkc_filesys.h"
 #include "core/gkc_error.h"
@@ -13,7 +15,12 @@ Galaktic::Render::Animation::Animation(const path& path, SDL_Renderer* renderer)
         return;
     }
 
-    m_textures = new SDL_Texture*[m_animation->count];
+    if (m_animation->count <= 0 || !m_animation->frames || !m_animation->delays) {
+        IMG_FreeAnimation(m_animation);
+        m_animation = nullptr;
+        return;
+    }
+    m_textures = new SDL_Texture*[m_animation->count]{};
     for (int i = 0; i < m_animation->count; ++i) {
         m_textures[i] = SDL_CreateTextureFromSurface(renderer, m_animation->frames[i]);
         if (m_textures[i] != nullptr) {
@@ -21,6 +28,12 @@ Galaktic::Render::Animation::Animation(const path& path, SDL_Renderer* renderer)
         }
         if (m_textures[i] == nullptr) {
             Debug::Logger::LogErrorWithType(ErrorType::AssetLoadError, "Failed to create texture for frame {0}: {1}", i, SDL_GetError());
+            for (int j = 0; j < i; ++j) SDL_DestroyTexture(m_textures[j]);
+            delete[] m_textures;
+            m_textures = nullptr;
+            IMG_FreeAnimation(m_animation);
+            m_animation = nullptr;
+            return;
         }
     }
 }
@@ -43,14 +56,20 @@ Galaktic::Render::Animation::~Animation() {
 }
 
 void Animation::Update(float deltaTime) {
-   if (!IsValid() || !m_isPlaying) return;
+   if (!IsValid() || !m_isPlaying || !std::isfinite(deltaTime) || deltaTime < 0.f) return;
     
     m_accumulatedTime += deltaTime;
     
-    // Get delay for current frame (IMG_Animation stores delays in milliseconds)
-    float frameDelay = static_cast<float>(m_animation->delays[m_currentFrame]) / 1000.0f;
-    
-    if (m_accumulatedTime >= frameDelay) {
+    // Skip complete cycles without iterating once for every elapsed frame.
+    if (m_isLooping) {
+        double cycle = 0.0;
+        for (int i = 0; i < m_animation->count; ++i)
+            cycle += std::max(1, m_animation->delays[i]) / 1000.0;
+        m_accumulatedTime = std::fmod(m_accumulatedTime, cycle);
+    }
+    while (m_isPlaying) {
+        const double frameDelay = std::max(1, m_animation->delays[m_currentFrame]) / 1000.0;
+        if (m_accumulatedTime < frameDelay) break;
         m_accumulatedTime -= frameDelay;
         m_currentFrame++;
         
@@ -60,6 +79,7 @@ void Animation::Update(float deltaTime) {
             } else {
                 m_currentFrame = m_animation->count - 1;
                 m_isPlaying = false;
+                m_accumulatedTime = 0.0;
             }
         }
     }

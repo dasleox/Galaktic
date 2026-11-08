@@ -14,6 +14,11 @@ void KeySystem::OnEvent(Events::GKC_Event &e) {
             return false;
         }
     );
+    dispatcher.DispatchEvent<Events::KeyUpEvent>(
+        [this](Events::KeyUpEvent& e) {
+            m_keyState[GKC_SDLK_TO_ENUM(e)] = false;
+            return false;
+        });
     
     dispatcher.DispatchEvent<Events::KeyHoldEvent>(
         [this](Events::KeyHoldEvent &e) {
@@ -23,7 +28,7 @@ void KeySystem::OnEvent(Events::GKC_Event &e) {
 }
 
 bool Galaktic::Core::Systems::Keyboard::IsKeyDown(Key key) {
-    return m_keySystem->IsKeyDown(key);
+    return m_keySystem != nullptr && m_keySystem->IsKeyDown(key);
 }
 
 bool Galaktic::Core::Systems::Keyboard::IsKeyDownLua(lua_Integer key) {

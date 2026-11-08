@@ -35,6 +35,10 @@ namespace Galaktic::Config {
         Core::Systems::MouseClick mouseClick = Core::Systems::MouseClick::Unknown;
     };
     
+    /**
+     * @enum ActionType
+     * @brief Identifies engine actions that can be assigned to input bindings.
+     */
     enum class ActionType : uint32_t
     {
         Unknown = 0,
@@ -87,12 +91,24 @@ namespace Galaktic::Config {
              */
             Bind() = default;
 
+            /**
+             * @brief Creates an input binding for the supplied engine action.
+             * @param bindName Name identifying the input binding
+             * @param type Engine type identifier used by this operation
+             * @param key Key
+             */
             Bind(const string& bindName, ActionType type, const Core::Systems::Key& key) {
                 m_name = bindName;
                 m_actionType = type;
                 m_bind.keyBind = key;
             }
 
+            /**
+             * @brief Creates an input binding for the supplied engine action.
+             * @param bindName Name identifying the input binding
+             * @param type Engine type identifier used by this operation
+             * @param click Click
+             */
             Bind(const string& bindName, ActionType type, const Core::Systems::MouseClick& click) {
                 m_name = bindName;
                 m_actionType = type;
@@ -102,19 +118,62 @@ namespace Galaktic::Config {
 
     typedef unordered_map<string, Bind> BindMap;
 
+    /**
+     * @class BindConfigurator
+     * @brief Loads named input bindings and resolves their actions and callbacks.
+     */
     class BindConfigurator {
         public:
+            /**
+             * @brief Loads input bindings from the supplied configuration filepath.
+             * @param filepath Filepath to load or store
+             */
             BindConfigurator(const path& filepath);
+            /**
+             * @brief Removes a named input binding.
+             * @param bindName Name identifying the input binding
+             */
             static void DeleteBind(const string &bindName);
+            /**
+             * @brief Finds an input binding assigned to the specified engine action.
+             * @param type Engine type identifier used by this operation
+             */
             static BindType GetBindByAction(ActionType type);
+            /**
+             * @brief Assigns the named input key or button to the requested engine action.
+             * @param bindType Configured input key or mouse-button name
+             * @param actionName Configured engine action name
+             */
             static void BindAction(const string& bindType, const string& actionName);
+            /**
+             * @brief Returns the named input binding.
+             * @param bindName Name identifying the input binding
+             */
             static Bind GetBind(const string &bindName);
         private:
             static BindMap m_bindMap;
         private:
+            /**
+             * @brief Converts a configured input name into its keyboard or mouse binding.
+             * @param str String to convert or inspect
+             */
             static BindType ConvertStringToBindType(const string& str);
+            /**
+             * @brief Converts a configured action name to its engine action identifier.
+             * @param str String to convert or inspect
+             */
             static ActionType ConvertStringToActionType(const string& str);
+            /**
+             * @brief Checks whether the specified input binding is registered.
+             * @param keyBind Key bind
+             * @return true on success, false otherwise
+             */
             static bool CheckBindExists(const Bind& keyBind);
+            /**
+             * @brief Checks whether the specified input binding is registered.
+             * @param bindName Name identifying the input binding
+             * @return true on success, false otherwise
+             */
             static bool CheckBindExists(const string& bindName);
     };
 }

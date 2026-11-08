@@ -231,6 +231,11 @@ namespace Galaktic::ECS {
                 return m_entityToIndex.find(id) != m_entityToIndex.end();
             }
 
+            /**
+             * @brief Copies an existing source component or tag to the target entity.
+             * @param sourceID Entity's ID to copy from
+             * @param targetID Entity's ID to copy to
+             */
             void CopyComponent(EntityID sourceID, EntityID targetID) override {
                 const T* src = Get(sourceID);
                 if (!src) return;
@@ -238,6 +243,11 @@ namespace Galaktic::ECS {
                 Set(targetID, std::move(copy));
             }
 
+            /**
+             * @brief Stores a type-erased component value, reporting a mismatched std::any type.
+             * @param id Entity or asset ID used by this operation
+             * @param component Component value to store
+             */
             void SetFromAny(EntityID id, std::any&& component) override {
                 try {
                     T comp = std::any_cast<T>(component);
@@ -360,9 +370,21 @@ namespace Galaktic::ECS {
             }
             
             // Iterator support for range-based for loops
+            /**
+             * @brief Returns an iterator to the first component in contiguous pool storage.
+             */
             auto begin() { return m_components.begin(); }
+            /**
+             * @brief Returns the past-the-end iterator for contiguous pool storage.
+             */
             auto end() { return m_components.end(); }
+            /**
+             * @brief Returns an iterator to the first component in contiguous pool storage.
+             */
             auto begin() const { return m_components.begin(); }
+            /**
+             * @brief Returns the past-the-end iterator for contiguous pool storage.
+             */
             auto end() const { return m_components.end(); }
             
         private:
@@ -414,10 +436,20 @@ namespace Galaktic::ECS {
                 return m_entities.find(id) != m_entities.end();
             }
 
+            /**
+             * @brief Copies an existing source component or tag to the target entity.
+             * @param from Entity's ID to copy from
+             * @param to Entity's ID to copy to
+             */
             void CopyComponent(EntityID from, EntityID to) override {
                 if (Contains(from)) Set(to);
             }
 
+            /**
+             * @brief Stores a type-erased component value, reporting a mismatched std::any type.
+             * @param id Entity or asset ID used by this operation
+             * @param component Component value to store
+             */
             void SetFromAny(EntityID id, std::any&& component) override {
                 Set(id);
             }

@@ -145,6 +145,12 @@ namespace Galaktic::Filesystem {
 	 */
 	extern path GetFullPath();
 
+	/**
+	 * @brief Checks whether the filepath extension is in the supplied allowed list.
+	 * @param filepath Filepath to load or store
+	 * @param allowedExtensions Allowed extensions
+	 * @return true if the filepath extension is in the supplied allowed list, false otherwise
+	 */
 	extern bool CheckExtension(const path& filepath, const vector<string>& allowedExtensions);
 
 	const inline vector<path> APP_DIRECTORY_STRUCTURE = {

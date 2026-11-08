@@ -152,27 +152,27 @@ bool Helpers::ECS_Helper::ValidateComponentCompatibility(const string& name, con
 
 bool Helpers::ECS_Helper::IsLightEntity(const string &name) {
     auto entity = m_ecsManager->GetEntityByName(name);
-    return entity->Has<ECS::LightTag>();
+    return entity != nullptr && entity->Has<ECS::LightTag>();
 }
 
 bool Helpers::ECS_Helper::IsCameraEntity(const string &name) {
     auto entity = m_ecsManager->GetEntityByName(name);
-    return entity->Has<ECS::CameraTag>();
+    return entity != nullptr && entity->Has<ECS::CameraTag>();
 }
 
 bool Helpers::ECS_Helper::IsPlayerEntity(const string &name) {
     auto entity = m_ecsManager->GetEntityByName(name);
-    return entity->Has<ECS::PlayerTag>();
+    return entity != nullptr && entity->Has<ECS::PlayerTag>();
 }
 
 bool Helpers::ECS_Helper::IsStaticObjectEntity(const string &name) {
     auto entity = m_ecsManager->GetEntityByName(name);
-    return entity->Has<ECS::StaticObjectTag>();
+    return entity != nullptr && entity->Has<ECS::StaticObjectTag>();
 }
 
 bool Helpers::ECS_Helper::IsPhysicsObjectEntity(const string &name) {
     auto entity = m_ecsManager->GetEntityByName(name);
-    return entity->Has<ECS::PhysicsObjectTag>();
+    return entity != nullptr && entity->Has<ECS::PhysicsObjectTag>();
 }
 
 bool Helpers::ECS_Helper::HasNameComponent(const type_index &type) {
