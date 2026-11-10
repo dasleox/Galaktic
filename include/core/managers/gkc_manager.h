@@ -62,8 +62,8 @@ namespace Galaktic::Core::Managers
     {
         protected:
             static inline TypeList m_assetList;                          
-            static inline unordered_map<string, uint32_t> m_NameToIDList;
-            static inline unordered_map<uint32_t, string> m_IDToNameList;
+            static inline std::unordered_map<std::string, uint32_t> m_NameToIDList;
+            static inline std::unordered_map<uint32_t, std::string> m_IDToNameList;
             static inline std::atomic<uint32_t> m_IDCounter{1};
         public:
             /**
@@ -76,7 +76,7 @@ namespace Galaktic::Core::Managers
              * @note Only the filename (extension included) is used as the key
              * in \c m_NameToIDList
              */
-            static void RegisterAsset(const string& filepath)
+            static void RegisterAsset(const std::string& filepath)
             {
                 if (m_assetList.size() >= MaxLimit)
                 {
@@ -86,11 +86,11 @@ namespace Galaktic::Core::Managers
                     return;
                 }
 
-                GKC_CHECK_PATH_INTEGRITY(path(filepath));
+                GKC_CHECK_PATH_INTEGRITY(std::filesystem::path(filepath));
 
-                string assetName = Filesystem::GetFilename(filepath);
+                std::string assetName = Filesystem::GetFilename(filepath);
                 uint32_t id = m_IDCounter.fetch_add(1);
-                auto assetInfo = make_unique<AssetInfo>(filepath);
+                auto assetInfo = std::make_unique<AssetInfo>(filepath);
 
                 if (assetInfo == nullptr)
                 {
@@ -116,7 +116,7 @@ namespace Galaktic::Core::Managers
              * @param args     Additional arguments forwarded to \c LoadAsset
              */
             template<typename... Args>
-            static void LoadAndRegisterAsset(const string& filepath, Args&&... args)
+            static void LoadAndRegisterAsset(const std::string& filepath, Args&&... args)
             {
                 if (m_assetList.size() >= MaxLimit)
                 {
@@ -126,11 +126,11 @@ namespace Galaktic::Core::Managers
                     return;
                 }
 
-                GKC_CHECK_PATH_INTEGRITY(path(filepath));
+                GKC_CHECK_PATH_INTEGRITY(std::filesystem::path(filepath));
 
-                string assetName = Filesystem::GetFilename(filepath);
+                std::string assetName = Filesystem::GetFilename(filepath);
                 uint32_t id = m_IDCounter.fetch_add(1);
-                auto assetInfo = make_unique<AssetInfo>(filepath);
+                auto assetInfo = std::make_unique<AssetInfo>(filepath);
 
                 if (assetInfo == nullptr)
                 {
@@ -166,9 +166,9 @@ namespace Galaktic::Core::Managers
              *
              */
             template<typename... Args>
-            static void LoadAsset(const string& filepath, Args&&... args)
+            static void LoadAsset(const std::string& filepath, Args&&... args)
             {
-                string assetName = Filesystem::GetFilename(filepath);
+                std::string assetName = Filesystem::GetFilename(filepath);
 
                 if (!AssetExistsByName(assetName))
                 {
@@ -258,7 +258,7 @@ namespace Galaktic::Core::Managers
              * @param  name Asset filename (extension included)
              * @return      Corresponding asset ID, or \c 0 if not found
              */
-            static uint32_t GetAssetIDByName(const string& name)
+            static uint32_t GetAssetIDByName(const std::string& name)
             {
                 auto it = m_NameToIDList.find(name);
                 if (it != m_NameToIDList.end())
@@ -274,7 +274,7 @@ namespace Galaktic::Core::Managers
              *
              * @param name Asset filename (extension included)
              */
-            static void DeleteByName(const string& name) 
+            static void DeleteByName(const std::string& name)
             {
                 auto nameIt = m_NameToIDList.find(name);
                 if (nameIt == m_NameToIDList.end())
@@ -327,7 +327,7 @@ namespace Galaktic::Core::Managers
              * @param name Name used to identify the requested entry
              * @return true if the asset filename is registered, regardless of load state, false otherwise
              */
-            static bool AssetExistsByName(const string& name)
+            static bool AssetExistsByName(const std::string& name)
             {
                 return m_NameToIDList.contains(name);
             }
@@ -349,7 +349,7 @@ namespace Galaktic::Core::Managers
              * @param  name Asset filename (extension included)
              * @return      Raw pointer to the \c AssetType, or \c nullptr on failure
              */
-            static AssetType* GetAssetByName(const string& name)
+            static AssetType* GetAssetByName(const std::string& name)
             {
                 auto nameIt = m_NameToIDList.find(name);
                 if (nameIt == m_NameToIDList.end())
@@ -406,7 +406,7 @@ namespace Galaktic::Core::Managers
              * @param  name Asset filename (extension included)
              * @return      Raw pointer to the \c AssetInfo, or \c nullptr on failure
              */
-            static AssetInfo* GetAssetInfo(const string& name)
+            static AssetInfo* GetAssetInfo(const std::string& name)
             {
                 auto nameIt = m_NameToIDList.find(name);
                 if (nameIt == m_NameToIDList.end())
@@ -522,10 +522,10 @@ namespace Galaktic::Core::Managers
             /**
              * @brief Returns the read-only asset-filename to ID lookup map.
              */
-            static const unordered_map<string, uint32_t>& GetNameToIDList() { return m_NameToIDList; }
+            static const std::unordered_map<std::string, uint32_t>& GetNameToIDList() { return m_NameToIDList; }
             /**
              * @brief Returns the read-only asset-ID to filename lookup map.
              */
-            static const unordered_map<uint32_t, string>& GetIDToNameList() { return m_IDToNameList; } 
+            static const std::unordered_map<uint32_t, std::string>& GetIDToNameList() { return m_IDToNameList; }
     };
 }

@@ -28,6 +28,9 @@
 #include <render/gkc_texture.h>
 #include <core/gkc_error.h>
 
+using std::string;
+using std::vector;
+
 using namespace Galaktic;
 using namespace Galaktic::Render;
 using namespace Galaktic::Core;

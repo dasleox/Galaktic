@@ -46,6 +46,7 @@ namespace Galaktic
         EmptyString,
         InvalidVersionMatch,
         DeviceNotFound,
+        InvalidValue,
 
         // Memory
         AllocationFailed,
@@ -148,6 +149,7 @@ namespace Galaktic
             CASE_ERROR_RETURN(InvalidVersionMatch)
             CASE_ERROR_RETURN(InvalidArgument)
             CASE_ERROR_RETURN(DeviceNotFound)
+            CASE_ERROR_RETURN(InvalidValue)
             
             // Memory
             CASE_ERROR_RETURN(AllocationFailed)

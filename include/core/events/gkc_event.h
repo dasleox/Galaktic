@@ -370,20 +370,20 @@ namespace Galaktic::Core::Events {
              * @param name Name used to identify the requested entry
              * @param type Engine type identifier used by this operation
              */
-            explicit EntityCreatedEvent(const string& name, const type_index& type) :
+            explicit EntityCreatedEvent(const std::string& name, const std::type_index& type) :
                 m_name(name), m_type(type) {}
             GKC_WRITE_EVENT_FUNCS(EntityCreated, "EntityCreated", Application);
             /**
              * @brief Returns the entity name carried by the event.
              */
-            [[nodiscard]] string& GetEntityName() { return m_name; }
+            [[nodiscard]] std::string& GetEntityName() { return m_name; }
             /**
              * @brief Returns the tag or component type carried by the event.
              */
-            [[nodiscard]] type_index GetEntityType() { return m_type; }
+            [[nodiscard]] std::type_index GetEntityType() { return m_type; }
         private:
-            string m_name;
-            type_index m_type;
+            std::string m_name;
+            std::type_index m_type;
     };
 
     /**
@@ -398,7 +398,7 @@ namespace Galaktic::Core::Events {
              * @param type Engine type identifier used by this operation
              * @param comp Component value to serialize or populate
              */
-            explicit EntityModifiedEvent(EntityID id, const type_index& type, any&& comp) :
+            explicit EntityModifiedEvent(EntityID id, const std::type_index& type, std::any&& comp) :
                 m_id(id), m_type(type), m_comp(comp) {}
             GKC_WRITE_EVENT_FUNCS(EntityModified, "EntityModified", Application);
             /**
@@ -408,15 +408,15 @@ namespace Galaktic::Core::Events {
             /**
              * @brief Returns the tag or component type carried by the event.
              */
-            [[nodiscard]] type_index GetEntityType() { return m_type; }
+            [[nodiscard]] std::type_index GetEntityType() { return m_type; }
             /**
              * @brief Returns a copy of the replacement component carried by the event.
              */
-            [[nodiscard]] any GetEntityComponent() { return m_comp; }
+            [[nodiscard]] std::any GetEntityComponent() { return m_comp; }
         private:
             EntityID m_id;
-            type_index m_type;
-            any m_comp;
+            std::type_index m_type;
+            std::any m_comp;
     };
 
 
@@ -505,15 +505,15 @@ namespace Galaktic::Core::Events {
              * @brief Creates the event with the supplied payload values.
              * @param text Text string
              */
-            explicit TextInputEvent(const string& text) : m_text(text) {}
+            explicit TextInputEvent(const std::string& text) : m_text(text) {}
             GKC_WRITE_EVENT_FUNCS(TextInput, "TextInput", Input);
 
             /**
              * @brief Returns the UTF-8 text carried by this input event.
              */
-            [[nodiscard]] const string& GetText() const { return m_text; }
+            [[nodiscard]] const std::string& GetText() const { return m_text; }
         private:
-            string m_text;
+            std::string m_text;
     };
 }
 

@@ -5,6 +5,8 @@
 #include "filesys/gkc_filesys.h"
 #include "core/gkc_error.h"
 
+using std::filesystem::path;
+
 using namespace Galaktic::Render;
 
 Galaktic::Render::Animation::Animation(const path& path, SDL_Renderer* renderer) {

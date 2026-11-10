@@ -57,7 +57,7 @@ namespace Galaktic::ECS {
              */
             template<typename Component>
             static void RegisterComponent(EntityID id, bool isTag = false) {
-                const type_index typeIndex(typeid(Component));
+                const std::type_index typeIndex(typeid(Component));
                 constexpr bool isPOD = std::is_trivially_copyable_v<Component>;
 
                 if constexpr (IsTag<Component>) {
@@ -67,9 +67,9 @@ namespace Galaktic::ECS {
                         id,
                         true,
                         false,
-                        [](const any&) -> size_t { return 0ull; },
-                        [](const any&, ofstream&) {},
-                        [](any&, ifstream&) {}
+                        [](const std::any&) -> size_t { return 0ull; },
+                        [](const std::any&, std::ofstream&) {},
+                        [](std::any&, std::ifstream&) {}
                     );
 
                     m_compTypes.emplace(typeIndex, std::move(info));
@@ -77,21 +77,21 @@ namespace Galaktic::ECS {
                 }
 
                 size_t sizeValue = 0;
-                size_t (*sizeFn)(const any&) = nullptr;
+                size_t (*sizeFn)(const std::any&) = nullptr;
 
                 if constexpr (IsNonPOD<Component>) {
-                    sizeFn = [](const any& a) -> size_t {
+                    sizeFn = [](const std::any& a) -> size_t {
                         const Component& c = std::any_cast<const Component&>(a);
                         return Component::Size(c);
                     };
                 } else {
                     sizeValue = sizeof(Component);
-                    sizeFn = [](const any&) -> size_t {
+                    sizeFn = [](const std::any&) -> size_t {
                         return sizeof(Component);
                     };
                 }
 
-                auto serializeFn = [](const any& a, ofstream& file) {
+                auto serializeFn = [](const std::any& a, std::ofstream& file) {
                     const Component& c = std::any_cast<const Component&>(a);
                     if constexpr (isPOD) {
                         file.write(GKC_WRITE_BINARY(c), sizeof(Component));
@@ -100,7 +100,7 @@ namespace Galaktic::ECS {
                     }
                 };
 
-                auto deserializeFn = [](any& a, ifstream& file) {
+                auto deserializeFn = [](std::any& a, std::ifstream& file) {
                     Component c{};
                     if constexpr (isPOD) {
                         file.read(GKC_READ_BINARY(c), sizeof(Component));
@@ -132,7 +132,7 @@ namespace Galaktic::ECS {
              * @brief Returns registered serialization metadata; the type must already be registered.
              * @param type Engine type identifier used by this operation
              */
-            static const ComponentTypeInfo& Get(const type_index& type) {
+            static const ComponentTypeInfo& Get(const std::type_index& type) {
                 return m_compTypes.find(type)->second;
             }
 
@@ -142,7 +142,7 @@ namespace Galaktic::ECS {
              * @param id Entity or asset ID used by this operation
              * @param isTag Is tag
              */
-            static void RegisterComponentByType(const type_index& type, EntityID id, bool isTag) {
+            static void RegisterComponentByType(const std::type_index& type, EntityID id, bool isTag) {
                 auto it = m_compTypes.find(type);
                 if (it == m_compTypes.end())
                     Debug::Logger::LogFatalWithType(ErrorType::InvalidComponent, "Attempted to deserialize unregistered component type");
@@ -152,7 +152,7 @@ namespace Galaktic::ECS {
              * @brief Removes the shared serialization metadata for a component type.
              * @param type Engine type identifier used by this operation
              */
-            static void UnregisterComponentByType(const type_index& type) {
+            static void UnregisterComponentByType(const std::type_index& type) {
                 if(m_compTypes.contains(type)) {
                     m_compTypes.erase(type);
                 }
@@ -163,7 +163,7 @@ namespace Galaktic::ECS {
              * @param type Engine type identifier used by this operation
              * @return true if the component type has serialization metadata, false otherwise
              */
-            static bool IsRegistered(const type_index& type) {
+            static bool IsRegistered(const std::type_index& type) {
                 return m_compTypes.contains(type);
             }
 
@@ -178,11 +178,11 @@ namespace Galaktic::ECS {
             /**
              * @brief Returns mutable access to registered component-type metadata.
              */
-            static unordered_map<type_index, ComponentTypeInfo>& GetComponentTypes() {
+            static std::unordered_map<std::type_index, ComponentTypeInfo>& GetComponentTypes() {
                 return m_compTypes;
             }
         private:
-            static unordered_map<type_index, ComponentTypeInfo> m_compTypes;
+            static std::unordered_map<std::type_index, ComponentTypeInfo> m_compTypes;
     };
 }
 

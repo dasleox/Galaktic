@@ -72,6 +72,8 @@ namespace Galaktic::Core::Managers
              * @brief Returns a copy of a registered configuration file; changes to the copy do not update the manager.
              * @param filename Filename, including its extension when present
              */
-            static Config::ConfigFile GetConfigFile(const std::string& filename);
+            static Config::ConfigFile* GetConfigFile(const std::string& filename);
+
+            static std::vector<std::string> GetConfigFileNames();
     };
 }

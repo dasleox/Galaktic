@@ -3,6 +3,8 @@
 #include <core/gkc_error.h>
 #include "filesys/gkc_filesys.h"
 
+using std::filesystem::path;
+
 using namespace Galaktic;
 
 Audio::AudioFile::AudioFile(const path &filepath, MIX_Mixer* mixer) {

@@ -4,6 +4,8 @@
 #include "filesys/gkc_filesys.h"
 #include "core/gkc_error.h"
 
+using std::filesystem::path;
+
 using namespace Galaktic::Render;
 
 TTF_Direction Galaktic::Render::FontDirectionToTTF_Direction(FontDirection direction)

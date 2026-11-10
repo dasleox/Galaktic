@@ -113,15 +113,15 @@ namespace Galaktic::ECS {
                 }
                 
                 // Get or create the pool for this component type
-                unique_ptr<IComponentPool>& pool = m_pools[typeid(T)];
+                std::unique_ptr<IComponentPool>& pool = m_pools[typeid(T)];
                 
                 if (!pool) {
                     ComponentRegistry::RegisterComponent<T>(id, IsTag<T>);
                     // Create new pool based on whether it's a tag or regular component
                     if constexpr (IsTag<T>) {
-                        pool = make_unique<TagPool>();
+                        pool = std::make_unique<TagPool>();
                     } else {
-                        pool = make_unique<ComponentPool<T>>();
+                        pool = std::make_unique<ComponentPool<T>>();
                     }
                 }
                 
@@ -150,14 +150,14 @@ namespace Galaktic::ECS {
              */
             template<typename T>
             T& Add(EntityID id, T&& component) {                
-                unique_ptr<IComponentPool>& pool = m_pools[typeid(T)];
+                std::unique_ptr<IComponentPool>& pool = m_pools[typeid(T)];
                 
                 if (!pool) {
                     ComponentRegistry::RegisterComponent<T>(id, IsTag<T>);
                     if constexpr (IsTag<T>) {
-                        pool = make_unique<TagPool>();
+                        pool = std::make_unique<TagPool>();
                     } else {
-                        pool = make_unique<ComponentPool<T>>();
+                        pool = std::make_unique<ComponentPool<T>>();
                     }
                 }
                 
@@ -280,7 +280,7 @@ namespace Galaktic::ECS {
              * @param type Component type to check
              * @return true if component exists
              */
-            bool HasByType(EntityID id, const type_index& type) const {
+            bool HasByType(EntityID id, const std::type_index& type) const {
                 auto it = m_pools.find(type);
                 if (it == m_pools.end())
                     return false;
@@ -320,7 +320,7 @@ namespace Galaktic::ECS {
              * 
              * @return Map of type_index to component pool
              */
-            unordered_map<type_index, unique_ptr<IComponentPool>>& GetComponentPools() {
+            std::unordered_map<std::type_index, std::unique_ptr<IComponentPool>>& GetComponentPools() {
                 return m_pools;
             }
 
@@ -333,8 +333,8 @@ namespace Galaktic::ECS {
              * @param id Entity ID
              * @return Vector of type_index for each component
              */
-            vector<type_index> GetComponentsFromEntity(EntityID id) {
-                vector<type_index> components;
+            std::vector<std::type_index> GetComponentsFromEntity(EntityID id) {
+                std::vector<std::type_index> components;
 
                 for (const auto& [type, pool] : m_pools) {
                     if (pool->Contains(id)) {
@@ -373,7 +373,7 @@ namespace Galaktic::ECS {
              * @note Tags are skipped in iteration
              */
             void ForEachComponentDo(EntityID id,
-                                    const function<void(const ComponentTypeInfo&, const any&)> func) {
+                                    const std::function<void(const ComponentTypeInfo&, const std::any&)> func) {
                 for (const auto& [type, pool] : m_pools) {
                     if (!pool->Contains(id))
                         continue;
@@ -387,7 +387,7 @@ namespace Galaktic::ECS {
                     
                     // Call with empty any - serialization now uses m_pools directly
                     // This is kept for backwards compatibility
-                    any empty;
+                    std::any empty;
                     func(info, empty);
                 }
             }
@@ -396,7 +396,7 @@ namespace Galaktic::ECS {
              * @brief Iterate over all registered component types
              * @param fn Function to call for each registered component type
              */
-            void ForEachRegisteredComponent(const function<void(const ComponentTypeInfo&)>& fn) const {
+            void ForEachRegisteredComponent(const std::function<void(const ComponentTypeInfo&)>& fn) const {
                 for (const auto& [type, info] : ComponentRegistry::GetComponentTypes()) {
                     fn(info);
                 }
@@ -429,8 +429,8 @@ namespace Galaktic::ECS {
              * @return true if type matches T
              */
             template<typename T>
-            bool IsComponentType(const type_index& type) {
-                return type == type_index(typeid(T));
+            bool IsComponentType(const std::type_index& type) {
+                return type == std::type_index(typeid(T));
             }
             
             /**
@@ -442,7 +442,7 @@ namespace Galaktic::ECS {
              * @param id Entity ID to clear all components from
              */
             void RemoveAllComponents(EntityID id) {
-                vector<type_index> componentTypes = GetComponentsFromEntity(id);
+                std::vector<std::type_index> componentTypes = GetComponentsFromEntity(id);
                 for (const auto& type : componentTypes) {
                     auto it = m_pools.find(type);
                     if (it != m_pools.end()) {
@@ -464,6 +464,6 @@ namespace Galaktic::ECS {
             /**
              * @brief Storage for all component m_pools
             */
-            unordered_map<type_index, unique_ptr<IComponentPool>> m_pools;
+            std::unordered_map<std::type_index, std::unique_ptr<IComponentPool>> m_pools;
     };
 }

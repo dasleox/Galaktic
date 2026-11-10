@@ -1,8 +1,12 @@
 #include <audio/gkc_audio.h>
 #include <core/managers/gkc_audio_man.h>
 #include "core/gkc_logger.h"
+#include <config/gkc_config_setter.h>
 #include "filesys/gkc_filesys.h"
 #include <audio/gkc_audio_group.h>
+
+using std::string;
+using std::vector;
 
 using namespace Galaktic;
 using namespace Galaktic::Core;
@@ -20,6 +24,8 @@ Managers::AudioManager::AudioManager(const string &folder) {
     m_audioSpec.channels = 2;
     m_audioSpec.freq = 48000;
     m_audioSpec.format = SDL_AUDIO_F32;
+
+    Config::ConfigSetter::SetAudioConfigurationFromFile();
 
     m_deviceID = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &m_audioSpec);
     SDL_PauseAudioDevice(m_deviceID);
@@ -197,6 +203,7 @@ void Managers::AudioManager::SetVolumeByID(AudioID id, float volume) {
 }
 
 void Managers::AudioManager::SetMasterVolume(float volume) {
+    Config::ConfigSetter::SetVariable("master_volume", volume);
     MIX_SetMixerGain(m_mixer, ClampVolume(volume));
 }
 
@@ -255,6 +262,19 @@ void Managers::AudioManager::SetAudioFormat(SDL_AudioFormat format) {
         return;
 
     m_audioSpec.format = format;
+    RestartAudioDevice();
+}
+
+void Managers::AudioManager::SetAudioFormat(std::string format) {
+    auto sdlFormat = SDL_AUDIO_UNKNOWN;
+    if (format == "U8") sdlFormat = SDL_AUDIO_U8;
+    else if (format == "S8") sdlFormat = SDL_AUDIO_S8;
+    else if (format == "S16") sdlFormat = SDL_AUDIO_S16;
+    else if (format == "S32") sdlFormat = SDL_AUDIO_S32;
+    else if (format == "F32") sdlFormat = SDL_AUDIO_F32;
+    else return;
+
+    m_audioSpec.format = sdlFormat;
     RestartAudioDevice();
 }
 

@@ -78,7 +78,7 @@ namespace Galaktic::Debug {
      */
     struct ConsoleLine
     {
-        string text;
+        std::string text;
         spdlog::level::level_enum level;
         Uint64 timestamp = 0;
     };
@@ -90,7 +90,7 @@ namespace Galaktic::Debug {
     class ConsoleMutex : public spdlog::sinks::base_sink<Mutex>
     {
         private:
-            vector<ConsoleLine> m_lines;
+            std::vector<ConsoleLine> m_lines;
         protected:
             /**
              * @brief Formats and appends a log line, discarding the oldest lines when the console limit is reached.
@@ -120,7 +120,7 @@ namespace Galaktic::Debug {
             /**
              * @brief Returns borrowed chronological log lines; the sink owns their storage.
              */
-            const vector<ConsoleLine>& GetLines() const { return m_lines; }
+            const std::vector<ConsoleLine>& GetLines() const { return m_lines; }
             /**
              * @brief Clears the stored entries.
              */
@@ -134,22 +134,22 @@ namespace Galaktic::Debug {
      */
     class Logger {            
         private:
-            static shared_ptr<spdlog::logger> m_engineLogger;
-            static shared_ptr<spdlog::logger> m_clientLogger;
-            static shared_ptr<ConsoleMutex_mt> m_mutexSink;
+            static std::shared_ptr<spdlog::logger> m_engineLogger;
+            static std::shared_ptr<spdlog::logger> m_clientLogger;
+            static std::shared_ptr<ConsoleMutex_mt> m_mutexSink;
         public:
             /**
              * @brief Returns access to the shared engine logger initialized by Logger::Init.
              */
-            static shared_ptr<spdlog::logger>& GetEngineLogger()   { return m_engineLogger; }
+            static std::shared_ptr<spdlog::logger>& GetEngineLogger()   { return m_engineLogger; }
             /**
              * @brief Returns access to the shared client logger initialized by Logger::Init.
              */
-            static shared_ptr<spdlog::logger>& GetClientLogger()   { return m_clientLogger; }
+            static std::shared_ptr<spdlog::logger>& GetClientLogger()   { return m_clientLogger; }
             /**
              * @brief Returns access to the shared synchronized console log sink.
              */
-            static shared_ptr<ConsoleMutex_mt>& GetConsoleMutex()     { return m_mutexSink;    }
+            static std::shared_ptr<ConsoleMutex_mt>& GetConsoleMutex()     { return m_mutexSink;    }
 
             /**
              * @brief Inits the loggers & sets a pattern for them
@@ -165,17 +165,17 @@ namespace Galaktic::Debug {
              * @brief Logs an informational Lua message with its script call context.
              * @param msg Log message or format string
              */
-            static void LogInfoLua(const string& msg);
+            static void LogInfoLua(const std::string& msg);
             /**
              * @brief Logs a Lua warning with its script call context.
              * @param msg Log message or format string
              */
-            static void LogWarningLua(const string& msg);
+            static void LogWarningLua(const std::string& msg);
             /**
              * @brief Logs a Lua error with its script call context.
              * @param msg Log message or format string
              */
-            static void LogErrorLua(const string& msg);
+            static void LogErrorLua(const std::string& msg);
 
             /**
              * @brief Formats an error message and appends its engine error category.
@@ -184,7 +184,7 @@ namespace Galaktic::Debug {
              * @param args Arguments forwarded to the requested operation
              */
             template <typename ...Args>
-            static void LogErrorWithType(ErrorType type, const string& msg, Args&&... args)
+            static void LogErrorWithType(ErrorType type, const std::string& msg, Args&&... args)
             {
                 GetEngineLogger()->log(
                     spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION},
@@ -200,7 +200,7 @@ namespace Galaktic::Debug {
              * @param args Arguments forwarded to the requested operation
              */
             template <typename ...Args>
-            static void LogFatalWithType(ErrorType type, const string& msg, Args&&... args)
+            static void LogFatalWithType(ErrorType type, const std::string& msg, Args&&... args)
             {
                 GetEngineLogger()->log(
                     spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION},

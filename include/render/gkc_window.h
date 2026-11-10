@@ -28,7 +28,7 @@ namespace Galaktic::Core::Events {
     class GKC_Event;
 }
 
-using EventCallback = function<void(Galaktic::Core::Events::GKC_Event&)>;
+using EventCallback = std::function<void(Galaktic::Core::Events::GKC_Event&)>;
 
 namespace Galaktic::Render {
     /**
@@ -59,7 +59,7 @@ namespace Galaktic::Render {
              * @param height Height of the window
              * @param type Type of the window
              */
-            Window(const string& title, Uint32 width, Uint32 height, Window_Type type);
+            Window(const std::string& title, Uint32 width, Uint32 height, Window_Type type);
 
             /**
              * @brief Releases the resources owned by this object.
@@ -83,7 +83,7 @@ namespace Galaktic::Render {
             /**
              * @brief Returns the stored window title.
              */
-            [[nodiscard]] string GetTitle() const { return m_title; }
+            [[nodiscard]] std::string GetTitle() const { return m_title; }
             /**
              * @brief Returns the native SDL window ID.
              */
@@ -124,7 +124,7 @@ namespace Galaktic::Render {
              * @brief Updates the native SDL window title and stores it when the operation succeeds.
              * @param title Title
              */
-            void SetTitle(const string& title) { if (SDL_SetWindowTitle(m_window, title.c_str())) m_title = title; }
+            void SetTitle(const std::string& title) { if (SDL_SetWindowTitle(m_window, title.c_str())) m_title = title; }
             /**
              * @brief Updates the stored window width; does not resize the native window.
              * @param width Width in pixels
@@ -187,7 +187,7 @@ namespace Galaktic::Render {
              * @brief Sets the icon of the window
              * @param iconPath Path to the icon file
              */
-            void SetIcon(const path& iconPath);
+            void SetIcon(const std::filesystem::path& iconPath);
 
             /**
              * Draws the scene at a small fixed size (for example 320x180).
@@ -207,7 +207,7 @@ namespace Galaktic::Render {
              */
             void DisablePixelResolution();
         private:
-            string m_title;
+            std::string m_title;
             SDL_WindowID m_ID = 0;
             GKC_WindowID m_windowID = 0;
             Uint32 m_width = 0;

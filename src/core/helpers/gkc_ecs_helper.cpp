@@ -3,6 +3,10 @@
 #include "core/managers/gkc_ecs_man.h"
 #include "ecs/gkc_entity.h"
 
+using std::any;
+using std::string;
+using std::type_index;
+
 using namespace Galaktic::Core;
 using namespace Galaktic;
 

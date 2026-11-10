@@ -38,13 +38,13 @@ namespace Galaktic::Core::Events {
 }
 namespace Galaktic::ECS {
     class Entity;
-    typedef unordered_map<EntityID, Entity> Entity_List;
+    typedef std::unordered_map<EntityID, Entity> Entity_List;
 }
 namespace Galaktic::Render {
     class Window;
 }
 namespace Galaktic::Core::Systems {
-    typedef unordered_map<string, shared_ptr<BaseSystem>> System_List;
+    typedef std::unordered_map<std::string, std::shared_ptr<BaseSystem>> System_List;
     class CameraSystem;
 }
 namespace Galaktic::Core::Managers {
@@ -66,7 +66,7 @@ namespace Galaktic::Core {
      * @brief Saves all the information about the scene
      */
     struct SceneInformation {
-        string scene_name_;
+        std::string scene_name_;
         size_t scene_size_ = 0;
     };
 
@@ -94,7 +94,7 @@ namespace Galaktic::Core {
              * @param device_information DeviceInformation instance
              * @param path Path of the app
              */
-            Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformation& device_information, const path& path);
+            Scene(const std::string& name, ManagersWrapper* wrapper, const DeviceInformation& device_information, const std::filesystem::path& path);
 
             /**
              * @brief Destructor - properly cleans up all allocated resources
@@ -136,19 +136,19 @@ namespace Galaktic::Core {
              * @brief Create a Static Object object
              * @param name Entity's name
              */
-            void CreateStaticObject(const string &name);
+            void CreateStaticObject(const std::string &name);
 
             /**
              * @brief Create a Physics Object object
              * @param name Entity's name
              */
-            void CreatePhysicsObject(const string &name);
+            void CreatePhysicsObject(const std::string &name);
 
             /**
              * @brief Create a Light Entity object
              * @param name Entity's name
              */
-            void CreateLightEntity(const string &name);
+            void CreateLightEntity(const std::string &name);
 
             /**
              * @brief Copy an entity list into the scene's entity list
@@ -165,7 +165,7 @@ namespace Galaktic::Core {
              * @brief Create a Camera entity
              * @param name Entity's name
              */
-            void CreateCamera(const string &name);
+            void CreateCamera(const std::string &name);
 
             /**
              * @brief Toggles the scene's entity-outline debug overlay.
@@ -224,7 +224,7 @@ namespace Galaktic::Core {
 
             double m_hotReloadTimer = 0.0;
 
-            shared_ptr<Render::Window> m_window;
+            std::shared_ptr<Render::Window> m_window;
             // Declared after the window so its texture is destroyed first.
             Render::LightingState m_lighting;
             float m_ambientLight = 1.f;
@@ -237,7 +237,7 @@ namespace Galaktic::Core {
             Helpers::TextureHelper* m_textureHelper = nullptr;
             Helpers::AnimationHelper* m_animationHelper = nullptr;
             ManagersWrapper* m_managerWrapper = nullptr;
-            path m_appPath;
+            std::filesystem::path m_appPath;
 
         private:
             // ---- Startup helpers, called once from the constructor ----
@@ -249,7 +249,7 @@ namespace Galaktic::Core {
             /** @brief Creates and registers every engine system used by the scene's loop */
             void InitializeSystems();
             /** @brief Ensures the scene's local script folder exists on disk */
-            void EnsureSceneScriptFolder(const string& name);
+            void EnsureSceneScriptFolder(const std::string& name);
 
             // ---- Run-loop helpers, called every time Run() executes ----
 
@@ -265,12 +265,12 @@ namespace Galaktic::Core {
              */
             void SpawnDebugEntities();
             /** @brief Advances gameplay systems by one fixed timestep */
-            void FixedUpdate(float deltaTime, const shared_ptr<Systems::BaseSystem>& movementSystem,
-                const shared_ptr<Systems::CameraSystem>& cameraSystem);
+            void FixedUpdate(float deltaTime, const std::shared_ptr<Systems::BaseSystem>& movementSystem,
+                const std::shared_ptr<Systems::CameraSystem>& cameraSystem);
             /** @brief Draws one frame, including debug overlays and the engine console */
             void RenderFrame(float deltaTime, TTF_Font* consoleFont, Console* console,
-                const shared_ptr<Systems::CameraSystem>& cameraSystem);
+                const std::shared_ptr<Systems::CameraSystem>& cameraSystem);
     };
 
-    typedef unordered_map<string, unique_ptr<Scene>> Scene_List;
+    typedef std::unordered_map<std::string, std::unique_ptr<Scene>> Scene_List;
 }

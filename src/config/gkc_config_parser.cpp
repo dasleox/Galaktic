@@ -3,6 +3,11 @@
 #include <core/gkc_logger.h>
 #include <filesys/gkc_filesys.h>
 
+using std::ifstream;
+using std::filesystem::path;
+using std::string;
+using std::vector;
+
 using namespace Galaktic;
 using namespace Galaktic::Debug;
 using namespace Galaktic::Config;

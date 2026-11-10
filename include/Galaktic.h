@@ -7,6 +7,7 @@
 #include <config/gkc_config_parser.h>
 #include <config/gkc_config_register.h>
 #include <config/gkc_config_file.h>
+#include <config/gkc_config_setter.h>
 
 #include <core/events/gkc_event.h>
 #include <core/events/gkc_dispatcher.h>

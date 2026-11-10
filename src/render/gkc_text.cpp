@@ -4,6 +4,8 @@
 #include <core/gkc_error.h>
 #include <core/gkc_logger.h>
 
+using std::string;
+
 using namespace Galaktic::Render;
 
 Text::Text(TTF_Font* font, const string& text, SDL_Color color)

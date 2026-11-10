@@ -4,6 +4,9 @@
 #include <core/gkc_error.h>
 #include <filesys/gkc_filesys.h>
 
+using std::filesystem::path;
+using std::string;
+
 using namespace Galaktic::Render;
 bool Window::m_isFullscreen = false;
 

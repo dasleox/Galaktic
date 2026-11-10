@@ -320,7 +320,7 @@ namespace Galaktic::ECS {
              * For trivially copyable types (POD), uses binary write.
              * For non-POD types, calls Component::Write()
              */
-            void Serialize(EntityID id, ofstream& file) const override {
+            void Serialize(EntityID id, std::ofstream& file) const override {
                 const T* comp = Get(id);
                 if (comp) {
                     if constexpr (std::is_trivially_copyable_v<T>) {
@@ -339,7 +339,7 @@ namespace Galaktic::ECS {
              * For trivially copyable types (POD), uses binary read.
              * For non-POD types, calls Component::Read()
              */
-            void Deserialize(EntityID id, ifstream& file) override {
+            void Deserialize(EntityID id, std::ifstream& file) override {
                 T component{};
                 if constexpr (std::is_trivially_copyable_v<T>) {
                     file.read(GKC_READ_BINARY(component), sizeof(T));
@@ -388,9 +388,9 @@ namespace Galaktic::ECS {
             auto end() const { return m_components.end(); }
             
         private:
-            vector<T> m_components;     
-            unordered_map<EntityID, size_t> m_entityToIndex;
-            unordered_map<size_t, EntityID> m_indexToEntity;
+            std::vector<T> m_components;
+            std::unordered_map<EntityID, size_t> m_entityToIndex;
+            std::unordered_map<size_t, EntityID> m_indexToEntity;
     };
 
     /**
@@ -482,7 +482,7 @@ namespace Galaktic::ECS {
              * @param id Entity's ID
              * @param file file
              */
-            void Serialize(EntityID id, ofstream& file) const override {
+            void Serialize(EntityID id, std::ofstream& file) const override {
                 // tags are just markers xd
             }
             
@@ -491,7 +491,7 @@ namespace Galaktic::ECS {
              * @param id Entity's ID
              * @param file file
              */
-            void Deserialize(EntityID id, ifstream& file) override {
+            void Deserialize(EntityID id, std::ifstream& file) override {
                 Set(id);
             }
             

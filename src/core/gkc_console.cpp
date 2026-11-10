@@ -14,6 +14,11 @@
 #include <core/systems/gkc_key.h>
 #include <sstream>
 
+using std::shared_ptr;
+using std::string;
+using std::to_string;
+using std::vector;
+
 using namespace Galaktic;
 using namespace Galaktic::Core;
 using namespace Galaktic::Core::Managers;

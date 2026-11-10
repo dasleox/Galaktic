@@ -3,6 +3,11 @@
 #include <core/gkc_logger.h>
 #include <script/gkc_script.h>
 
+using std::make_shared;
+using std::shared_ptr;
+using std::string;
+using std::unordered_map;
+
 using namespace Galaktic;
 using namespace Galaktic::Core;
 using namespace Galaktic::Script;

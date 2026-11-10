@@ -3,6 +3,9 @@
 #include <filesys/gkc_filesys.h>
 #include <core/gkc_logger.h>
 
+using std::string;
+using std::vector;
+
 using namespace Galaktic::Core;
 using namespace Galaktic::Core::Managers;
 using namespace Galaktic::Render;

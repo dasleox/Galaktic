@@ -6,6 +6,9 @@
 #include <filesys/gkc_filesys.h>
 #include <core/gkc_console.h>
 
+using std::filesystem::path;
+using std::string;
+
 using namespace Galaktic;
 using namespace Galaktic::Config;
 using namespace Galaktic::Core::Systems;

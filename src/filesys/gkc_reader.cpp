@@ -4,6 +4,11 @@
 
 #include "core/gkc_scene.h"
 
+using std::any;
+using std::ifstream;
+using std::filesystem::path;
+using std::string;
+
 using namespace Galaktic;
 
 void Filesystem::FileReader::ReadString(ifstream &file, string &str) {

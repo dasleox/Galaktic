@@ -42,7 +42,7 @@ namespace Galaktic::Filesystem {
 	 * @return true if the directory exists.
 	 *         false if the directory doesn't exist (duh! x2)
 	 */
-	extern bool CheckDirectory(const path& dir_path);
+	extern bool CheckDirectory(const std::filesystem::path& dir_path);
 
 	/**
 	 * @brief Checks if a file exists at the given path.
@@ -50,7 +50,7 @@ namespace Galaktic::Filesystem {
 	 * @return true if the file exists.
 	 *         false if the file doesn't exist (duh! x3)
 	 */
-	extern bool CheckFile(const path& file_path);
+	extern bool CheckFile(const std::filesystem::path& file_path);
 
 	/**
 	 * @brief Creates a new directory at the specified path.
@@ -58,39 +58,39 @@ namespace Galaktic::Filesystem {
 	 * @return true if the directory was created successfully.
 	 *         false if creation failed or the directory already exists.
 	 */
-	extern bool CreateFolder(const path& dir_path);
+	extern bool CreateFolder(const std::filesystem::path& dir_path);
 
 	/**
 	 * @brief Renames or moves a file from one path to another.
 	 * @param old_path Current file path.
 	 * @param new_path New file path (including new name if desired).
 	 */
-	extern void RenameFile(const path& old_path, const path& new_path);
+	extern void RenameFile(const std::filesystem::path& old_path, const std::filesystem::path& new_path);
 
 	/**
 	 * @brief Deletes a file at the specified path.
 	 * @param filepath filepath
 	 */
-	extern void RemoveFile(const path& filepath);
+	extern void RemoveFile(const std::filesystem::path& filepath);
 
 	/**
 	 * @brief Reads and lists the contents of a given folder.
 	 * @param folder_path Folder path to read.
 	 * @note This function prints folder files/entries
 	 */
-	extern void ReadFolderContent(const path& folder_path);
+	extern void ReadFolderContent(const std::filesystem::path& folder_path);
 
 	/**
 	 * @brief Reads information (e.g., size, modification date) about a specific file.
 	 * @param file_path File path to read information from.
 	 */
-	extern void ReadFileInfo(const path& file_path);
+	extern void ReadFileInfo(const std::filesystem::path& file_path);
 
 	/**
 	 * @brief Creates the directory structure for an app
 	 * @param project_path File path to read information from.
 	 */
-	extern void CreateAppDirectoryStructure(const path& project_path);
+	extern void CreateAppDirectoryStructure(const std::filesystem::path& project_path);
 
 	/**
 	 * @brief Get the Filenames in a folder path
@@ -98,7 +98,7 @@ namespace Galaktic::Filesystem {
 	 * @return vector with filenames, empty vector if the folder doesn't exist 
 	 * 		   or the folder is empty
 	 */
-	extern vector<string> GetFilenamesInFolder(const path& folder);
+	extern std::vector<std::string> GetFilenamesInFolder(const std::filesystem::path& folder);
 
 	/**
 	 * @brief Get the folder's paths in a folder path
@@ -107,14 +107,14 @@ namespace Galaktic::Filesystem {
 	 * @return vector with the folder's path, empty vector if no folders were found
 	 * 		   inside the specified folder
 	 */
-	extern vector<string> GetFoldersInFolder(const path& folder);
+	extern std::vector<std::string> GetFoldersInFolder(const std::filesystem::path& folder);
 
 	/**
 	 * @brief Extracts the filename from a full file path.
 	 * @param fullPath Full file path.
 	 * @return Filename as a string.
 	 */
-	extern string GetFilename(const path& fullPath);
+	extern std::string GetFilename(const std::filesystem::path& fullPath);
 
 	/**
 	 * @brief Extracts the filename from a full file path relative to a given path.
@@ -122,14 +122,14 @@ namespace Galaktic::Filesystem {
 	 * @param relativePath Relative path to extract from.
 	 * @return Filename as a string.
 	 */
-	extern string GetFilenameFromRelativePath(const path& fullPath, const path& relativePath);
+	extern std::string GetFilenameFromRelativePath(const std::filesystem::path& fullPath, const std::filesystem::path& relativePath);
 
 	/**
 	 * @brief Refreshes the contents of a folder and updates the provided vector with filenames.
 	 * @param content vector string
 	 * @param folder folder to scan (can be the same)
 	 */
-	extern void RefreshFolderContents(vector<string> &content, const path &folder);
+	extern void RefreshFolderContents(std::vector<std::string> &content, const std::filesystem::path &folder);
 
 	/**
 	 * Get the size in bytes, if the file doesn't exist it will return 0
@@ -137,13 +137,13 @@ namespace Galaktic::Filesystem {
 	 * @param path filepath
 	 * @return The size of the file in bytes if it exists, 0 otherwise 
 	 */
-	extern uintmax_t GetFileSize(const path& filepath);
+	extern uintmax_t GetFileSize(const std::filesystem::path& filepath);
 
 	/**
 	 * @brief Gets the full path of the application. (.exe location)
 	 * @return Full application path
 	 */
-	extern path GetFullPath();
+	extern std::filesystem::path GetFullPath();
 
 	/**
 	 * @brief Checks whether the filepath extension is in the supplied allowed list.
@@ -151,9 +151,9 @@ namespace Galaktic::Filesystem {
 	 * @param allowedExtensions Allowed extensions
 	 * @return true if the filepath extension is in the supplied allowed list, false otherwise
 	 */
-	extern bool CheckExtension(const path& filepath, const vector<string>& allowedExtensions);
+	extern bool CheckExtension(const std::filesystem::path& filepath, const std::vector<std::string>& allowedExtensions);
 
-	const inline vector<path> APP_DIRECTORY_STRUCTURE = {
+	const inline std::vector<std::filesystem::path> APP_DIRECTORY_STRUCTURE = {
 		"assets", "assets/textures", "assets/sounds", "assets/animations",
 		"scenes", "scripts", "scripts/local", "scripts/local/shared", "scripts/modules",
 		"scripts/modules/Galaktic", "config"

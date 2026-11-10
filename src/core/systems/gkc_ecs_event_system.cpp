@@ -3,6 +3,8 @@
 #include "core/events/gkc_dispatcher.h"
 #include "core/managers/gkc_ecs_man.h"
 
+using std::string;
+
 using namespace Galaktic::Core;
 using namespace Galaktic;
 

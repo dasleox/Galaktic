@@ -3,6 +3,8 @@
 #include "core/gkc_error.h"
 #include "filesys/gkc_filesys.h"
 
+using std::filesystem::path;
+
 using namespace Galaktic::Render;
 
 Texture::Texture(const path &path, SDL_Renderer* renderer) {

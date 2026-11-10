@@ -55,7 +55,7 @@ namespace Galaktic::Core {
              * @param project_path Project folder path
              * @param title Title of the app
              */
-            App(const path& project_path, const string& title);
+            App(const std::filesystem::path& project_path, const std::string& title);
 
             /**
              * @brief Returns access to the application's scene-manager pointer.
@@ -68,11 +68,11 @@ namespace Galaktic::Core {
             static Console* GetConsole() { return m_console.get(); }
         private:
             Managers::SceneManager* m_sceneManager;                 // Scene Manager
-            unique_ptr<Config::BindConfigurator> m_bindConfigurator;// Bind Configurator
+            std::unique_ptr<Config::BindConfigurator> m_bindConfigurator;// Bind Configurator
             DeviceInformation m_deviceInfo;                         // Device Info
-            unique_ptr<ManagersWrapper> m_managersWrapper;          // Managers Wrapper Pointer
-            string m_appName;                                       // App name
-            static unique_ptr<Console> m_console;
+            std::unique_ptr<ManagersWrapper> m_managersWrapper;          // Managers Wrapper Pointer
+            std::string m_appName;                                       // App name
+            static std::unique_ptr<Console> m_console;
 
             /**
              * @brief Get the screen information and set the width and height of the built window

@@ -3,6 +3,9 @@
 #include "core/gkc_logger.h"
 #include "core/events/gkc_dispatcher.h"
 
+using std::string;
+using std::unordered_map;
+
 using namespace Galaktic::Core::Systems;
 using namespace Galaktic::Core;
 

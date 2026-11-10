@@ -41,7 +41,7 @@ namespace Galaktic::ECS {
      * @param func function to execute
      */
     template <typename T>
-    inline void IfComponentExists(ECS::Entity& entity, function<void()> func) {
+    inline void IfComponentExists(ECS::Entity& entity, std::function<void()> func) {
         if (entity.Has<T>()) {
             func();
         }
@@ -130,7 +130,7 @@ namespace Galaktic::Core::Managers {
              * @param comp Component
              * 
              */
-            void AddRawComponentToEntity(EntityID id, const type_index& type, any&& comp){
+            void AddRawComponentToEntity(EntityID id, const std::type_index& type, std::any&& comp){
                 GKC_ENGINE_WARNING("AddRawComponentToEntity called - consider using typed Add instead");
 
                 auto it = m_entityList.find(id);
@@ -155,7 +155,7 @@ namespace Galaktic::Core::Managers {
              * @param id Entity or asset ID used by this operation
              * @param type Engine type identifier used by this operation
              */
-            void DeleteRawComponentFromEntity(EntityID id, const type_index& type) {
+            void DeleteRawComponentFromEntity(EntityID id, const std::type_index& type) {
                 auto it = m_entityList.find(id);
                 if (it == m_entityList.end())
                     return;
@@ -173,7 +173,7 @@ namespace Galaktic::Core::Managers {
              * @brief Returns the ID mapped to the entity name, or InvalidEntity when absent.
              * @param name Name used to identify the requested entry
              */
-            EntityID GetEntityIDByName(const string& name) const {
+            EntityID GetEntityIDByName(const std::string& name) const {
                 auto it = m_nameToEntityList.find(name);
                 if (it != m_nameToEntityList.end()) {
                     return it->second;
@@ -190,7 +190,7 @@ namespace Galaktic::Core::Managers {
              * @param id
              * @param type
              */
-            void AddTagByType(EntityID id, const type_index& type) {
+            void AddTagByType(EntityID id, const std::type_index& type) {
                 auto it = m_entityList.find(id);
                 if (it == m_entityList.end())
                     return;
@@ -220,7 +220,7 @@ namespace Galaktic::Core::Managers {
              * @param name Name of the entity
              */
             template<typename T>
-            ECS::Entity CreateEntity(const string& name) {
+            ECS::Entity CreateEntity(const std::string& name) {
                 if(m_entityList.size() >= MAX_ENTITY_QUANTITY) {
                     Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max entity quantity reached!");
                     return ECS::Entity(0, m_registry);
@@ -229,7 +229,7 @@ namespace Galaktic::Core::Managers {
                 EntityID id = s_nextID++;
                 ECS::Entity entity = ECS::Entity(id, m_registry);
                 m_entityList.emplace(id, entity);
-                string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, name);
+                std::string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, name);
                 AddComponentToEntity<ECS::NameComponent>(id, uniqueName);
                 AddTagToEntity<T>(id);
                 m_nameToEntityList.emplace(uniqueName, id);
@@ -245,7 +245,7 @@ namespace Galaktic::Core::Managers {
              * @param name Name of the entity
              * @param type Tag type
              */
-            void CreateEntityByTypeIndex(const string& name, const type_index& type) {
+            void CreateEntityByTypeIndex(const std::string& name, const std::type_index& type) {
                 if(m_entityList.size() >= MAX_ENTITY_QUANTITY) {
                     Debug::Logger::LogErrorWithType(ErrorType::EntityLimitReached, "Max entity quantity reached!");
                     return;
@@ -255,7 +255,7 @@ namespace Galaktic::Core::Managers {
                 ECS::Entity entity = ECS::Entity(id, m_registry);
                 m_entityList.emplace(id, entity);
 
-                string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, name);
+                std::string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, name);
                 AddComponentToEntity<ECS::NameComponent>(id, uniqueName);
                 AddTagByType(id, type);
                 m_nameToEntityList.emplace(uniqueName, id);
@@ -319,7 +319,7 @@ namespace Galaktic::Core::Managers {
              * @param id Entity's ID
              * @param newName New name of the entity
              */
-            void RenameEntity(EntityID id, const string& newName) {
+            void RenameEntity(EntityID id, const std::string& newName) {
                 if(m_entityList.find(id) == m_entityList.end()) 
                     return;
                 if (!m_entityList.at(id).Has<ECS::NameComponent>())
@@ -330,7 +330,7 @@ namespace Galaktic::Core::Managers {
                     m_nameToEntityList.erase(nameComp.name);
                 }
                 
-                string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, newName);
+                std::string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, newName);
                 nameComp.name = uniqueName;
                 m_nameToEntityList.insert_or_assign(nameComp.name, id);
             }
@@ -341,7 +341,7 @@ namespace Galaktic::Core::Managers {
              * @note This function returns the first entity created with the same name,
              *       use \c GetEntitiesByName() for multiple entities with the same name
              */
-            ECS::Entity* GetEntityByName(const string& name) {
+            ECS::Entity* GetEntityByName(const std::string& name) {
                 auto it = m_nameToEntityList.find(name);
                 if (it != m_nameToEntityList.end()) {
                     return &m_entityList[it->second];
@@ -405,9 +405,9 @@ namespace Galaktic::Core::Managers {
              * @brief Returns the entity's name, or UnknownName when unavailable.
              * @param id Entity or asset ID used by this operation
              */
-            string GetEntityNameByID(EntityID id) {
+            std::string GetEntityNameByID(EntityID id) {
                 auto it = m_entityList.find(id);
-                string nameFound = "UnknownName";
+                std::string nameFound = "UnknownName";
                 if (it != m_entityList.end()) {
                     ECS::IfComponentExists<ECS::NameComponent>(it->second, [&]() {
                         auto& nameComp = it->second.Get<ECS::NameComponent>();
@@ -450,7 +450,7 @@ namespace Galaktic::Core::Managers {
              * @param sourceID Entity's ID to copy from
              * @param newName Replacement name
              */
-            void CopyEntity(EntityID sourceID, const string& newName) {
+            void CopyEntity(EntityID sourceID, const std::string& newName) {
                 if (!m_entityList.contains(sourceID)) {
                     Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Source entity does not exist!");
                     return;
@@ -471,7 +471,7 @@ namespace Galaktic::Core::Managers {
                 m_registry->CopyAllComponents(sourceID, newID);
 
                 // Overwrites the copied NameComponent with a unique one
-                string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, newName);
+                std::string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, newName);
                 AddComponentToEntity<ECS::NameComponent>(newID, uniqueName);
                 m_nameToEntityList.emplace(uniqueName, newID);
             }
@@ -481,7 +481,7 @@ namespace Galaktic::Core::Managers {
              * @param sourceID Entity's ID to copy from
              * @param newName Replacement name
              */
-            ECS::Entity* CopyAndGetEntity(EntityID sourceID, const string& newName) {
+            ECS::Entity* CopyAndGetEntity(EntityID sourceID, const std::string& newName) {
                 if (!m_entityList.contains(sourceID)) {
                     Debug::Logger::LogErrorWithType(ErrorType::EntityNotFound, "Source entity does not exist!");
                     return nullptr;
@@ -496,7 +496,7 @@ namespace Galaktic::Core::Managers {
                 m_registry->CopyAllComponents(sourceID, newID);
 
                 // Overwrites the copied NameComponent with a unique one
-                string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, newName);
+                std::string uniqueName = Core::GenerateUniqueName(m_nameToEntityList, newName);
                 AddComponentToEntity<ECS::NameComponent>(newID, uniqueName);
                 m_nameToEntityList.emplace(uniqueName, newID);
 
@@ -512,7 +512,7 @@ namespace Galaktic::Core::Managers {
              * @brief Deletes the named entity through the manager's normal deletion checks.
              * @param name Name used to identify the requested entry
              */
-            void DeleteEntityByName(const string& name) {
+            void DeleteEntityByName(const std::string& name) {
                 auto it = m_nameToEntityList.find(name);
                 if (it != m_nameToEntityList.end()) {
                     DeleteEntity(it->second);
@@ -547,7 +547,7 @@ namespace Galaktic::Core::Managers {
              * @param name Name used to identify the requested entry
              * @return true if the manager contains the requested entity ID or name, false otherwise
              */
-            bool EntityExists(const string& name)
+            bool EntityExists(const std::string& name)
             {
                 auto it = m_nameToEntityList.find(name);
                 if(it != m_nameToEntityList.end())
@@ -563,7 +563,7 @@ namespace Galaktic::Core::Managers {
              * @param x Horizontal coordinate or amount
              * @param y Vertical coordinate or amount
              */
-            void TeleportEntityByName(const string& name, float x, float y)
+            void TeleportEntityByName(const std::string& name, float x, float y)
             {
                 if(EntityExists(name))
                 {
@@ -581,7 +581,7 @@ namespace Galaktic::Core::Managers {
              * @param name Name used to identify the requested entry
              * @param targetName Target name
              */
-            void TeleportEntityToEntityByName(const string& name, const string& targetName)
+            void TeleportEntityToEntityByName(const std::string& name, const std::string& targetName)
             {
                 if(EntityExists(name) && EntityExists(targetName))
                 {
@@ -613,7 +613,7 @@ namespace Galaktic::Core::Managers {
              * @param name Name used to identify the requested entry
              * @param degrees Degrees
              */
-            void RotateEntityByName(const string& name, float degrees)
+            void RotateEntityByName(const std::string& name, float degrees)
             {
                 if(EntityExists(name))
                 {
@@ -629,7 +629,7 @@ namespace Galaktic::Core::Managers {
              * @brief Logs the named entity's component information.
              * @param name Name used to identify the requested entry
              */
-            void DisplayEntityInformation(const string& name)
+            void DisplayEntityInformation(const std::string& name)
             {
                 if(EntityExists(name))
                 {

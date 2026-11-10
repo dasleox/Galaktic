@@ -46,7 +46,7 @@ namespace Galaktic::Render
              * @param path Source asset filepath
              * @param renderer SDL_Renderer used for drawing; ownership stays with the caller
              */
-            Texture(const path& path, SDL_Renderer* renderer);
+            Texture(const std::filesystem::path& path, SDL_Renderer* renderer);
             /**
              * @brief Releases the resources owned by this object.
              */
@@ -96,7 +96,7 @@ namespace Galaktic::Render
         using AssetInfo<Texture>::AssetInfo;
     };
 
-    typedef unordered_map<uint32_t, unique_ptr<TextureInfo>> Texture_List;
+    typedef std::unordered_map<uint32_t, std::unique_ptr<TextureInfo>> Texture_List;
 }
 
 /**

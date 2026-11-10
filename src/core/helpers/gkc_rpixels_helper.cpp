@@ -2,6 +2,11 @@
 #include <core/managers/gkc_ecs_man.h>
 #include <render/gkc_rpixels.h>
 
+using std::make_shared;
+using std::move;
+using std::shared_ptr;
+using std::string;
+
 using namespace Galaktic;
 using namespace Galaktic::Core::Managers;
 using namespace Galaktic::Core;

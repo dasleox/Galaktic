@@ -215,15 +215,15 @@ namespace Galaktic::ECS {
          * @brief Initializes the component from the supplied values.
          * @param name Name used to identify the requested entry
          */
-        NameComponent(const string& name) : name(name) {}
-        string name = "";
+        NameComponent(const std::string& name) : name(name) {}
+        std::string name = "";
 
         /**
          * @brief Writes the component's binary representation to an open output stream.
          * @param file Open binary stream used for this operation
          * @param comp Component value to serialize or populate
          */
-        static void Write(ofstream& file, const NameComponent& comp) {
+        static void Write(std::ofstream& file, const NameComponent& comp) {
             GKC_ENSURE_FILE_OPEN(file);
             auto len = static_cast<Uint32>(comp.name.size());
             file.write(GKC_WRITE_BINARY(len), sizeof(len));
@@ -235,7 +235,7 @@ namespace Galaktic::ECS {
          * @param file Open binary stream used for this operation
          * @param comp Component value to serialize or populate
          */
-        static void Read(ifstream& file, NameComponent& comp) {
+        static void Read(std::ifstream& file, NameComponent& comp) {
             GKC_ENSURE_FILE_OPEN(file);
             Uint32 len;
             file.read(GKC_READ_BINARY(len), sizeof(len));
@@ -430,14 +430,14 @@ namespace Galaktic::ECS {
          * @param serializeFn Callback writing the component to a binary stream
          * @param deserializeFn Callback reading the component from a binary stream
          */
-        ComponentTypeInfo(type_index type,
+        ComponentTypeInfo(std::type_index type,
             size_t size,
             EntityID parentID,
             bool isTag,
             bool isPOD,
-            size_t (*sizeFn)(const any&),
-            void (*serializeFn)(const any&, ofstream&),
-            void (*deserializeFn)(any&, ifstream&)
+            size_t (*sizeFn)(const std::any&),
+            void (*serializeFn)(const std::any&, std::ofstream&),
+            void (*deserializeFn)(std::any&, std::ifstream&)
         )
             : type(type)
             , size(size)
@@ -449,7 +449,7 @@ namespace Galaktic::ECS {
             , deserialize(deserializeFn)
         {}
         
-        type_index type;
+        std::type_index type;
         size_t size;
         EntityID parentID;
         bool isTag;
@@ -457,7 +457,7 @@ namespace Galaktic::ECS {
 
         // Modifiable Lambdas for writing/reading/size
         size_t (*sizeFunc)(const std::any&);
-        void (*serialize)(const std::any&, ofstream&);
-        void (*deserialize)(std::any&, ifstream&);
+        void (*serialize)(const std::any&, std::ofstream&);
+        void (*deserialize)(std::any&, std::ifstream&);
     };
 }

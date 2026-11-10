@@ -47,7 +47,7 @@ namespace Galaktic::Core::Managers {
             /**
              * @param path folder path
              */
-            TextureManager(const string& path);
+            TextureManager(const std::string& path);
 
 
             /**

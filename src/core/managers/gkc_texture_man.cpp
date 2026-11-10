@@ -5,6 +5,9 @@
 #include "ecs/gkc_entity.h"
 #include "core/managers/gkc_texture_man.h"
 
+using std::string;
+using std::vector;
+
 using namespace Galaktic::Core;
 using namespace Galaktic;
 

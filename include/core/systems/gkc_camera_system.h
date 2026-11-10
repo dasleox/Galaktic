@@ -64,7 +64,7 @@ namespace Galaktic::Core::Systems {
              * @param width Width of the screen
              * @param height Height of the screen
              */
-            void Update(const unordered_map<EntityID, ECS::Entity> &list, float dt, Uint32 width,
+            void Update(const std::unordered_map<EntityID, ECS::Entity> &list, float dt, Uint32 width,
                 Uint32 height) override;
 
             /**
@@ -81,14 +81,14 @@ namespace Galaktic::Core::Systems {
             /**
              * Finds the player entity and sets the camera to follow it
              */
-            void FollowPlayer(const unordered_map<EntityID, ECS::Entity>& list);
+            void FollowPlayer(const std::unordered_map<EntityID, ECS::Entity>& list);
         private:
             /**
              * Helper funciton to find the primary camera (a.k.a active camera) in the entity list,
              * if found it sets the m_activeCamera to the found entity
              * @param list Entity list
              */
-            void FindPrimaryCamera(const unordered_map<EntityID, ECS::Entity>& list);
+            void FindPrimaryCamera(const std::unordered_map<EntityID, ECS::Entity>& list);
             
             ECS::Entity m_activeCamera;
     };

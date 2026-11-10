@@ -36,7 +36,7 @@ namespace Galaktic::Render {
 			 * @param path Source asset filepath
 			 * @param renderer SDL_Renderer used for drawing; ownership stays with the caller
 			 */
-			Animation(const path& path, SDL_Renderer* renderer);
+			Animation(const std::filesystem::path& path, SDL_Renderer* renderer);
             /**
              * @brief Releases the resources owned by this object.
              */
@@ -148,5 +148,5 @@ namespace Galaktic::Render {
         using AssetInfo<Animation>::AssetInfo;
     };
 
-    typedef unordered_map<uint32_t, unique_ptr<Render::AnimationInfo>> Animation_List;
+    typedef std::unordered_map<uint32_t, std::unique_ptr<Render::AnimationInfo>> Animation_List;
 }

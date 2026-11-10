@@ -45,33 +45,33 @@ namespace Galaktic::Config
             template<typename T>
             std::string ToConfigString(const T& value)
             {
-                if constexpr (std::is_same_v<T, std::string>) 
+                if constexpr (std::is_same_v<T, std::string>)
                 {
                     return value;
                 }
-                else if constexpr (std::is_same_v<T, char>) 
+                else if constexpr (std::is_same_v<T, char>)
                 {
-                    return string(1, value);
+                    return std::string(1, value);
                 }
-                else if constexpr (std::is_same_v<T, float>) 
-                {
-                    std::ostringstream ss;
-                    ss << std::setprecision(8) << value;  
-                    return ss.str();
-                }
-                else if constexpr (std::is_same_v<T, double>) 
+                else if constexpr (std::is_same_v<T, float>)
                 {
                     std::ostringstream ss;
-                    ss << std::setprecision(8) << value;  
+                    ss << std::setprecision(8) << value;
                     return ss.str();
                 }
-                else if constexpr (std::is_same_v<T, bool>) 
+                else if constexpr (std::is_same_v<T, double>)
+                {
+                    std::ostringstream ss;
+                    ss << std::setprecision(8) << value;
+                    return ss.str();
+                }
+                else if constexpr (std::is_same_v<T, bool>)
                 {
                     return value ? "true" : "false";
                 }
                 else 
                 {
-                    return std::to_string(value);         
+                    return std::to_string(value);
                 }
 
             }
@@ -81,9 +81,9 @@ namespace Galaktic::Config
              * @param raw Raw configuration value
              */
             template<typename T>
-            static std::optional<T> FromConfigString(const string& raw)
+            static std::optional<T> FromConfigString(const std::string& raw)
             {
-                if constexpr (std::is_same_v<T, string>)      
+                if constexpr (std::is_same_v<T, std::string>)
                     return raw;
 
                 else if constexpr (std::is_same_v<T, char>)
@@ -112,19 +112,19 @@ namespace Galaktic::Config
              * @param value Value to convert, store or inspect
              * @return true on success, false otherwise
              */
-            bool SetRaw(const string& varName, const string& value);
+            bool SetRaw(const std::string& varName, const std::string& value);
             /**
              * @brief Returns the trimmed raw variable value, or std::nullopt when absent.
              * @param varName Configuration or Lua variable name
              */
-            std::optional<string> GetRaw(const string& varName) const;
+            std::optional<std::string> GetRaw(const std::string& varName) const;
 
         public:
             /**
              * @brief Stores the configuration filepath and attempts to load its contents.
              * @param filepath Filepath to load or store
              */
-            explicit ConfigFile(const path& filepath);
+            explicit ConfigFile(const std::filesystem::path& filepath);
             
             /**
              * @brief Loads configuration lines and rebuilds the variable-name lookup map.
@@ -141,7 +141,7 @@ namespace Galaktic::Config
              * @param varName Configuration or Lua variable name
              * @return true on success, false otherwise
              */
-            bool Has(const string& varName) const;
+            bool Has(const std::string& varName) const;
 
             /**
              * @brief Converts and stores a configuration value in memory; Save writes it to disk.
@@ -150,7 +150,7 @@ namespace Galaktic::Config
              * @return true on success, false otherwise
              */
             template<typename T>
-            bool SetValue(const string& varName, const T& value)
+            bool SetValue(const std::string& varName, const T& value)
             {
                 return SetRaw(varName, ToConfigString(value));
             }
@@ -160,11 +160,21 @@ namespace Galaktic::Config
              * @param varName Configuration or Lua variable name
              */
             template<typename T>
-            std::optional<T> GetValue(const string& varName) const
+            std::optional<T> GetValue(const std::string& varName) const
             {
                 auto raw = GetRaw(varName);
                 if(!raw) return std::nullopt;
                 return FromConfigString<T>(*raw);
+            }
+
+            bool IsValid() const
+            {
+                return !m_path.empty() && !m_lines.empty();
+            }
+
+            const std::filesystem::path& GetPath() const
+            {
+                return m_path;
             }
     };
 }

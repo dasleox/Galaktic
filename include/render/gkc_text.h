@@ -42,7 +42,7 @@ namespace Galaktic::Render
              * @param text Text string
              * @param color RGBA color
              */
-            Text(TTF_Font* font, const string& text, SDL_Color color);
+            Text(TTF_Font* font, const std::string& text, SDL_Color color);
             /**
              * @brief Releases the resources owned by this object.
              */
@@ -81,7 +81,7 @@ namespace Galaktic::Render
              * @brief Replaces the text string and refreshes its cached surface.
              * @param text Text string
              */
-            void SetText(const string& text);
+            void SetText(const std::string& text);
 
             /**
              * @brief Returns the borrowed surface-engine TTF_Text owned by this instance.
@@ -116,5 +116,5 @@ namespace Galaktic::Render
         using AssetInfo<Text>::AssetInfo;
     };
 
-    typedef unordered_map<uint32_t, unique_ptr<TextInfo>> Text_List;
+    typedef std::unordered_map<uint32_t, std::unique_ptr<TextInfo>> Text_List;
 }

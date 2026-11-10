@@ -4,6 +4,10 @@
 #include <core/gkc_error.h>
 #include <filesys/gkc_filesys.h>
 
+using std::ofstream;
+using std::filesystem::path;
+using std::string;
+
 using namespace Galaktic;
 using namespace Galaktic::Core::Managers;
 
@@ -142,9 +146,20 @@ bool ConfigManager::AddConfigFile(const path& path)
     return true;
 }
 
-Config::ConfigFile ConfigManager::GetConfigFile(const std::string& filename)
+Config::ConfigFile* ConfigManager::GetConfigFile(const std::string& filename)
 {
-    if(!m_configFileMap.contains(filename)) return Config::ConfigFile(filename);
+    if(!m_configFileMap.contains(filename)) return nullptr;
 
-    return m_configFileMap.at(filename);
+    return &m_configFileMap.at(filename);
+}
+
+std::vector<std::string> ConfigManager::GetConfigFileNames()
+{
+    auto filenames = std::vector<std::string>();
+    for(const auto& [filename, _] : m_configFileMap)
+    {
+        filenames.push_back(filename);
+    } 
+
+    return filenames;
 }

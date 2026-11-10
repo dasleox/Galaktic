@@ -39,7 +39,7 @@ namespace Galaktic::Audio
              * @param filepath sound filepath
              * @param mixer MIX_Mixer
              */
-            explicit AudioFile(const path &filepath, MIX_Mixer* mixer);
+            explicit AudioFile(const std::filesystem::path &filepath, MIX_Mixer* mixer);
             /**
              * @brief Releases the resources owned by this object.
              */
@@ -77,5 +77,5 @@ namespace Galaktic::Audio
         using AssetInfo<AudioFile>::AssetInfo;
     };
     
-    typedef unordered_map<AudioID, unique_ptr<AudioInfo>> Audio_List;
+    typedef std::unordered_map<AudioID, std::unique_ptr<AudioInfo>> Audio_List;
 }

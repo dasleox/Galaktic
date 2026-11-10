@@ -48,7 +48,7 @@ namespace Galaktic::Filesystem {
              * @param file Output file stream to write to.
              * @param str String to write.
              */
-            static void WriteString(ofstream& file, const string& str);
+            static void WriteString(std::ofstream& file, const std::string& str);
 
             /**
              * @brief Writes a generic data type to an output file stream.
@@ -57,7 +57,7 @@ namespace Galaktic::Filesystem {
              * @param value Value to write.
              */
             template<typename T>
-            static void Write(ofstream& file, const T& value) {
+            static void Write(std::ofstream& file, const T& value) {
                 file.write(reinterpret_cast<const char*>(&value), sizeof(T));
             }
 
@@ -73,7 +73,7 @@ namespace Galaktic::Filesystem {
              * @param entity Entity to write
              * @param registry Registry (ECS)
              */
-            static void WriteEntity(ofstream& file, const ECS::Entity& entity,
+            static void WriteEntity(std::ofstream& file, const ECS::Entity& entity,
                 ECS::Registry* registry);
 
             /**
@@ -88,7 +88,7 @@ namespace Galaktic::Filesystem {
              * @param scene Scene reference to write data from
              * @param registry Registry (ECS)
              */
-            static void WriteScene(const path& name, Core::Scene &scene, ECS::Registry *registry);
+            static void WriteScene(const std::filesystem::path& name, Core::Scene &scene, ECS::Registry *registry);
 
     };
 }

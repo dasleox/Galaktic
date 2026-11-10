@@ -15,6 +15,11 @@
 #include <config/gkc_config_file.h>
 #include <core/gkc_console.h>
 
+using std::make_unique;
+using std::filesystem::path;
+using std::string;
+using std::unique_ptr;
+
 using namespace Galaktic::Core;
 
 unique_ptr<Console> App::m_console = nullptr;

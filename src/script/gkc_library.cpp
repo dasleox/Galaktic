@@ -12,6 +12,12 @@
 #include <core/systems/gkc_mouse_system.h>
 #include <filesys/gkc_filesys.h>
 
+using std::ofstream;
+using std::filesystem::path;
+using std::string;
+using std::to_string;
+using std::vector;
+
 using namespace Galaktic::Script;
 using namespace Galaktic::Core::Systems;
 using namespace Galaktic::Core::Managers;

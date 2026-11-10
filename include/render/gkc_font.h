@@ -77,7 +77,7 @@ namespace Galaktic::Render
              * @param renderer SDL_Renderer used for drawing; ownership stays with the caller
              * @param size Font size in points
              */
-            Font(const path& path, SDL_Renderer* renderer, float size);
+            Font(const std::filesystem::path& path, SDL_Renderer* renderer, float size);
             /**
              * @brief Releases the resources owned by this object.
              */
@@ -155,7 +155,7 @@ namespace Galaktic::Render
         using AssetInfo<Font>::AssetInfo;
     };
 
-    typedef unordered_map<uint32_t, unique_ptr<FontInfo>> Font_List;
+    typedef std::unordered_map<uint32_t, std::unique_ptr<FontInfo>> Font_List;
 }
 
 /**

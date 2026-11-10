@@ -35,7 +35,7 @@ namespace Galaktic::Render {
      * \c PixelColoredGroupInfo::RecolorEntityTexture, so a mask built for one
      * texture size can be applied directly without transposing it.
      */
-    typedef vector<vector<bool>> PixelMapping_List;
+    typedef std::vector<std::vector<bool>> PixelMapping_List;
 
     /**
      * @class PixelColoredGroupInfo
@@ -60,7 +60,7 @@ namespace Galaktic::Render {
              * @param id Entity ID of the group's parent; its texture defines the group's dimensions
              * @param ecsManager ECS_Manager owning the entity/component data
              */
-            PixelColoredGroupInfo(const string& name, SDL_Color mainColor, EntityID id,
+            PixelColoredGroupInfo(const std::string& name, SDL_Color mainColor, EntityID id,
                 Core::Managers::ECS_Manager& ecsManager);
 
             /**
@@ -79,7 +79,7 @@ namespace Galaktic::Render {
              * @brief Changes the stored name.
              * @param newName Replacement name
              */
-            void SetName(const string& newName) { m_groupName = newName; }
+            void SetName(const std::string& newName) { m_groupName = newName; }
             /**
              * @brief Stores a new group color and marks painted textures for refresh.
              * @param newColor New color
@@ -89,7 +89,7 @@ namespace Galaktic::Render {
             /**
              * @brief Returns the name identifying this object or event.
              */
-            [[nodiscard]] const string& GetName() const { return m_groupName; }
+            [[nodiscard]] const std::string& GetName() const { return m_groupName; }
             /**
              * @brief Returns the RGBA color stored by this object.
              */
@@ -129,13 +129,13 @@ namespace Galaktic::Render {
              */
             void RefreshChangedTextures();
         private:
-            string m_groupName;
+            std::string m_groupName;
             SDL_Color m_mainColor;
             EntityID m_parentEntityID = InvalidEntity;
             Uint32 m_textureWidth = 0;
             Uint32 m_textureHeight = 0;
-            unordered_set<EntityID> m_affectedEntities;
-            unordered_map<EntityID, const SDL_Texture*> m_paintedTextures;
+            std::unordered_set<EntityID> m_affectedEntities;
+            std::unordered_map<EntityID, const SDL_Texture*> m_paintedTextures;
             PixelMapping_List m_affectedPixels;
             Core::Managers::ECS_Manager& m_ecsManager;
 

@@ -40,7 +40,7 @@ namespace Galaktic::Core::Managers
              * @brief Initializes this manager using the supplied project context.
              * @param folder Folder containing the managed files
              */
-            explicit FontManager(const path& folder);
+            explicit FontManager(const std::filesystem::path& folder);
             /**
              * @brief Returns the borrowed engine fallback font.
              */

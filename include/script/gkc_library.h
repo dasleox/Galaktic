@@ -74,7 +74,7 @@ namespace Galaktic::Script {
              * @param func function
              */
             template <typename FunctionType>
-            static void BindLuaFunction(const string &functionName, FunctionType func) {
+            static void BindLuaFunction(const std::string &functionName, FunctionType func) {
                 luabridge::getGlobalNamespace(m_luaState).addFunction(functionName.c_str(), func);
             }
 
@@ -86,7 +86,7 @@ namespace Galaktic::Script {
              * @return luabridge::LuaRef 
              */
             template <typename... Args>
-            static luabridge::LuaRef CallLuaFunction(const string &functionName, Args... args) {
+            static luabridge::LuaRef CallLuaFunction(const std::string &functionName, Args... args) {
                 auto& func = luabridge::getGlobal(m_luaState, functionName.c_str());
                 if(func.isFunction()) {
                     return func(args...);
@@ -103,7 +103,7 @@ namespace Galaktic::Script {
              * @param value value
              */
             template <typename T>
-            static void SetGlobalVariable(const string &varName, T value) {
+            static void SetGlobalVariable(const std::string &varName, T value) {
                 luabridge::setGlobal(m_luaState, value, varName.c_str());
             }
 
@@ -114,7 +114,7 @@ namespace Galaktic::Script {
              * @return T value's type
              */
             template <typename T>
-            static T GetGlobalVariable(const string &varName) {
+            static T GetGlobalVariable(const std::string &varName) {
                 luabridge::LuaRef ref = luabridge::getGlobal(m_luaState, varName.c_str());
                 if(ref.isNil()) {
                     GKC_ENGINE_ERROR("Global variable '{}' doesn't exist!", varName);
@@ -134,7 +134,7 @@ namespace Galaktic::Script {
              * @param functionName function's name
              * @return luabridge::LuaRef reference to a Lua function,
              */
-            static luabridge::LuaRef GetLuaFunction(const string &functionName) {
+            static luabridge::LuaRef GetLuaFunction(const std::string &functionName) {
                 auto ref = luabridge::getGlobal(m_luaState, functionName.c_str());
                 if(ref.isFunction()) {
                     return ref;
@@ -150,14 +150,14 @@ namespace Galaktic::Script {
              * 
              * @param path module's path
              */
-            static void AddLuaModulePath(const string& path);
+            static void AddLuaModulePath(const std::string& path);
 
             /**
              * Starts all modules registered in Lua to be used in any script
              * 
              * @param scriptRootFolder root script folder
              */
-            static void SetupModules(const path& scriptRootFolder);
+            static void SetupModules(const std::filesystem::path& scriptRootFolder);
             
             /**
              * @brief Closes the Lua state and frees all memory
@@ -177,7 +177,7 @@ namespace Galaktic::Script {
              * @param level Level of the Lua stack
              * @return formatted string with call context info
              */
-            static string GetLuaCallContext(int level);
+            static std::string GetLuaCallContext(int level);
 
             /**
              * Creates a default update script, has no content inside the update function
@@ -185,7 +185,7 @@ namespace Galaktic::Script {
              * 
              * @param path specific scene folder
              */
-            static void CreateDefaultUpdateFile(const path& path);
+            static void CreateDefaultUpdateFile(const std::filesystem::path& path);
 
             /**
              * Creates a default player script, it adds default movement and health
@@ -194,7 +194,7 @@ namespace Galaktic::Script {
              * 
              * @param path shared's folder
              */
-            static void CreateDefaultPlayerFile(const path& path);
+            static void CreateDefaultPlayerFile(const std::filesystem::path& path);
 
             /**
              * @brief Logs the contents of the current Lua stack.
@@ -202,7 +202,7 @@ namespace Galaktic::Script {
             static void PrintLuaStack();
         private:
             static lua_State* m_luaState;
-            static vector<string> m_modulePathList;
+            static std::vector<std::string> m_modulePathList;
 
         private:
             // Global constants (Keys and Click types)
@@ -249,7 +249,7 @@ namespace Galaktic::Script {
              * Automatically adds all the module folders needed to start them
              * @param sriptModulesPath script's module folder
              */
-            static void AddModuleFolders(const path& sriptModulesPath);
+            static void AddModuleFolders(const std::filesystem::path& sriptModulesPath);
 
 
     };

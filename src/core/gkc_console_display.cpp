@@ -9,6 +9,9 @@
 #include <core/systems/gkc_key.h>
 #include <sstream>
 
+using std::string;
+using std::vector;
+
 using namespace Galaktic;
 using namespace Galaktic::Core;
 

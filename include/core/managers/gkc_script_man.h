@@ -38,41 +38,41 @@ namespace Galaktic::Core::Managers {
              * @param folder Folder containing the managed files
              * @param luaState Borrowed Lua state used to load and execute the script
              */
-            ScriptManager(const string& folder, lua_State* luaState);
+            ScriptManager(const std::string& folder, lua_State* luaState);
 
             /**
              * @brief Registers a Lua script supplied as a string.
              * @param scriptName Name identifying the Lua script
              * @param script Lua source code
              */
-            static void AddInlineScript(const string& scriptName, const string& script);
+            static void AddInlineScript(const std::string& scriptName, const std::string& script);
             /**
              * @brief Registers a Lua script loaded from a file.
              * @param scriptPath Lua script filepath
              */
-            static void AddScriptFromFile(const string& scriptPath);
+            static void AddScriptFromFile(const std::string& scriptPath);
 
             /**
              * @brief Invokes the script's named global entry-point function.
              * @param scriptName Name identifying the Lua script
              */
-            static void RunScript(const string& scriptName);
+            static void RunScript(const std::string& scriptName);
             /**
              * @brief Removes a registered script by name.
              * @param scriptName Name identifying the Lua script
              */
-            static void DeleteScriptFromList(const string& scriptName);
+            static void DeleteScriptFromList(const std::string& scriptName);
 
             /**
              * @brief Returns shared ownership of the named script, or nullptr when absent.
              * @param scriptName Name identifying the Lua script
              */
-            static shared_ptr<Script::GKC_Script> GetScriptFromName(const string& scriptName);
+            static std::shared_ptr<Script::GKC_Script> GetScriptFromName(const std::string& scriptName);
             /**
              * @brief Returns shared ownership of the script ID, or nullptr when absent.
              * @param id Entity or asset ID used by this operation
              */
-            static shared_ptr<Script::GKC_Script> GetScriptFromID(ScriptID id);
+            static std::shared_ptr<Script::GKC_Script> GetScriptFromID(ScriptID id);
 
             /**
              * @brief Returns mutable access to the registered scripts.
@@ -80,7 +80,7 @@ namespace Galaktic::Core::Managers {
             static Script::Script_List& GetScriptList() { return m_scriptList; }
         private:
             static Script::Script_List m_scriptList;
-            static unordered_map<ScriptID, string> m_IDToNameList;
+            static std::unordered_map<ScriptID, std::string> m_IDToNameList;
             static lua_State* m_luaState;
             /**
              * @brief Executes the engine's Lua module in the current scripting state.

@@ -1,6 +1,10 @@
 #include <core/managers/gkc_font_man.h>
 #include <render/gkc_font.h>
 
+using std::filesystem::path;
+using std::string;
+using std::vector;
+
 using namespace Galaktic::Core::Managers;
 
 static const vector<string> FONT_EXTENSIONS = {".ttf"};

@@ -5,6 +5,8 @@
 #include <core/gkc_error.h>
 #include <ecs/gkc_components.h>
 
+using std::string;
+
 using namespace Galaktic::Core::Helpers;
 using namespace Galaktic::Core::Managers;
 AnimationHelper::AnimationHelper(Managers::ECS_Manager &ecsManager) 

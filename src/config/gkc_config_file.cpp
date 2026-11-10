@@ -3,6 +3,11 @@
 #include <config/gkc_config_file.h>
 #include <filesys/gkc_filesys.h>
 
+using std::ifstream;
+using std::ofstream;
+using std::filesystem::path;
+using std::string;
+
 using namespace Galaktic::Core;
 using namespace Galaktic;
 using namespace Galaktic::Config;

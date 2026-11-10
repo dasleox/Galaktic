@@ -3,6 +3,9 @@
 #include <core/gkc_logger.h>
 #include <core/gkc_error.h>
 
+using std::filesystem::path;
+using std::string;
+
 using namespace Galaktic;
 
 

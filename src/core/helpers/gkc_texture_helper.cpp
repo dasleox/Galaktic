@@ -4,6 +4,8 @@
 #include <core/managers/gkc_texture_man.h>
 #include <render/gkc_texture.h>
 
+using std::string;
+
 using namespace Galaktic::Core;
 
 Helpers::TextureHelper::TextureHelper(Managers::ECS_Manager& ecsManager) 

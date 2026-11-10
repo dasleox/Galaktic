@@ -49,7 +49,7 @@ namespace Galaktic::Core::Events {
              * @return true if the function passed is handled, false is the event wasn't handled
              */
             template<typename T>
-            bool DispatchEvent(function<bool(T&)> func) {
+            bool DispatchEvent(std::function<bool(T&)> func) {
                 if (m_event.GetEventType() == T::GetStaticType()) {
                     m_event.m_handled = func(static_cast<T&>(m_event));
                     return true;

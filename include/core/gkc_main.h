@@ -37,6 +37,10 @@
 #include <typeindex>
 #include <cxxabi.h>
 #include <any>
+#include <cstdlib>
+#include <iomanip>
+#include <sstream>
+#include <utility>
 
 // Operating System Detection
 
@@ -92,20 +96,12 @@
 
 #define GKC_MAJOR_VERSION 0
 #define GKC_MINOR_VERSION 7
-#define GKC_PATCH_VERSION 0
+#define GKC_PATCH_VERSION 1
 #define GKC_SET_COLOR(color) (color.r), (color.g), (color.b), (color.a)
 
-// 'using' declarations
-using std::shared_ptr, std::unique_ptr, std::weak_ptr, std::cout, std::cin, std::endl;
-using std::string, std::to_string, std::vector, std::map, std::unordered_map, std::unordered_set;
-using std::stringstream, std::ifstream, std::ofstream;
-using std::make_shared, std::make_unique, std::function;
-using std::filesystem::path, std::unordered_multimap;
-using std::type_index, std::any, std::array, std::move;
-
-const string GKC_SUFFIX = "Earthy";
-inline const string GKC_VERSION_STR = to_string(GKC_MAJOR_VERSION) + "."
-    + to_string(GKC_MINOR_VERSION) + "." + to_string(GKC_PATCH_VERSION);
+const std::string GKC_SUFFIX = "Earthy";
+inline const std::string GKC_VERSION_STR = std::to_string(GKC_MAJOR_VERSION) + "."
+    + std::to_string(GKC_MINOR_VERSION) + "." + std::to_string(GKC_PATCH_VERSION);
 
 typedef Uint32 EntityID;
 typedef Uint32 AudioID;
@@ -132,14 +128,14 @@ inline constexpr Uint32 MAX_FONT_QUANTITY = 1024;
 inline constexpr EntityID InvalidEntity = 0;
 inline constexpr double FIXED_DELTA_TIME = 1.0 / 60;
 
-inline const path GKC_TEXTURE_PATH = "assets\\textures";
-inline const path GKC_SOUND_PATH = "assets\\sounds";
-inline const path GKC_ANIMATION_PATH = "assets\\animations";
-inline const path GKC_SCENE_PATH = "scenes";
-inline const path GKC_SCRIPT_PATH = "scripts";
-inline const path GKC_CONFIG_PATH = "config";
+inline const std::filesystem::path GKC_TEXTURE_PATH = "assets\\textures";
+inline const std::filesystem::path GKC_SOUND_PATH = "assets\\sounds";
+inline const std::filesystem::path GKC_ANIMATION_PATH = "assets\\animations";
+inline const std::filesystem::path GKC_SCENE_PATH = "scenes";
+inline const std::filesystem::path GKC_SCRIPT_PATH = "scripts";
+inline const std::filesystem::path GKC_CONFIG_PATH = "config";
 
-inline const path GKC_ARIAL_FONT = "C:\\Windows\\Fonts\\Arial.ttf";
+inline const std::filesystem::path GKC_ARIAL_FONT = "C:\\Windows\\Fonts\\Arial.ttf";
 
 
 inline constexpr SDL_Color WHITE_COLOR = {255, 255, 255, 255};
@@ -165,11 +161,11 @@ namespace Galaktic
          * @brief Stores the asset filepath without loading the asset yet.
          * @param filepath Filepath to load or store
          */
-        AssetInfo(const string& filepath) 
+        AssetInfo(const std::string& filepath)
             : filepath(filepath) {}
 
-        string filepath;
-        unique_ptr<AssetType> asset = nullptr;
+        std::string filepath;
+        std::unique_ptr<AssetType> asset = nullptr;
         bool isLoaded = false;
         std::filesystem::file_time_type lastWriteTime{};
 
@@ -180,9 +176,9 @@ namespace Galaktic
          * @return true on success, false otherwise
          */
         template<typename... Args>
-        bool LoadAsset(const string& filepath, Args&& ...args)
+        bool LoadAsset(const std::string& filepath, Args&& ...args)
         {
-            auto replacement = make_unique<AssetType>(filepath, std::forward<Args>(args)...);
+            auto replacement = std::make_unique<AssetType>(filepath, std::forward<Args>(args)...);
             if constexpr (requires { replacement->IsValid(); }) {
                 if (!replacement->IsValid()) return false;
             }
@@ -205,12 +201,12 @@ namespace Galaktic
         /**
          * @brief Returns the stored asset filepath.
          */
-        const string& GetFilepath() const { return filepath; }
+        const std::string& GetFilepath() const { return filepath; }
 
         /**
          * @brief Returns access to the asset's owning unique_ptr.
          */
-        unique_ptr<AssetType>& GetAsset()
+        std::unique_ptr<AssetType>& GetAsset()
         {
             return asset;
         }
@@ -218,7 +214,7 @@ namespace Galaktic
         /**
          * @brief Returns access to the asset's owning unique_ptr.
          */
-        const unique_ptr<AssetType>& GetAsset() const
+        const std::unique_ptr<AssetType>& GetAsset() const
         {
             return asset;
         }
@@ -294,8 +290,8 @@ namespace Galaktic::Core {
      * @struct DeviceInformation
     */
     struct DeviceInformation {
-          string os_;         // Operating system of the computer
-          string arch_;       // Architecture of the computer
+          std::string os_;         // Operating system of the computer
+          std::string arch_;       // Architecture of the computer
           Uint32 width_ = 0;      // Width of the screen
           Uint32 height_ = 0;     // Height of the screen
           /**
@@ -327,8 +323,8 @@ namespace Galaktic::Core {
      * @param hex HEX String
      * @return A SDL_Color struct
      */
-    inline SDL_Color HexToSDL_Color(const string& hex) {
-        string s = hex;
+    inline SDL_Color HexToSDL_Color(const std::string& hex) {
+        std::string s = hex;
 
         if (!s.empty() && s[0] == '#')
             s.erase(0, 1);
@@ -366,7 +362,7 @@ namespace Galaktic::Core {
      * @param vec Vec2
      * @return A string with X and Y value
      */
-    inline string Vec2ToString(const Render::Vec2& vec) {
+    inline std::string Vec2ToString(const Render::Vec2& vec) {
         return "X: " + std::to_string(vec.x) + "," + " Y: " + std::to_string(vec.y);
     }
     
@@ -387,8 +383,8 @@ namespace Galaktic::Core {
      * @param baseName Preferred name before adding a unique suffix
      */
     template<typename Key, typename Value>
-    inline string GenerateUniqueName(const unordered_map<Key, Value>& map, const string& baseName) {
-        string uniqueName = baseName;
+    inline std::string GenerateUniqueName(const std::unordered_map<Key, Value>& map, const std::string& baseName) {
+        std::string uniqueName = baseName;
         int counter = 2;
         while (map.find(uniqueName) != map.end()) {
             uniqueName = baseName + std::to_string(counter);
@@ -470,7 +466,7 @@ namespace Galaktic::Debug {
     * @brief Gets the engine version
     * @return A string with the engine version
     */
-    inline string GetEngineName() {
+    inline std::string GetEngineName() {
         return "Galaktic Engine " + GKC_VERSION_STR + " '"
         + GKC_SUFFIX;
     }  
@@ -481,8 +477,8 @@ namespace Galaktic::Debug {
      * @param deviceInfo DeviceInformation instance
      * @return A string with the display information
     */
-    inline string GetDisplayInfo(const Core::DeviceInformation& deviceInfo) {
-        return to_string(deviceInfo.width_) + "x" + to_string(deviceInfo.height_);
+    inline std::string GetDisplayInfo(const Core::DeviceInformation& deviceInfo) {
+        return std::to_string(deviceInfo.width_) + "x" + std::to_string(deviceInfo.height_);
     }
 
     /**
@@ -490,10 +486,10 @@ namespace Galaktic::Debug {
     * @param name Typename
     * @return name of the typename
     */
-    inline string DemangleTypename(const char* name) 
+    inline std::string DemangleTypename(const char* name)
     {
         int status = -1;
-        unique_ptr<char, void(*)(void*)> res = {
+        std::unique_ptr<char, void(*)(void*)> res = {
             abi::__cxa_demangle(name, NULL, NULL, &status),
             std::free
         };
@@ -504,11 +500,11 @@ namespace Galaktic::Debug {
      * @brief Returns a readable type name with implementation-specific prefixes removed.
      * @param name Name used to identify the requested entry
      */
-    inline string GetCleanTypename(const char* name)
+    inline std::string GetCleanTypename(const char* name)
     {
-        string demangled = DemangleTypename(name);
+        std::string demangled = DemangleTypename(name);
         size_t pos = demangled.rfind("::");
-        if(pos != string::npos)
+        if(pos != std::string::npos)
             demangled = demangled.substr(pos + 2);
         
         return demangled;
@@ -518,7 +514,7 @@ namespace Galaktic::Debug {
      * @brief Returns a readable type name with implementation-specific prefixes removed.
      */
     template<typename T>
-    inline string GetCleanTypename()
+    inline std::string GetCleanTypename()
     {
         return GetCleanTypename(typeid(T).name());
     }

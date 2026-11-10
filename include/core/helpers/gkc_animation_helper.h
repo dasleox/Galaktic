@@ -44,7 +44,7 @@ namespace Galaktic::Core::Helpers {
              * @param id Entity or asset ID used by this operation
              * @param animationName Registered animation filename, including its extension
              */
-            void SetAnimationToEntity(EntityID id, const string& animationName);
+            void SetAnimationToEntity(EntityID id, const std::string& animationName);
         private:
             Managers::ECS_Manager& m_ecsManager;
     };

@@ -2,6 +2,10 @@
 #include <filesys/gkc_filesys.h>
 #include <core/gkc_logger.h>
 
+using std::filesystem::path;
+using std::string;
+using std::vector;
+
 using namespace Galaktic;
 using namespace std::filesystem;
 

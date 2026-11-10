@@ -64,7 +64,7 @@ namespace Galaktic::Core::Managers {
             /**
              * @param folder folder path (audio folder)
              */
-            explicit AudioManager(const string& folder);
+            explicit AudioManager(const std::string& folder);
 
             /**
              * Plays a track from an audio file depending on the times
@@ -74,14 +74,14 @@ namespace Galaktic::Core::Managers {
              * @param name audio filename
              * @param loops times to loop
              */
-            static void PlayAudioFile(const string& name, int loops = 0);
+            static void PlayAudioFile(const std::string& name, int loops = 0);
 
             /**
              * Plays a track indefinitely until stopped or dereferenced
              * , the audio file should exist in the list in order to play
              * @param name music filename
              */
-            static void PlayMusicFile(const string& name);
+            static void PlayMusicFile(const std::string& name);
 
             /**
              * Stops a track using the audio file's name, a fade time in
@@ -92,7 +92,7 @@ namespace Galaktic::Core::Managers {
              * @note Only the first track played will be stopped, if there are
              * more tracks you would like to stop use \c StopAllTracksFromSound
              */
-            static void StopSound(const string& name, Sint64 fadeOutMs = 0);
+            static void StopSound(const std::string& name, Sint64 fadeOutMs = 0);
 
             /**
              * Stops all tracks related to the audio file's name, a fade time in
@@ -100,7 +100,7 @@ namespace Galaktic::Core::Managers {
              * @param name audio filename
              * @param fadeOutMs fade ms
              */
-            static void StopAllTracksFromSound(const string& name, Sint64 fadeOutMs = 0);
+            static void StopAllTracksFromSound(const std::string& name, Sint64 fadeOutMs = 0);
 
             /**
              * Stops \b ALL tracks inside the audio list, a fade time in
@@ -173,27 +173,33 @@ namespace Galaktic::Core::Managers {
             static void SetAudioFormat(SDL_AudioFormat format);
 
             /**
+             * @brief Updates the requested audio format and restarts the audio device.
+             * @param format Format
+             */
+            static void SetAudioFormat(std::string format);
+
+            /**
              * @brief Creates a named group with the requested volume limit.
              * @param name Name used to identify the requested entry
              * @param maxVolume Maximum allowed audio gain
              */
-            static void CreateAudioGroup(const string& name, float maxVolume);
+            static void CreateAudioGroup(const std::string& name, float maxVolume);
             /**
              * @brief Applies volume to the active tracks of a named audio group.
              * @param name Name used to identify the requested entry
              * @param volume Requested audio gain in the range [0, 1]
              */
-            static void SetAudioVolumeByGroup(const string& name, float volume);
+            static void SetAudioVolumeByGroup(const std::string& name, float volume);
             /**
              * @brief Removes a named audio group.
              * @param name Name used to identify the requested entry
              */
-            static void DeleteAudioGroup(const string& name);
+            static void DeleteAudioGroup(const std::string& name);
             /**
              * @brief Returns a copy of the named audio group, or a default group when absent.
              * @param name Name used to identify the requested entry
              */
-            static Audio::AudioGroup GetAudioGroupByName(const string& name);
+            static Audio::AudioGroup GetAudioGroupByName(const std::string& name);
 
             /**
              * @brief Sets the maximum allowed volume.
@@ -209,7 +215,7 @@ namespace Galaktic::Core::Managers {
             static SDL_AudioSpec m_audioSpec;
             static SDL_AudioDeviceID m_deviceID;
             static MIX_Mixer* m_mixer;
-            static std::unordered_map<string, Audio::AudioGroup> m_audioGroupList;
+            static std::unordered_map<std::string, Audio::AudioGroup> m_audioGroupList;
             static float m_maxVolume;
 
             /**

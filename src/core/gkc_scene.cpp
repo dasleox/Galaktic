@@ -39,6 +39,12 @@
 #include <algorithm>
 #include <cmath>
 
+using std::make_shared;
+using std::filesystem::path;
+using std::shared_ptr;
+using std::string;
+using std::vector;
+
 using namespace Galaktic::Core;
 using namespace Galaktic::Filesystem;
 

@@ -47,7 +47,7 @@ namespace Galaktic::Core::Helpers {
              * @param id Entity or asset ID used by this operation
              * @param textureName Registered texture filename, including its extension
              */
-            void SetTextureToEntity(EntityID id, const string& textureName);
+            void SetTextureToEntity(EntityID id, const std::string& textureName);
         private:
             Managers::ECS_Manager& m_ecsManager;
     };

@@ -4,6 +4,11 @@
 #include "core/gkc_scene.h"
 #include "filesys/gkc_reader.h"
 
+using std::make_unique;
+using std::filesystem::path;
+using std::string;
+using std::unique_ptr;
+
 using namespace Galaktic::Core;
 
 Managers::SceneManager::SceneManager(const path &folder, ManagersWrapper* wrapper, const DeviceInformation &info)

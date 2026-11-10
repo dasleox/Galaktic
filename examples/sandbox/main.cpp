@@ -1,5 +1,9 @@
 #include <Galaktic.h>
 
+using std::cout;
+using std::endl;
+using std::filesystem::path;
+
 int main(int argc, char** argv) {
     path current_path = std::filesystem::current_path();
     cout << current_path << endl;

@@ -124,8 +124,8 @@ namespace Galaktic::ECS {
             Registry* m_registry= nullptr;
     };
 
-    typedef unordered_map<EntityID, Entity> Entity_List;
+    typedef std::unordered_map<EntityID, Entity> Entity_List;
 
     // Searching by name helper list
-    typedef unordered_map<string, EntityID> NameToEntity_List;
+    typedef std::unordered_map<std::string, EntityID> NameToEntity_List;
 }

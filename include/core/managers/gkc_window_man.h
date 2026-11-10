@@ -51,7 +51,7 @@ namespace Galaktic::Core::Managers {
              * @param type Type of the window
              * @see Window_Type for types of windows that can be created
              */
-            static void CreateGKCWindow(const string& title, Uint32 width, Uint32 height, Render::Window_Type type);
+            static void CreateGKCWindow(const std::string& title, Uint32 width, Uint32 height, Render::Window_Type type);
 
             /**
              * Registers a window into the list, it is automatically assigned a GKC_WindowID
@@ -59,7 +59,7 @@ namespace Galaktic::Core::Managers {
              * 256 windows will not register the window.
              * @param window shared_ptr Window
              */
-            static void RegisterWindow(shared_ptr<Render::Window> window);
+            static void RegisterWindow(std::shared_ptr<Render::Window> window);
 
             /**
              * Unregisters a window from the list, its resources are freed, the destructor
@@ -74,17 +74,17 @@ namespace Galaktic::Core::Managers {
              * @param id GKC_WindowID
              * @return shared_ptr Window associated with the given GKC_WindowID, nullptr if not found
              */
-            static shared_ptr<Render::Window> GetWindow(GKC_WindowID id);
+            static std::shared_ptr<Render::Window> GetWindow(GKC_WindowID id);
 
             /**
              * @brief Returns mutable access to the window manager's shared window entries.
              */
-            static unordered_map<GKC_WindowID, shared_ptr<Render::Window>>& GetWindowList() {
+            static std::unordered_map<GKC_WindowID, std::shared_ptr<Render::Window>>& GetWindowList() {
                 return m_windowList;
             }
         private:
-            static unordered_map<GKC_WindowID, shared_ptr<Render::Window>> m_windowList;
+            static std::unordered_map<GKC_WindowID, std::shared_ptr<Render::Window>> m_windowList;
     };
 
-    typedef unordered_map<GKC_WindowID, shared_ptr<Render::Window>> Window_List;
+    typedef std::unordered_map<GKC_WindowID, std::shared_ptr<Render::Window>> Window_List;
 }

@@ -51,7 +51,7 @@ namespace Galaktic::Filesystem {
              * @param file Input file stream to read from.
              * @param str String reference to store the result.
              */
-            static void ReadString(ifstream& file, string& str);
+            static void ReadString(std::ifstream& file, std::string& str);
 
             /**
              * @brief Reads a generic data type from an input file stream.
@@ -60,7 +60,7 @@ namespace Galaktic::Filesystem {
              * @param value Variable to store the read value.
              */
             template<typename T>
-            static void Read(ifstream& file, T& value) {
+            static void Read(std::ifstream& file, T& value) {
                 file.read(reinterpret_cast<char*>(&value), sizeof(T));
             }
             
@@ -76,7 +76,7 @@ namespace Galaktic::Filesystem {
              * @param manager ECS_Manager
              * @param registry Registry (ECS)
              */
-            static void ReadEntity(ifstream& file, Core::Managers::ECS_Manager& manager,
+            static void ReadEntity(std::ifstream& file, Core::Managers::ECS_Manager& manager,
                 ECS::Registry* registry);
 
             /**
@@ -94,7 +94,7 @@ namespace Galaktic::Filesystem {
              * 
              * @return True if the scene was read successfully, false otherwise.
              */
-            static bool ReadScene(const path& path, Core::Managers::ECS_Manager& manager,
+            static bool ReadScene(const std::filesystem::path& path, Core::Managers::ECS_Manager& manager,
                 ECS::Registry* registry, Core::Scene& scene);
     };
 }

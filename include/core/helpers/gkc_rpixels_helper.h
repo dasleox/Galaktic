@@ -48,25 +48,25 @@ namespace Galaktic::Core::Helpers {
               * @param groupName Name identifying the pixel or audio group
               * @param id Entity or asset ID used by this operation
               */
-             void CreatePixelGroup(const string& groupName, EntityID id);
+             void CreatePixelGroup(const std::string& groupName, EntityID id);
              /**
               * @brief Removes the named pixel-color group from the helper.
               * @param groupName Name identifying the pixel or audio group
               */
-             void DeletePixelGroup(const string& groupName);
+             void DeletePixelGroup(const std::string& groupName);
 
              /**
               * @brief Adds an entity to the named group after validating texture compatibility.
               * @param groupName Name identifying the pixel or audio group
               * @param id Entity or asset ID used by this operation
               */
-             void AddEntityToGroup(const string& groupName, EntityID id);
+             void AddEntityToGroup(const std::string& groupName, EntityID id);
              /**
               * @brief Removes an entity from the group and forgets its painted texture.
               * @param groupName Name identifying the pixel or audio group
               * @param id Entity or asset ID used by this operation
               */
-             void DeleteEntityFromGroup(const string& groupName, EntityID id);
+             void DeleteEntityFromGroup(const std::string& groupName, EntityID id);
             
              /**
               * @brief Refreshes changed textures in every owned pixel group.
@@ -77,9 +77,9 @@ namespace Galaktic::Core::Helpers {
               * @brief Returns shared ownership of the named pixel group, or nullptr when unavailable.
               * @param groupName Name identifying the pixel or audio group
               */
-             shared_ptr<Render::PixelColoredGroupInfo> GetPixelGroup(const string& groupName);
+             std::shared_ptr<Render::PixelColoredGroupInfo> GetPixelGroup(const std::string& groupName);
         private:
-             unordered_map<string, shared_ptr<Render::PixelColoredGroupInfo>> m_groupList; 
+             std::unordered_map<std::string, std::shared_ptr<Render::PixelColoredGroupInfo>> m_groupList;
              Managers::ECS_Manager& m_ecsManager; 
     };
 }

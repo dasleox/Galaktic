@@ -49,13 +49,13 @@ namespace Galaktic::Core::Helpers {
              * @brief Creates a player entity with default properties
              * @param name Name of the player
              */
-            static ECS::Entity CreatePlayer(const string& name);
+            static ECS::Entity CreatePlayer(const std::string& name);
 
             /**
              * @brief Creates a static object with default properties
              * @param name Name of the object
              */
-            static ECS::Entity CreateStaticObject(const string& name);
+            static ECS::Entity CreateStaticObject(const std::string& name);
 
             /**
              * @brief Creates a physics object with default properties
@@ -63,19 +63,19 @@ namespace Galaktic::Core::Helpers {
              *
              * This creates an object with simple collision properties
              */
-            static ECS::Entity CreatePhysicsObject(const string& name);
+            static ECS::Entity CreatePhysicsObject(const std::string& name);
 
             /**
              * @brief Creates a light entity
              * @param name Name of the light entity
              */
-            static ECS::Entity CreateLightEntity(const string& name);
+            static ECS::Entity CreateLightEntity(const std::string& name);
 
             /**
              * @brief Creates a camera entity
              * @param name Name of the camera
              */
-            static ECS::Entity CreateCameraEntity(const string& name);
+            static ECS::Entity CreateCameraEntity(const std::string& name);
 
             /**
              * @brief Modifies a component based on the type, if the component doesn't exist in
@@ -85,7 +85,7 @@ namespace Galaktic::Core::Helpers {
              * @param component Component instance to change
              */
             template<typename Component>
-            static void ModifyEntity(const string& name, Component& component) {
+            static void ModifyEntity(const std::string& name, Component& component) {
                 auto id = m_ecsManager->GetNameToEntityList().find(name)->second;
                 if (m_ecsManager->GetEntityByName(name)->Has<Component>()) {
                     auto& oldComponent = m_ecsManager->GetComponentOfEntity<Component>(id);
@@ -103,7 +103,7 @@ namespace Galaktic::Core::Helpers {
              * @brief Deletes the named entity through the ECS manager and its deletion checks.
              * @param name Name used to identify the requested entry
              */
-            static void DeleteEntity(const string& name);
+            static void DeleteEntity(const std::string& name);
 
             /**
              * @brief Adds a runtime-typed component to the named entity after compatibility checks.
@@ -111,13 +111,13 @@ namespace Galaktic::Core::Helpers {
              * @param type Engine type identifier used by this operation
              * @param component Component value to store
              */
-            static void AddComponentToEntity(const string& name, const type_index& type, any& component);
+            static void AddComponentToEntity(const std::string& name, const std::type_index& type, std::any& component);
             /**
              * @brief Removes a runtime-typed component from the named entity.
              * @param name Name used to identify the requested entry
              * @param type Engine type identifier used by this operation
              */
-            static void RemoveComponentFromEntity(const string& name, const type_index& type);
+            static void RemoveComponentFromEntity(const std::string& name, const std::type_index& type);
 
             /**
              * @brief Returns the player entity handle; the ECS manager retains its components.
@@ -129,7 +129,7 @@ namespace Galaktic::Core::Helpers {
              * @param name Entity's name
              * @return A reference to the entity given
              */
-            [[nodiscard]] static ECS::Entity& GetEntityByName(const string& name);
+            [[nodiscard]] static ECS::Entity& GetEntityByName(const std::string& name);
         private:
             static Galaktic::Core::Managers::ECS_Manager* m_ecsManager;
             static EntityID m_id;
@@ -139,68 +139,68 @@ namespace Galaktic::Core::Helpers {
              * @param name Name used to identify the requested entry
              * @return true if the supplied name or type identifies a light entity, false otherwise
              */
-            static bool IsLightEntity(const string& name);
+            static bool IsLightEntity(const std::string& name);
             /**
              * @brief Checks whether the supplied name or type identifies a camera entity.
              * @param name Name used to identify the requested entry
              * @return true if the supplied name or type identifies a camera entity, false otherwise
              */
-            static bool IsCameraEntity(const string& name);
+            static bool IsCameraEntity(const std::string& name);
             /**
              * @brief Checks whether the supplied name or type identifies a player entity.
              * @param name Name used to identify the requested entry
              * @return true if the supplied name or type identifies a player entity, false otherwise
              */
-            static bool IsPlayerEntity(const string& name);
+            static bool IsPlayerEntity(const std::string& name);
             /**
              * @brief Checks whether the supplied name or type identifies a static object entity.
              * @param name Name used to identify the requested entry
              * @return true if the supplied name or type identifies a static object entity, false otherwise
              */
-            static bool IsStaticObjectEntity(const string& name);
+            static bool IsStaticObjectEntity(const std::string& name);
             /**
              * @brief Checks whether the supplied name or type identifies a physics object entity.
              * @param name Name used to identify the requested entry
              * @return true if the supplied name or type identifies a physics object entity, false otherwise
              */
-            static bool IsPhysicsObjectEntity(const string& name);
+            static bool IsPhysicsObjectEntity(const std::string& name);
             /**
              * @brief Checks whether the supplied type identifies NameComponent.
              * @param type Engine type identifier used by this operation
              * @return true if the supplied type identifies NameComponent, false otherwise
              */
-            static bool HasNameComponent(const type_index& type);
+            static bool HasNameComponent(const std::type_index& type);
 
             /**
              * @brief Checks whether the supplied name or type identifies a light component.
              * @param type Engine type identifier used by this operation
              * @return true if the supplied name or type identifies a light component, false otherwise
              */
-            static bool IsLightComponent(const type_index& type);
+            static bool IsLightComponent(const std::type_index& type);
             /**
              * @brief Checks whether the supplied name or type identifies a camera component.
              * @param type Engine type identifier used by this operation
              * @return true if the supplied name or type identifies a camera component, false otherwise
              */
-            static bool IsCameraComponent(const type_index& type);
+            static bool IsCameraComponent(const std::type_index& type);
             /**
              * @brief Checks whether the supplied name or type identifies a player component.
              * @param type Engine type identifier used by this operation
              * @return true if the supplied name or type identifies a player component, false otherwise
              */
-            static bool IsPlayerComponent(const type_index& type);
+            static bool IsPlayerComponent(const std::type_index& type);
             /**
              * @brief Checks whether the supplied name or type identifies a static object component.
              * @param type Engine type identifier used by this operation
              * @return true if the supplied name or type identifies a static object component, false otherwise
              */
-            static bool IsStaticObjectComponent(const type_index& type);
+            static bool IsStaticObjectComponent(const std::type_index& type);
             /**
              * @brief Checks whether the supplied name or type identifies a physics object component.
              * @param type Engine type identifier used by this operation
              * @return true if the supplied name or type identifies a physics object component, false otherwise
              */
-            static bool IsPhysicsObjectComponent(const type_index& type);
+            static bool IsPhysicsObjectComponent(const std::type_index& type);
 
             /**
              * @brief Checks the helper's allowed component combinations for the named entity category.
@@ -208,6 +208,6 @@ namespace Galaktic::Core::Helpers {
              * @param type Engine type identifier used by this operation
              * @return true on success, false otherwise
              */
-            static bool ValidateComponentCompatibility(const string& name, const type_index& type);
+            static bool ValidateComponentCompatibility(const std::string& name, const std::type_index& type);
     };
 }

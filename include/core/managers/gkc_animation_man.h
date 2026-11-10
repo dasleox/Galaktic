@@ -39,27 +39,27 @@ namespace Galaktic::Core::Managers {
              * @brief Initializes this manager using the supplied project context.
              * @param folderPath Folder containing the managed files
              */
-            explicit AnimationManager(const string& folderPath);      
+            explicit AnimationManager(const std::string& folderPath);
             /**
              * @brief Resumes playback of a named animation asset.
              * @param name Name used to identify the requested entry
              */
-            static void PlayAnimation(const string& name);
+            static void PlayAnimation(const std::string& name);
             /**
              * @brief Pauses a named animation asset without resetting its frame.
              * @param name Name used to identify the requested entry
              */
-            static void PauseAnimation(const string& name);
+            static void PauseAnimation(const std::string& name);
             /**
              * @brief Stops a named animation asset and resets its frame.
              * @param name Name used to identify the requested entry
              */
-            static void StopAnimation(const string& name); 
+            static void StopAnimation(const std::string& name);
             /**
              * @brief Enables looping for the named animation asset.
              * @param name Name used to identify the requested entry
              */
-            static void SetLoopToAnimation(const string& name);     
+            static void SetLoopToAnimation(const std::string& name);
             /**
              * @brief Advances every loaded animation by the elapsed time in seconds.
              * @param deltaTime Elapsed time in seconds

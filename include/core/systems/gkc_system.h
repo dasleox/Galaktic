@@ -63,14 +63,14 @@ namespace Galaktic::Core::Systems {
              * @param list Entity handles to inspect or draw
              * @param dt Elapsed time in seconds
              */
-            virtual void Update(const unordered_map<EntityID, ECS::Entity>& list, float dt) {}
+            virtual void Update(const std::unordered_map<EntityID, ECS::Entity>& list, float dt) {}
 
             /**
              * Updates the system with the given entity list and delta time.
              * @param list List of entities
              * @param dt Delta time
              */
-            virtual void Update(const unordered_map<EntityID, ECS::Entity>& list, float dt,
+            virtual void Update(const std::unordered_map<EntityID, ECS::Entity>& list, float dt,
                 Uint32 width, Uint32 height) {}
             
             /**
@@ -81,7 +81,7 @@ namespace Galaktic::Core::Systems {
             virtual void OnEvent(Events::GKC_Event& e) {}
     };
 
-    typedef unordered_map<string, shared_ptr<BaseSystem>> System_List;
+    typedef std::unordered_map<std::string, std::shared_ptr<BaseSystem>> System_List;
 }
 
 constexpr int GKC_SYSTEMS_COUNTER = 8;

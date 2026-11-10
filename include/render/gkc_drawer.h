@@ -47,7 +47,7 @@ namespace Galaktic::Render {
              * @param renderer SDL_Renderer
              * @param cameraSystem CameraSystem reference
              */
-            static void DrawEntities(const unordered_map<EntityID, ECS::Entity>& list, SDL_Renderer* renderer,
+            static void DrawEntities(const std::unordered_map<EntityID, ECS::Entity>& list, SDL_Renderer* renderer,
                 Core::Systems::CameraSystem& cameraSystem);
 
             /**
@@ -56,7 +56,7 @@ namespace Galaktic::Render {
              * @param renderer SDL_Renderer used for drawing; ownership stays with the caller
              * @param cameraSystem Camera system providing the active camera
              */
-            static void DrawColliders(const unordered_map<EntityID, ECS::Entity>& list, SDL_Renderer* renderer,
+            static void DrawColliders(const std::unordered_map<EntityID, ECS::Entity>& list, SDL_Renderer* renderer,
                 Core::Systems::CameraSystem& cameraSystem);
 
             /**
@@ -65,7 +65,7 @@ namespace Galaktic::Render {
              * @param renderer SDL_Renderer used for drawing; ownership stays with the caller
              * @param cameraSystem Camera system providing the active camera
              */
-            static void DrawWireframes(const unordered_map<EntityID, ECS::Entity>& list, SDL_Renderer* renderer,
+            static void DrawWireframes(const std::unordered_map<EntityID, ECS::Entity>& list, SDL_Renderer* renderer,
                 Core::Systems::CameraSystem& cameraSystem);
 
             static constexpr int MaxShadowRadiusPixels = 1024;
@@ -74,7 +74,7 @@ namespace Galaktic::Render {
              *  are logical pixels. Returns false with SDL_GetError() on failure;
              *  an incomplete light map is never composited. Ambient is [0, 1].
              */
-            static bool DrawLighting(const unordered_map<EntityID, ECS::Entity>& list,
+            static bool DrawLighting(const std::unordered_map<EntityID, ECS::Entity>& list,
                 SDL_Renderer* renderer, Core::Systems::CameraSystem& cameraSystem,
                 LightingState& state, int viewWidth, int viewHeight, float ambientLight);
 
@@ -100,7 +100,7 @@ namespace Galaktic::Render {
              * @param state Reusable lighting buffers owned by the scene
              * @return true on success, false otherwise
              */
-            static bool CollectLights(const unordered_map<EntityID, ECS::Entity>& list,
+            static bool CollectLights(const std::unordered_map<EntityID, ECS::Entity>& list,
                 float cameraX, float cameraY, LightingState& state);
             /**
              * @brief Refreshes and returns a borrowed alpha mask once per source surface per frame.
@@ -116,7 +116,7 @@ namespace Galaktic::Render {
              * @param state Reusable lighting buffers owned by the scene
              * @return true on success, false otherwise
              */
-            static bool CollectOccluders(const unordered_map<EntityID, ECS::Entity>& list,
+            static bool CollectOccluders(const std::unordered_map<EntityID, ECS::Entity>& list,
                 float cameraX, float cameraY, LightingState& state);
             /**
              * @brief Rasterizes rotated caster silhouettes into the current light's pixel grid.
@@ -184,7 +184,7 @@ namespace Galaktic::Render {
              * @brief Returns entity handles sorted by transform z-index, then ID; handles without transforms come last.
              * @param list Entity handles to inspect or draw
              */
-            static const std::vector<std::pair<EntityID, ECS::Entity>> OrderByZIndex(const unordered_map<EntityID, ECS::Entity>& list);
+            static const std::vector<std::pair<EntityID, ECS::Entity>> OrderByZIndex(const std::unordered_map<EntityID, ECS::Entity>& list);
             /**
              * @brief Rounds a coordinate down to its containing logical pixel.
              * @param value Value to convert, store or inspect

@@ -53,33 +53,33 @@ namespace Galaktic::Core::Systems {
              * @param list List of entities
              * @param dt Delta time
              */
-            void Update(const unordered_map<EntityID, ECS::Entity>& list, float dt) override;
+            void Update(const std::unordered_map<EntityID, ECS::Entity>& list, float dt) override;
         private:
             /**
              * @brief Apply forces to entities that have physics components
              * @param list List of entities
              * @note It only applies gravity force by now
              */
-            void ApplyForces(const unordered_map<EntityID, ECS::Entity>& list) const;
+            void ApplyForces(const std::unordered_map<EntityID, ECS::Entity>& list) const;
 
             /**
              * @brief Integrate velocity to all physics component entities
              * @param list List of entities
              * @param dt Delta time
              */
-            void IntegrateMotion(const unordered_map<EntityID, ECS::Entity>& list, float dt);
+            void IntegrateMotion(const std::unordered_map<EntityID, ECS::Entity>& list, float dt);
 
             /**
              * @brief Clean all forces
              * @param list List of entities
              */
-            void CleanForces(const unordered_map<EntityID, ECS::Entity>& list);
+            void CleanForces(const std::unordered_map<EntityID, ECS::Entity>& list);
 
             /**
              * @brief Applies collision if the entities touch the floor of the scene (y = 0.0f)
              * @param list List of entities
              */
-            void ResolveGroundCollision(const unordered_map<EntityID, ECS::Entity>& list);
+            void ResolveGroundCollision(const std::unordered_map<EntityID, ECS::Entity>& list);
             float m_gravity;
             float m_floorHeight;
             bool m_useFloor;

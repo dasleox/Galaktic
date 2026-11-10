@@ -24,9 +24,6 @@
 #pragma once
 #include <pch.hpp>
 
-#pragma once
-#include <pch.hpp>
-
 namespace Galaktic::Config
 {
     /**
@@ -35,9 +32,9 @@ namespace Galaktic::Config
     class CallbackRegister
     {
         private:
-            unordered_map<string, function<void()>> m_callbackList;
+            std::unordered_map<std::string, std::function<void()>> m_callbackList;
         public:
-            using Callback = function<void()>;
+            using Callback = std::function<void()>;
             
             /**
              * @brief Returns the callback registry singleton.
@@ -55,7 +52,7 @@ namespace Galaktic::Config
              * @param callbackName name to register the callback under
              * @param callback the callback to store
              */
-            void RegisterCallback(const string& callbackName, Callback callback);
+            void RegisterCallback(const std::string& callbackName, Callback callback);
 
             /**
              * @brief Looks up a previously registered callback by name.
@@ -63,7 +60,7 @@ namespace Galaktic::Config
              * @return pointer to the stored callback, or nullptr if none is
              *         registered under that name
              */
-            const Callback* Find(const string& callbackName) const;
+            const Callback* Find(const std::string& callbackName) const;
     };
 }
 

@@ -79,8 +79,8 @@ namespace Galaktic::Config {
             BindType m_bind;
             bool m_isEnabled = true;
             ActionType m_actionType = ActionType::Unknown;
-            string m_name;
-            function<void()> m_functionCallback;    //< Assigned Later
+            std::string m_name;
+            std::function<void()> m_functionCallback;    //< Assigned Later
 
         public:
             /**
@@ -97,7 +97,7 @@ namespace Galaktic::Config {
              * @param type Engine type identifier used by this operation
              * @param key Key
              */
-            Bind(const string& bindName, ActionType type, const Core::Systems::Key& key) {
+            Bind(const std::string& bindName, ActionType type, const Core::Systems::Key& key) {
                 m_name = bindName;
                 m_actionType = type;
                 m_bind.keyBind = key;
@@ -109,14 +109,14 @@ namespace Galaktic::Config {
              * @param type Engine type identifier used by this operation
              * @param click Click
              */
-            Bind(const string& bindName, ActionType type, const Core::Systems::MouseClick& click) {
+            Bind(const std::string& bindName, ActionType type, const Core::Systems::MouseClick& click) {
                 m_name = bindName;
                 m_actionType = type;
                 m_bind.mouseClick = click;
             }
     };
 
-    typedef unordered_map<string, Bind> BindMap;
+    typedef std::unordered_map<std::string, Bind> BindMap;
 
     /**
      * @class BindConfigurator
@@ -128,12 +128,12 @@ namespace Galaktic::Config {
              * @brief Loads input bindings from the supplied configuration filepath.
              * @param filepath Filepath to load or store
              */
-            BindConfigurator(const path& filepath);
+            BindConfigurator(const std::filesystem::path& filepath);
             /**
              * @brief Removes a named input binding.
              * @param bindName Name identifying the input binding
              */
-            static void DeleteBind(const string &bindName);
+            static void DeleteBind(const std::string &bindName);
             /**
              * @brief Finds an input binding assigned to the specified engine action.
              * @param type Engine type identifier used by this operation
@@ -144,12 +144,12 @@ namespace Galaktic::Config {
              * @param bindType Configured input key or mouse-button name
              * @param actionName Configured engine action name
              */
-            static void BindAction(const string& bindType, const string& actionName);
+            static void BindAction(const std::string& bindType, const std::string& actionName);
             /**
              * @brief Returns the named input binding.
              * @param bindName Name identifying the input binding
              */
-            static Bind GetBind(const string &bindName);
+            static Bind GetBind(const std::string &bindName);
         private:
             static BindMap m_bindMap;
         private:
@@ -157,12 +157,12 @@ namespace Galaktic::Config {
              * @brief Converts a configured input name into its keyboard or mouse binding.
              * @param str String to convert or inspect
              */
-            static BindType ConvertStringToBindType(const string& str);
+            static BindType ConvertStringToBindType(const std::string& str);
             /**
              * @brief Converts a configured action name to its engine action identifier.
              * @param str String to convert or inspect
              */
-            static ActionType ConvertStringToActionType(const string& str);
+            static ActionType ConvertStringToActionType(const std::string& str);
             /**
              * @brief Checks whether the specified input binding is registered.
              * @param keyBind Key bind
@@ -174,6 +174,6 @@ namespace Galaktic::Config {
              * @param bindName Name identifying the input binding
              * @return true on success, false otherwise
              */
-            static bool CheckBindExists(const string& bindName);
+            static bool CheckBindExists(const std::string& bindName);
     };
 }

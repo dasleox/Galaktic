@@ -27,7 +27,7 @@
 #include <config/gkc_config.h>
 namespace Galaktic::ECS {
     class Entity;
-    typedef unordered_map<EntityID, Entity> Entity_List;
+    typedef std::unordered_map<EntityID, Entity> Entity_List;
 }
 
 namespace Galaktic::Core::Systems {

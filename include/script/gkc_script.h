@@ -43,14 +43,14 @@ namespace Galaktic::Script {
              * @param scriptPath Lua script filepath
              * @param luaState Borrowed Lua state used to load and execute the script
              */
-            explicit GKC_Script(const path& scriptPath, lua_State* luaState);
+            explicit GKC_Script(const std::filesystem::path& scriptPath, lua_State* luaState);
             /**
              * @brief Loads and executes Lua source using the borrowed Lua state.
              * @param scriptName Name identifying the Lua script
              * @param scriptString Lua source code
              * @param luaState Borrowed Lua state used to load and execute the script
              */
-            explicit GKC_Script(const string& scriptName, const string& scriptString, lua_State* luaState);
+            explicit GKC_Script(const std::string& scriptName, const std::string& scriptString, lua_State* luaState);
 
             /**
              * @brief Invokes the script's named global entry-point function.
@@ -66,7 +66,7 @@ namespace Galaktic::Script {
              * @param name Name used to identify the requested entry
              */
             template<typename T>
-            T GetGlobal(const string& name) {
+            T GetGlobal(const std::string& name) {
                 return luabridge::getGlobal(m_luaState, name.c_str());
             }
 
@@ -76,13 +76,13 @@ namespace Galaktic::Script {
              * @param value Value to convert, store or inspect
              */
             template<typename T>
-            void SetGlobal(const string& name, const T& value) {
+            void SetGlobal(const std::string& name, const T& value) {
                 luabridge::setGlobal(m_luaState, value, name.c_str());
             }
             
         private:
             lua_State* m_luaState;
-            string m_scriptName;
+            std::string m_scriptName;
     };
 
     /**
@@ -100,16 +100,16 @@ namespace Galaktic::Script {
      */
     struct ScriptInfo {
         ScriptID scriptID_;
-        shared_ptr<Script::GKC_Script> script_;
+        std::shared_ptr<Script::GKC_Script> script_;
         ScriptType scriptType_;
     };
     
-    typedef unordered_map<string, ScriptInfo> Script_List;
+    typedef std::unordered_map<std::string, ScriptInfo> Script_List;
 
     /**
      * @brief Checks whether the filepath exists and has the supported .lua extension.
      * @param path Source asset filepath
      * @return true if the filepath exists and has the supported .lua extension, false otherwise
      */
-    extern bool CheckScriptExtension(const path& path);
+    extern bool CheckScriptExtension(const std::filesystem::path& path);
 }

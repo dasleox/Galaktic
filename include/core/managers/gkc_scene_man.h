@@ -49,19 +49,19 @@ namespace Galaktic::Core::Managers
              * @param wrapper Borrowed application asset-manager pointers
              * @param info Device information used when creating scenes
              */
-            SceneManager(const path& folder, ManagersWrapper* wrapper, const DeviceInformation& info);
+            SceneManager(const std::filesystem::path& folder, ManagersWrapper* wrapper, const DeviceInformation& info);
 
             /**
              * Creates a scene with the passed name
              * @param name scene's name
              */
-            void CreateScene(const string& name);
+            void CreateScene(const std::string& name);
 
             /**
              * Deletes a scene with the passed name
              * @param name scene's name
              */
-            void DeleteScene(const string& name);
+            void DeleteScene(const std::string& name);
 
             /**
              * Loads a specific scene by its name inside the list,
@@ -69,7 +69,7 @@ namespace Galaktic::Core::Managers
              * @param name 
              * @return true if the scene was loaded successfully, false otherwise
              */
-            bool LoadSpecificScene(const string& name) const;
+            bool LoadSpecificScene(const std::string& name) const;
 
             /**
              * Loads a specific scene from a file (.gkscene), if the file
@@ -77,7 +77,7 @@ namespace Galaktic::Core::Managers
              * @param filepath 
              * @return true if the scene was loaded successfully, false otherwise
              */
-            bool LoadSpecificSceneFromFile(const path& filepath);
+            bool LoadSpecificSceneFromFile(const std::filesystem::path& filepath);
 
             /**
              * Displays all the scenes in the scenes folder
@@ -88,18 +88,18 @@ namespace Galaktic::Core::Managers
              * Checks if a scene is registered inside the scene list
              * @return true if the scene exists, false otherwise
              */
-            bool SceneExists(const string& name);
+            bool SceneExists(const std::string& name);
 
             /**
              * Transfers scene ownership to the caller and removes its manager entry.
              * @param name Name of the scene to extract
              * @return Owned scene if it exists, nullptr otherwise
              */
-            unique_ptr<Scene> GetScene(const string& name);
+            std::unique_ptr<Scene> GetScene(const std::string& name);
         private:
             DeviceInformation m_deviceInfo;
-            path m_folder;
-            unordered_map<string, unique_ptr<Scene>> m_sceneList;
+            std::filesystem::path m_folder;
+            std::unordered_map<std::string, std::unique_ptr<Scene>> m_sceneList;
             ManagersWrapper* m_managersWrapper = nullptr;
     };
 }

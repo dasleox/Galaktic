@@ -11,6 +11,10 @@
 #include "core/managers/gkc_ecs_man.h"
 #include "ecs/gkc_component_registry.h"
 #include <filesys/gkc_filesys.h>
+
+using std::ofstream;
+using std::filesystem::path;
+using std::string;
 using namespace Galaktic;
 
 void Filesystem::FileWriter::WriteString(ofstream &file, const string &str) {

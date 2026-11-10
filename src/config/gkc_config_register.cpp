@@ -2,6 +2,8 @@
 #include <core/gkc_logger.h>
 #include <core/gkc_error.h>
 
+using std::string;
+
 using namespace Galaktic::Config;
 using namespace Galaktic;
 

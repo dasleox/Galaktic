@@ -2,6 +2,10 @@
 #include "core/gkc_logger.h"
 #include "render/gkc_window.h"
 
+using std::make_shared;
+using std::shared_ptr;
+using std::string;
+
 using namespace Galaktic::Core;
 
 Managers::Window_List Managers::WindowManager::m_windowList;

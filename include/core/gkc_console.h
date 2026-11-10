@@ -42,8 +42,8 @@ namespace Galaktic::Core {
     struct DebugInformation {
         size_t m_ramUsage = 0;
         size_t m_ramAvailable = 0;
-        string m_engineName;
-        string m_displayInfo;
+        std::string m_engineName;
+        std::string m_displayInfo;
         float m_fps = 0.f;
         float m_playerXCoordinate = 0.f;
         float m_playerYCoordinate = 0.f;
@@ -125,7 +125,7 @@ namespace Galaktic::Core {
          * @param args Arguments forwarded to the requested operation
          * @param type Engine type identifier used by this operation
          */
-        CommandWrapper(const string& command, const string& args, CommandTypes type)
+        CommandWrapper(const std::string& command, const std::string& args, CommandTypes type)
         {
             this->command = command;
             this->args = args;
@@ -147,8 +147,8 @@ namespace Galaktic::Core {
         {
             return !args.empty();
         }
-        string command = "";
-        string args = "";
+        std::string command = "";
+        std::string args = "";
         CommandTypes type = CommandTypes::Unknown;
     };
 
@@ -157,9 +157,9 @@ namespace Galaktic::Core {
      * @param text 
      * @return string Cleaned log line
      */
-    inline string CleanLogText(const string& text)
+    inline std::string CleanLogText(const std::string& text)
     {
-        string out;
+        std::string out;
         out.reserve(text.size());
 
         for (size_t i = 0; i < text.size(); ++i)
@@ -196,16 +196,16 @@ namespace Galaktic::Core {
             void DisplayContents(SDL_Renderer* renderer, TTF_Font* font, int windowWidth, int windowHeight);
             Scene* m_currentScene = nullptr;
             Managers::SceneManager* m_sceneManager = nullptr;
-            unique_ptr<DebugInformation> m_pDebugInfo = nullptr;
-            shared_ptr<Debug::ConsoleMutex_mt> m_sink = nullptr;
+            std::unique_ptr<DebugInformation> m_pDebugInfo = nullptr;
+            std::shared_ptr<Debug::ConsoleMutex_mt> m_sink = nullptr;
 
             bool m_cheatsToggle = false;
             bool m_isVisible = false;
 
             /// Text currently being typed into the console's input line.
-            string m_inputBuffer;
+            std::string m_inputBuffer;
 
-            std::stack<string> m_commandHistory;
+            std::stack<std::string> m_commandHistory;
 
             static constexpr int m_wheelStep = 3;
             int m_scrollOffset = 0;     
@@ -216,7 +216,7 @@ namespace Galaktic::Core {
              * @brief Stores the shared log sink used to display console messages.
              * @param sink Shared console log sink
              */
-            Console(shared_ptr<Debug::ConsoleMutex_mt> sink);
+            Console(std::shared_ptr<Debug::ConsoleMutex_mt> sink);
 
             /**
              * @brief Draws the console in native output pixels and restores the
@@ -247,7 +247,7 @@ namespace Galaktic::Core {
              *        "teleport_entity player 10 20".
              * @param command the raw command line as typed
              */
-            void ExecuteCommand(const string& command);
+            void ExecuteCommand(const std::string& command);
 
             /**
              * @brief Routes input events to the console's input line.
@@ -297,14 +297,14 @@ namespace Galaktic::Core {
              * @brief Classifies a console command that does not take arguments.
              * @param command Console command name
              */
-            CommandWrapper NoArgumentCommands(const string& command);
+            CommandWrapper NoArgumentCommands(const std::string& command);
             /// @brief Resolves a command with a trailing argument string (e.g. "load myscene").
             /**
              * @brief Classifies a console command and stores its argument string.
              * @param command Console command name
              * @param args Arguments forwarded to the requested operation
              */
-            CommandWrapper ArgumentCommands(const string& command, const string& args);
+            CommandWrapper ArgumentCommands(const std::string& command, const std::string& args);
 
             /**
              * @brief Executes scene-management console commands.
@@ -347,7 +347,7 @@ namespace Galaktic::Core {
              * @brief Logs help for the requested console command section.
              * @param type Engine type identifier used by this operation
              */
-            void DisplayHelp(const string& type);
+            void DisplayHelp(const std::string& type);
             /// @brief Prints the current frame rate, derived from Clock (`show_fps`).
             /**
              * @brief Logs frames per second calculated from the last clock delta.
@@ -363,14 +363,14 @@ namespace Galaktic::Core {
              * @brief Logs a console argument error.
              * @param message Diagnostic message
              */
-            void InvalidArgumentError(const string& message);
+            void InvalidArgumentError(const std::string& message);
 
             /// @brief Splits a command's argument string on whitespace.
             /**
              * @brief Splits a console argument string into individual arguments.
              * @param args Arguments forwarded to the requested operation
              */
-            vector<string> GetListOfArguments(const string& args);
+            std::vector<std::string> GetListOfArguments(const std::string& args);
             /// @brief Maps a spdlog level to the color its line is drawn in.
             /**
              * @brief Returns the console text color associated with a log severity.

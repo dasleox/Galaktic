@@ -32,10 +32,10 @@ namespace Galaktic::Config
      */
     struct BindEntry
     {
-        string bindKey;
-        string actionName;
-        string callbackType;
-        string callbackName;
+        std::string bindKey;
+        std::string actionName;
+        std::string callbackType;
+        std::string callbackName;
     };  
 
     /**
@@ -45,29 +45,29 @@ namespace Galaktic::Config
     class ConfigParser
     {
         private:
-            static path m_configFilepath;
-            static vector<BindEntry> m_bindEntryList;
+            static std::filesystem::path m_configFilepath;
+            static std::vector<BindEntry> m_bindEntryList;
         private:
             /**
              * @brief Parses a binding directive into its key, action and callback fields.
              * @param line Configuration line to parse
              */
-            static BindEntry ParseLine(const string& line);
+            static BindEntry ParseLine(const std::string& line);
             /**
              * @brief Removes leading and trailing whitespace from a string.
              * @param str String to convert or inspect
              */
-            static std::string Trim(const string& str);
+            static std::string Trim(const std::string& str);
         public:
             /**
              * @brief Reads binding directives from a configuration file.
              * @param filepath Filepath to load or store
              * @return true on success, false otherwise
              */
-            static bool ParseFile(const path& filepath);
+            static bool ParseFile(const std::filesystem::path& filepath);
             /**
              * @brief Returns mutable access to the parsed binding entries.
              */
-            static vector<BindEntry>& GetBindEntryList() { return m_bindEntryList; }
+            static std::vector<BindEntry>& GetBindEntryList() { return m_bindEntryList; }
     };
 }

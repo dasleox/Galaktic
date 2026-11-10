@@ -67,7 +67,7 @@ namespace Galaktic::Core::Systems {
                 return m_mouseState[type];
             }
         private:
-            unordered_map<MouseClick, bool> m_mouseState;
+            std::unordered_map<MouseClick, bool> m_mouseState;
     };
 
     /**
@@ -105,12 +105,12 @@ namespace Galaktic::Core::Systems {
             static bool IsMouseDownLua(Uint32 click);
         private:
             static MouseSystem* m_mouseSystem ;
-            static unordered_map<string, MouseClick> m_clickMap;
+            static std::unordered_map<std::string, MouseClick> m_clickMap;
             /**
              * @brief Converts a known mouse-button name; falls back to the left button for unknown names.
              * @param type Engine type identifier used by this operation
              */
-            static MouseClick StringToMouseClick(const string& type);
+            static MouseClick StringToMouseClick(const std::string& type);
     };
 
     
