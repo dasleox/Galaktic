@@ -103,6 +103,9 @@ namespace Galaktic::ECS {
         bool canJump = true;
     };
 
+    /** @brief Defines how a body moves and responds to solid contacts */
+    enum class BodyType { Static, Kinematic, Dynamic };
+
     /**
      * @struct RigidBody
      * @brief Stores velocity, accumulated force and mass for physics integration.
@@ -130,6 +133,10 @@ namespace Galaktic::ECS {
         Render::Vec2 velocity{0.f, 0.f};
         Render::Vec2 force{0.f, 0.f};
         float mass = 1.f;
+        BodyType bodyType = BodyType::Dynamic;
+        float gravityScale = 1.f;
+        float restitution = 0.f;
+        float friction = 0.f;
     };
 
     /**
@@ -153,6 +160,9 @@ namespace Galaktic::ECS {
         Render::Vec2 collisionBox = {0.f, 0.f};
         Render::Vec2 collisionOffset = {0.f, 0.f};
         bool collidable = true;
+        bool isSensor = false;
+        Uint32 category = 1;
+        Uint32 mask = ~Uint32{0};
     };
 
     /**
@@ -381,6 +391,25 @@ namespace Galaktic::ECS {
          */
         VisibilityComponent(bool visible) : visible(visible) {}
         bool visible = true;
+    };
+
+    struct TriggerComponent {
+        /**
+         * @brief Initializes the component with its default values.
+         */
+        TriggerComponent() {}
+
+        TriggerComponent(Render::Vec2 location, Render::Vec2 size, float rotation,
+                         std::function<void(EntityID)> onEnter,
+                         std::function<void(EntityID)> onExit)
+            : location(location), size(size), rotation(rotation),
+              onEnter(onEnter), onExit(onExit) {}
+ 
+        Render::Vec2 location{0.f, 0.f};
+        Render::Vec2 size{50.f, 50.f};
+        float rotation = 0.f;
+        std::function<void(EntityID)> onEnter;
+        std::function<void(EntityID)> onExit;
     };
 
     /**

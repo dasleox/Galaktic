@@ -22,66 +22,29 @@
 */
 
 #pragma once
-#include <pch.hpp>
 #include <core/systems/gkc_system.h>
-
-namespace Galaktic::ECS {
-    class Entity;
-}
+#include <core/systems/gkc_collision_system.h>
 
 namespace Galaktic::Core::Systems {
     /**
      * @class PhysicsSystem
-     * @brief Manages the physics of entities that have physics components
-     * 
-     * Manages all physics of entities that have physics components, applying forces,
-     * integrating motion, and resolving collisions.
-     * A custom gravity can be applied to the whole scene, it will affect all entities
-     * inside the scene that have physics components.
+     * @brief Integrates top-down bodies and coordinates non-rotating box collisions
      */
     class PhysicsSystem final : public BaseSystem {
         public:
-            /**
-             * @param gravity Gravity applied to the scene
-             * @param floorHeight Height of the floor
-             */
-             explicit PhysicsSystem(float gravity = -9.81f, float floorHeight = 0.f, bool useFloor = true)
-                    : m_gravity(gravity), m_floorHeight(floorHeight), m_useFloor(useFloor) {}
-
-            /**
-             * @brief Applies physics to entities
-             * @param list List of entities
-             * @param dt Delta time
-             */
+            /** @param gravity Acceleration along positive Y; zero for top-down scenes */
+            explicit PhysicsSystem(float gravity = 0.f) : m_gravity(gravity) {}
+            /** @brief Applies forces, moves bodies, resolves contacts and clears forces */
             void Update(const std::unordered_map<EntityID, ECS::Entity>& list, float dt) override;
+            /** @brief Returns collision queries and events from the last fixed tick */
+            CollisionSystem& GetCollisionSystem() { return m_collisionSystem; }
         private:
-            /**
-             * @brief Apply forces to entities that have physics components
-             * @param list List of entities
-             * @note It only applies gravity force by now
-             */
-            void ApplyForces(const std::unordered_map<EntityID, ECS::Entity>& list) const;
-
-            /**
-             * @brief Integrate velocity to all physics component entities
-             * @param list List of entities
-             * @param dt Delta time
-             */
-            void IntegrateMotion(const std::unordered_map<EntityID, ECS::Entity>& list, float dt);
-
-            /**
-             * @brief Clean all forces
-             * @param list List of entities
-             */
-            void CleanForces(const std::unordered_map<EntityID, ECS::Entity>& list);
-
-            /**
-             * @brief Applies collision if the entities touch the floor of the scene (y = 0.0f)
-             * @param list List of entities
-             */
-            void ResolveGroundCollision(const std::unordered_map<EntityID, ECS::Entity>& list);
             float m_gravity;
-            float m_floorHeight;
-            bool m_useFloor;
+            CollisionSystem m_collisionSystem;
+            /** @brief Integrates one body's velocity and world position */
+            void IntegrateMotion(ECS::Entity entity, float dt);
+            /** @brief Sweeps a dynamic body against static walls and slides along them */
+            void MoveBody(ECS::TransformComponent& transform, ECS::RigidBody& body,
+                const ECS::CollisionComponent& collider, EntityID id, float dt);
     };
 }

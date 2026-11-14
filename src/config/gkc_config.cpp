@@ -16,7 +16,9 @@ using namespace Galaktic::Core::Systems;
 BindMap BindConfigurator::m_bindMap;
 
 BindConfigurator::BindConfigurator(const path& filepath) {
-    GKC_CHECK_PATH_INTEGRITY(filepath);
+    m_bindMap.clear();
+    std::error_code error;
+    if(!std::filesystem::is_regular_file(filepath, error) || error) return;
 
     if (!ConfigParser::ParseFile(filepath))
         return;

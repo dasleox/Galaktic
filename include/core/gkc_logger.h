@@ -219,7 +219,7 @@ namespace Galaktic::Debug {
 spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, \
 spdlog::level::trace, __VA_ARGS__)
 #else
-    #define GKC_ENGINE_DEBUG() ((void)0)
+    #define GKC_ENGINE_DEBUG(...) ((void)0)
 #endif
 
 #define GKC_CHECK_PATH_INTEGRITY(path)                                \

@@ -10,20 +10,10 @@ using namespace Galaktic;
 using namespace Galaktic::Config;
 using namespace Galaktic::Core::Managers;
 
-#define CHECK_OPTIONAL_VALUE(opt, func, varName, file) \
-    do { \
-        if((opt).has_value()) { \
-            func(*opt); \
-        } else { \
-            Debug::Logger::LogErrorWithType(ErrorType::InvalidValue, "Failed to set '{}' value from '{}' file!", varName, file->GetPath().string()); \
-        } \
-    } while(0)
-
 namespace
 {
-    //@todo Fix the bug with configurations variables in filesw
     template<typename T>
-    void SetConfigVariable(const std::string& variableName, const T& value)
+    void SetConfigVariable(const std::string& variableName, const T& value, const std::string& filename)
     {
         if(variableName.empty())
         {
@@ -31,13 +21,14 @@ namespace
             return;
         }
 
-        for(auto& filename : ConfigManager::GetConfigFileNames())
+        const auto filenames = filename.empty() ? ConfigManager::GetConfigFileNames()
+            : std::vector<std::string>{filename};
+        for(const auto& configFilename : filenames)
         {
-            GKC_ENGINE_INFO("Searching for '{}' in '{}'", variableName, filename);
-            auto configFile = ConfigManager::GetConfigFile(filename);
-            if(!configFile) return;
+            auto configFile = ConfigManager::GetConfigFile(configFilename);
+            if(!configFile) continue;
 
-            if(!configFile->IsValid() || !configFile->Has(variableName))
+            if(!configFile->IsValid() || (filename.empty() && !configFile->Has(variableName)))
                 continue;
 
             if(!configFile->SetValue(variableName, value))
@@ -55,60 +46,37 @@ namespace
     }
 }
 
-void ConfigSetter::SetVariable(const std::string& variableName, const double& value)
+void ConfigSetter::SetVariable(const std::string& variableName, const double& value, const std::string& filename)
 {
-    SetConfigVariable(variableName, value);
+    SetConfigVariable(variableName, value, filename);
 }
 
-void ConfigSetter::SetVariable(const std::string& variableName, const float& value)
+void ConfigSetter::SetVariable(const std::string& variableName, const float& value, const std::string& filename)
 {   
-    SetConfigVariable(variableName, value);
+    SetConfigVariable(variableName, value, filename);
 }
 
-void ConfigSetter::SetVariable(const std::string& variableName, const int& value)
+void ConfigSetter::SetVariable(const std::string& variableName, const int& value, const std::string& filename)
 {
-    SetConfigVariable(variableName, value);
+    SetConfigVariable(variableName, value, filename);
 }
 
-void ConfigSetter::SetVariable(const std::string& variableName, const std::string& value)
+void ConfigSetter::SetVariable(const std::string& variableName, const std::string& value, const std::string& filename)
 {
-    SetConfigVariable(variableName, value);
+    SetConfigVariable(variableName, value, filename);
 }
 
-void ConfigSetter::SetVariable(const std::string& variableName, const bool& value)
+void ConfigSetter::SetVariable(const std::string& variableName, const bool& value, const std::string& filename)
 {
-    SetConfigVariable(variableName, value);
+    SetConfigVariable(variableName, value, filename);
 }
 
-void ConfigSetter::SetVariable(const std::string& variableName, const char& value)
+void ConfigSetter::SetVariable(const std::string& variableName, const char& value, const std::string& filename)
 {
-    SetConfigVariable(variableName, value);
+    SetConfigVariable(variableName, value, filename);
 }
 
 void ConfigSetter::SetAudioConfigurationFromFile()
 {
-    auto configFile = ConfigManager::GetConfigFile("audio.cfg");
-    if(!configFile) return;
-
-    if(!configFile->IsValid())
-    {
-        Debug::Logger::LogErrorWithType(ErrorType::NoConfigFileFound, "Audio configuration file 'audio.cfg' not found!");
-        return;
-    }
-
-    auto audioChannelsOpt = configFile->GetValue<int>("audio_channels");
-    CHECK_OPTIONAL_VALUE(audioChannelsOpt, AudioManager::SetAudioChannels, "audio_channels", configFile);
-
-    auto audioFrequencyOpt = configFile->GetValue<int>("audio_frequency");
-    CHECK_OPTIONAL_VALUE(audioFrequencyOpt, AudioManager::SetAudioFrequency, "audio_frequency", configFile);
-
-    auto audioFormatOpt = configFile->GetValue<std::string>("audio_format");
-    CHECK_OPTIONAL_VALUE(audioFormatOpt, AudioManager::SetAudioFormat, "audio_format", configFile);
-
-    auto audioMasterVolumeOpt = configFile->GetValue<float>("master_volume");
-    CHECK_OPTIONAL_VALUE(audioMasterVolumeOpt, AudioManager::SetMasterVolume, "master_volume", configFile);
-
+    AudioManager::LoadConfiguration();
 }
-
-
-#undef CHECK_OPTIONAL_VALUE

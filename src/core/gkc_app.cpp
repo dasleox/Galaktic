@@ -10,9 +10,11 @@
 #include <core/gkc_console.h>
 #include <core/managers/gkc_animation_man.h>
 #include <core/managers/gkc_config_manager.h>
+#include <core/managers/gkc_font_man.h>
 #include <script/gkc_library.h>
 #include <config/gkc_config.h>
 #include <config/gkc_config_file.h>
+#include <config/gkc_config_values.h>
 #include <core/gkc_console.h>
 
 using std::make_unique;
@@ -58,21 +60,29 @@ App::App(const path& project_path, const string &title)
 
     m_console = make_unique<Console>(Debug::Logger::GetConsoleMutex());
 
-    Filesystem::CreateFolder(title);
+    Filesystem::CreateFolder(project_path / title);
     Filesystem::CreateAppDirectoryStructure(project_path / title);
+    const auto projectRoot = project_path / title;
+    Managers::ConfigManager::SetFolder(projectRoot / GKC_CONFIG_PATH);
+    m_bindConfigurator = make_unique<Config::BindConfigurator>(projectRoot / GKC_CONFIG_PATH / "bind.cfg");
     ScreenStartup();
 
     m_managersWrapper = make_unique<ManagersWrapper>();
     GKC_RELEASE_ASSERT(m_managersWrapper != nullptr, "Failed to create the managers wrapper!");
-    m_managersWrapper->m_audioManager = new Managers::AudioManager(path(project_path / title /GKC_SOUND_PATH).string());
-    m_managersWrapper->m_textureManager = new Managers::TextureManager(path(project_path / title / GKC_TEXTURE_PATH).string());
-    m_managersWrapper->m_animationManager = new Managers::AnimationManager(path(project_path / title / GKC_ANIMATION_PATH).string());
+    m_managersWrapper->m_audioManager = new Managers::AudioManager(
+        Config::GetDirectoryOrDefault("sound_path", projectRoot, GKC_SOUND_PATH).string());
+    m_managersWrapper->m_textureManager = new Managers::TextureManager(
+        Config::GetDirectoryOrDefault("texture_path", projectRoot, GKC_TEXTURE_PATH).string());
+    m_managersWrapper->m_animationManager = new Managers::AnimationManager(
+        Config::GetDirectoryOrDefault("animation_path", projectRoot, GKC_ANIMATION_PATH).string());
+    m_managersWrapper->m_fontManager = new Managers::FontManager(
+        Config::GetDirectoryOrDefault("font_path", projectRoot, "assets/fonts"));
+    const auto scriptRoot = Config::GetDirectoryOrDefault("script_path", projectRoot, GKC_SCRIPT_PATH);
     
     GKC_RELEASE_ASSERT(Script::LuaGalaktic::Initialize(), "Failed to initialize Lua!");
-    Script::LuaGalaktic::SetupModules(project_path / title / GKC_SCRIPT_PATH);
+    Script::LuaGalaktic::SetupModules(scriptRoot);
     Script::LuaGalaktic::BindGalaktic();
-    Managers::ConfigManager::SetFolder(project_path/ title / GKC_CONFIG_PATH);
-    m_managersWrapper->m_scriptManager = new Managers::ScriptManager(path(project_path / title / GKC_SCRIPT_PATH).string(), Script::LuaGalaktic::GetLuaState());
+    m_managersWrapper->m_scriptManager = new Managers::ScriptManager(scriptRoot.string(), Script::LuaGalaktic::GetLuaState());
 
     // The scene manager is created last: it owns scene creation/loading from
     // here on, and every manager it may hand to a scene already exists above.

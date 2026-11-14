@@ -95,8 +95,8 @@
 #endif
 
 #define GKC_MAJOR_VERSION 0
-#define GKC_MINOR_VERSION 7
-#define GKC_PATCH_VERSION 1
+#define GKC_MINOR_VERSION 8
+#define GKC_PATCH_VERSION 0
 #define GKC_SET_COLOR(color) (color.r), (color.g), (color.b), (color.a)
 
 const std::string GKC_SUFFIX = "Earthy";
@@ -112,6 +112,7 @@ typedef Uint32 ScriptID;
 typedef Uint32 AnimationID;
 typedef Uint32 PixelGroupID;
 typedef Uint32 FontID;
+typedef Uint32 TriggerID;
 
 inline constexpr float GKC_PI = 3.14159265358979323846f;
 
@@ -521,7 +522,7 @@ namespace Galaktic::Debug {
 }
 
 namespace Galaktic::Filesystem {
-    constexpr unsigned int GKC_VERSION_SCENE = 3;
+    constexpr unsigned int GKC_VERSION_SCENE = 4;
 }
 
 #define GKC_WRITE_BINARY(x) reinterpret_cast<const char*>(&x)

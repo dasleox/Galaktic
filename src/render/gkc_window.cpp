@@ -3,6 +3,7 @@
 #include <core/events/gkc_event.h>
 #include <core/gkc_error.h>
 #include <filesys/gkc_filesys.h>
+#include <config/gkc_config_setter.h>
 
 using std::filesystem::path;
 using std::string;
@@ -11,6 +12,9 @@ using namespace Galaktic::Render;
 bool Window::m_isFullscreen = false;
 
 Window::Window(const string& title, Uint32 width, Uint32 height, Window_Type type)
+    : Window(title, width, height, type, true) {}
+
+Window::Window(const string& title, Uint32 width, Uint32 height, Window_Type type, bool maximize)
     : m_title(title), m_width(width), m_height(height), m_type(type) {
 
     // Dont worry be happi uuuh ,about unsigned values here
@@ -21,7 +25,7 @@ Window::Window(const string& title, Uint32 width, Uint32 height, Window_Type typ
     GKC_ASSERT(m_renderer != nullptr, "Renderer wasn't created correctly!");
     GKC_ASSERT(m_window != nullptr, "Window wasn't created correctly!");
 
-    if (TranslateSDLType(type) == SDL_WINDOW_RESIZABLE) {
+    if (maximize && type == Window_Type::Resizable) {
         SDL_MaximizeWindow(m_window);
     }
 
@@ -72,6 +76,62 @@ void Window::RequestClose() {
 
 bool Window::IsValid() {
      return m_window != nullptr;
+}
+
+void Window::SetTitle(const string& title)
+{
+    if(SDL_SetWindowTitle(m_window, title.c_str()))
+    {
+        m_title = title;
+        Galaktic::Config::ConfigSetter::SetVariable("window_title", m_title, "general.cfg");
+    }
+}
+
+// @bug This function does not update the window size in the config file if the window is in fullscreen mode. 
+// It only updates the config when the window is not fullscreen. 
+// fucking hell man....
+// Fix for 0.8.1
+
+void Window::SetWidth(Uint32 width)
+{
+    m_width = width;
+    if(!m_isFullscreen && !(SDL_GetWindowFlags(m_window) & SDL_WINDOW_FULLSCREEN))
+        Galaktic::Config::ConfigSetter::SetVariable("window_width", static_cast<int>(width), "general.cfg");
+}
+
+void Window::SetHeight(Uint32 height)
+{
+    m_height = height;
+    if(!m_isFullscreen && !(SDL_GetWindowFlags(m_window) & SDL_WINDOW_FULLSCREEN))
+        Galaktic::Config::ConfigSetter::SetVariable("window_height", static_cast<int>(height), "general.cfg");
+}
+
+void Window::SetType(Window_Type type)
+{
+    string configuredType;
+    switch(type)
+    {
+        case Window_Type::Fullscreen: configuredType = "Fullscreen"; break;
+        case Window_Type::Borderless: configuredType = "Borderless"; break;
+        case Window_Type::Transparent: configuredType = "Transparent"; break;
+        case Window_Type::Resizable: configuredType = "Resizable"; break;
+        case Window_Type::Hidden: configuredType = "Hidden"; break;
+        case Window_Type::OpenGL: configuredType = "OpenGL"; break;
+        default: return;
+    }
+    m_type = type;
+    Galaktic::Config::ConfigSetter::SetVariable("window_type", configuredType, "general.cfg");
+}
+
+void Window::SetFullScreen(bool enabled)
+{
+    m_isFullscreen = enabled;
+    Galaktic::Config::ConfigSetter::SetVariable("window_fullscreen", enabled, "general.cfg");
+}
+
+void Window::ToggleFullscreen()
+{
+    SetFullScreen(!m_isFullscreen);
 }
 
 SDL_WindowFlags Window::TranslateSDLType(const Window_Type& type) {

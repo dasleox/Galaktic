@@ -6,37 +6,30 @@
 #include <config/gkc_config.h>
 
 #include "core/gkc_logger.h"
+#include <cmath>
 
 using namespace Galaktic::Core::Systems;
 using namespace Galaktic::Core;
 using namespace Galaktic::ECS;
 
 void MovementSystem::Update(const Entity_List& list, float dt) {
-    for (auto entity : list) {
-        if (!entity.second.Has<TransformComponent>() || !entity.second.Has<SpeedComponent>()
-            || !entity.second.Has<PlayerTag>())
-            continue;
-
-        auto& transform = entity.second.Get<TransformComponent>();
-        auto& player = entity.second.Get<SpeedComponent>();
-        
-        if(IsActionDown(Config::ActionType::MoveForward, Key::W))
-            transform.location.y -= player.maxSpeed * dt;
-        if(IsActionDown(Config::ActionType::MoveBackward, Key::S))
-            transform.location.y += player.maxSpeed * dt;
-        if(IsActionDown(Config::ActionType::MoveLeft, Key::A))
-            transform.location.x -= player.maxSpeed * dt;
-        if(IsActionDown(Config::ActionType::MoveRight, Key::D))
-            transform.location.x += player.maxSpeed * dt;
-        if(IsActionDown(Config::ActionType::Jump, Key::Space))
-            ApplyJump(entity.second);
-    }
-}
-
-void MovementSystem::ApplyJump(ECS::Entity &entity) {
-    if (entity.Has<ECS::PlayerTag>() && entity.Has<ECS::JumpComponent>() && entity.Has<ECS::RigidBody>()) {
-        auto& jump_comp = entity.Get<ECS::JumpComponent>();
-        entity.Get<ECS::RigidBody>().force.y += jump_comp.jumpHeight;
+    for (auto [id, entity] : list) {
+        if (!entity.Has<TransformComponent>() || !entity.Has<SpeedComponent>() ||
+            !entity.Has<PlayerTag>()) continue;
+        Render::Vec2 direction;
+        if (IsActionDown(Config::ActionType::MoveForward, Key::W)) direction.y -= 1.f;
+        if (IsActionDown(Config::ActionType::MoveBackward, Key::S)) direction.y += 1.f;
+        if (IsActionDown(Config::ActionType::MoveLeft, Key::A)) direction.x -= 1.f;
+        if (IsActionDown(Config::ActionType::MoveRight, Key::D)) direction.x += 1.f;
+        float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+        if (length > 0.f) direction = direction / length;
+        auto velocity = direction * entity.Get<SpeedComponent>().maxSpeed;
+        if (entity.Has<RigidBody>()) {
+            auto& body = entity.Get<RigidBody>();
+            if (body.bodyType != BodyType::Static) body.velocity = velocity;
+        } else {
+            entity.Get<TransformComponent>().location += velocity * dt;
+        }
     }
 }
 

@@ -53,7 +53,7 @@ namespace Galaktic::Core::Systems {
 }
 
 #define GKC_CHECK_RUN_SCRIPT(script, id)                                            \
-    if(script != nullptr) {                                                         \
+    if((script) != nullptr) {                                                         \
         script->RunScript();                                                        \
     } else {                                                                        \
         GKC_ENGINE_ERROR("Script to run (ID: {}) doesn't exists", id); \

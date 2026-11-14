@@ -37,6 +37,19 @@ bool ConfigParser::ParseFile(const path& filepath)
 
         if(line.empty()) { continue; }
 
+        // Current .cfg format: action=key;. Keep supporting the older bind directive below.
+        const auto equals = line.find('=');
+        if(equals != string::npos) {
+            auto value = Trim(line.substr(equals + 1));
+            if(!value.empty() && value.back() == ';') value.pop_back();
+            BindEntry entry;
+            entry.actionName = Trim(line.substr(0, equals));
+            entry.bindKey = Trim(value);
+            if(!entry.actionName.empty() && !entry.bindKey.empty())
+                m_bindEntryList.push_back(std::move(entry));
+            continue;
+        }
+
         std::istringstream ss(line);
         string directive;
 

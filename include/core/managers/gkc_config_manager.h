@@ -69,11 +69,14 @@ namespace Galaktic::Core::Managers
              */
             static bool AddConfigFile(const std::filesystem::path& filepath);
             /**
-             * @brief Returns a copy of a registered configuration file; changes to the copy do not update the manager.
+             * @brief Returns a pointer to a registered configuration file, or nullptr when absent.
              * @param filename Filename, including its extension when present
              */
             static Config::ConfigFile* GetConfigFile(const std::string& filename);
 
             static std::vector<std::string> GetConfigFileNames();
+
+            /** @brief Returns the project root associated with the current configuration folder. */
+            static std::filesystem::path GetProjectFolder() { return m_folderPath.parent_path(); }
     };
 }

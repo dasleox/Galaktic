@@ -33,11 +33,18 @@ namespace Galaktic::Config
         public:
             static void SetAudioConfigurationFromFile();
 
-            static void SetVariable(const std::string& variableName, const double& value);
-            static void SetVariable(const std::string& variableName, const float& value);
-            static void SetVariable(const std::string& variableName, const int& value);
-            static void SetVariable(const std::string& variableName, const std::string& value);
-            static void SetVariable(const std::string& variableName, const bool& value);
-            static void SetVariable(const std::string& variableName, const char& value);
+            // An explicit filename also allows adding a setting to an older config file.
+            // Without it, search the loaded files for an existing variable.
+            static void SetVariable(const std::string& variableName, const double& value, const std::string& filename = "");
+            static void SetVariable(const std::string& variableName, const float& value, const std::string& filename = "");
+            static void SetVariable(const std::string& variableName, const int& value, const std::string& filename = "");
+            static void SetVariable(const std::string& variableName, const std::string& value, const std::string& filename = "");
+            // Prevent C strings from selecting the bool overload.
+            static void SetVariable(const std::string& variableName, const char* value, const std::string& filename = "")
+            {
+                if(value != nullptr) SetVariable(variableName, std::string(value), filename);
+            }
+            static void SetVariable(const std::string& variableName, const bool& value, const std::string& filename = "");
+            static void SetVariable(const std::string& variableName, const char& value, const std::string& filename = "");
     };
 }

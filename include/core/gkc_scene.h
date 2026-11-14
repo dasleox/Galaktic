@@ -46,6 +46,7 @@ namespace Galaktic::Render {
 namespace Galaktic::Core::Systems {
     typedef std::unordered_map<std::string, std::shared_ptr<BaseSystem>> System_List;
     class CameraSystem;
+    class CollisionSystem;
 }
 namespace Galaktic::Core::Managers {
     class ECS_Manager;
@@ -112,9 +113,16 @@ namespace Galaktic::Core {
             void Save();
 
             /**
-             * @brief Pauses animation playback without resetting its frame.
+             * @brief Toggles gameplay and audio pause without resetting playback positions.
              */
             void Pause();
+            /** @brief Sets whether gameplay simulation and audio playback are paused */
+            void SetPaused(bool paused);
+            /** @brief Sets whether entity outlines are drawn */
+            void SetWireframes(bool visible);
+            /** @brief Sets whether collision boxes are drawn */
+            void SetColliders(bool visible);
+
 
             /**
              * @brief Executes all events using the engine's systems
@@ -170,22 +178,18 @@ namespace Galaktic::Core {
             /**
              * @brief Toggles the scene's entity-outline debug overlay.
              */
-            void ToggleWireframes()
-            {
-                m_bShowWireframe = !m_bShowWireframe;
-            }
+            void ToggleWireframes();
             /**
              * @brief Toggles the scene's collision-box debug overlay.
              */
-            void ToggleColliders()
-            {
-                m_bShowColliders = !m_bShowColliders;
-            }
+            void ToggleColliders();
 
             /**
              * @brief Toggles the window's fullscreen request.
              */
-            void SetFullscreen();
+            void ToggleFullscreen();
+            /** @brief Sets the window's fullscreen request */
+            void SetFullscreen(bool enabled);
 
             /**
              * Draws at a fixed logical size. Integer scaling preserves uniform
@@ -215,6 +219,8 @@ namespace Galaktic::Core {
              * @brief Returns access to the scene's ECS manager pointer.
              */
             Managers::ECS_Manager*& GetECSManager() { return m_ecsManager; }
+            /** @brief Returns collision queries and buffered events from the last fixed tick */
+            Systems::CollisionSystem& GetCollisionSystem();
             SceneInformation m_sceneInfo;
         private:
             bool m_isRunning = true;
@@ -264,6 +270,10 @@ namespace Galaktic::Core {
              *        exists - Scene::Run() should not be authoring test content.
              */
             void SpawnDebugEntities();
+            /** @brief Spawns a top-down physics sandbox; call instead of SpawnDebugEntities */
+            void SpawnPhysicsDebugEntities();
+            /** @brief Creates static walls for the physics sandbox */
+            void SpawnPhysicsDebugWalls();
             /** @brief Advances gameplay systems by one fixed timestep */
             void FixedUpdate(float deltaTime, const std::shared_ptr<Systems::BaseSystem>& movementSystem,
                 const std::shared_ptr<Systems::CameraSystem>& cameraSystem);

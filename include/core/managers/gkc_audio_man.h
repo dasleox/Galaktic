@@ -31,6 +31,8 @@ namespace Galaktic::Audio
     class AudioGroup;
 }
 
+namespace Galaktic::Config { class ConfigSetter; }
+
 namespace Galaktic::Core::Managers {
     /**
      * @class AudioManager
@@ -109,9 +111,15 @@ namespace Galaktic::Core::Managers {
              */
             static void StopAllSounds(Sint64 fadeOutMs = 0);
 
+            /**
+             * @brief Pauses or resumes playback without resetting track positions.
+             * New playback requests remain paused until resumed.
+             */
+            static void SetPaused(bool paused);
+
 
             /**
-             * @brief Reloads changed audio assets when their tracks are not playing.
+             * @brief Reloads changed audio assets when their tracks are neither playing nor paused.
              */
             static void ReloadAudioFiles();
 
@@ -123,7 +131,7 @@ namespace Galaktic::Core::Managers {
             static void SetMasterVolume(float volume);
 
             /**
-             * Checks if a track is currently active based on its ID
+             * Checks if a track is currently playing or paused based on its ID
              * @param id AudioInfo's id
              * @return true if the track is active, false otherwise
              */
@@ -205,18 +213,23 @@ namespace Galaktic::Core::Managers {
              * @brief Sets the maximum allowed volume.
              * @param volume Requested audio gain in the range [0, 1]
              */
-            static void SetMaxVolume(float volume) { m_maxVolume = volume; }
+            static void SetMaxVolume(float volume);
             /**
              * @brief Returns the configured volume limit.
              */
             static float GetMaxVolume() { return m_maxVolume; }
         private:    
+            friend class Config::ConfigSetter;
+            static void LoadConfiguration();
+            static bool OpenAudioDevice();
             static std::multimap<AudioID, MIX_Track*> m_activeTracks;
             static SDL_AudioSpec m_audioSpec;
             static SDL_AudioDeviceID m_deviceID;
             static MIX_Mixer* m_mixer;
             static std::unordered_map<std::string, Audio::AudioGroup> m_audioGroupList;
             static float m_maxVolume;
+            static float m_masterVolume;
+            static bool m_isPaused;
 
             /**
              * Helper to register a track inside the track list

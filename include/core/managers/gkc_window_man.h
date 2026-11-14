@@ -50,8 +50,9 @@ namespace Galaktic::Core::Managers {
              * @param height Height of the window
              * @param type Type of the window
              * @see Window_Type for types of windows that can be created
+             * @return true if the window was created successfully, false otherwise
              */
-            static void CreateGKCWindow(const std::string& title, Uint32 width, Uint32 height, Render::Window_Type type);
+            static bool CreateGKCWindow(const std::string& title, Uint32 width, Uint32 height, Render::Window_Type type);
 
             /**
              * Registers a window into the list, it is automatically assigned a GKC_WindowID

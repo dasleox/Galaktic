@@ -5,6 +5,7 @@
 #include "render/gkc_window.h"
 #include "core/gkc_app.h"
 #include "core/gkc_console.h"
+#include <core/gkc_logger.h>
 
 using namespace Galaktic::Core::Systems;
 using namespace Galaktic::Core;
@@ -22,7 +23,9 @@ void UISystem::OnEvent(Events::GKC_Event &e) {
     dispatcher.DispatchEvent<Events::KeyPressedEvent>(
         [this](Events::KeyPressedEvent &e) {
             if (GKC_SDLK_TO_ENUM(e) == Key::F11)
-                Render::Window::SetFullScreen();
+            {
+                Render::Window::ToggleFullscreen();
+            }
             return false;
         });
 }

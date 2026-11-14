@@ -17,7 +17,7 @@ path ConfigManager::m_folderPath;
 bool ConfigManager::CreateAudioConfigFile()
 {
     const path& filePath = m_folderPath / "audio.cfg";
-    GKC_FILE_ALREADY_EXISTS_BOOL(filePath);
+    if(Filesystem::CheckFile(filePath)) return true;
 
     ofstream file(filePath);
     GKC_ENSURE_FILE_OPEN_BOOL(file);
@@ -29,6 +29,7 @@ bool ConfigManager::CreateAudioConfigFile()
     file << "audio_frequency=48000;\n";
     file << "audio_format=F32;\n";           
     file << "master_volume=1.0;\n";
+    file << "max_volume=1.0;\n";
     file << "# Here will be added audio groups configurations\n";
 
     return true;
@@ -37,7 +38,7 @@ bool ConfigManager::CreateAudioConfigFile()
 bool ConfigManager::CreateBindConfigFile()
 {
     const path filePath = m_folderPath /"bind.cfg";
-    GKC_FILE_ALREADY_EXISTS_BOOL(filePath);
+    if(Filesystem::CheckFile(filePath)) return true;
 
     ofstream file(filePath);
     GKC_ENSURE_FILE_OPEN_BOOL(file);
@@ -59,15 +60,13 @@ bool ConfigManager::CreateBindConfigFile()
     file << "secondary_attack=right_click;\n";
     file << "special_attack=middle_click;\n";
     file << "# User defined actions (action0 - action9)\n";
-    file << "toggle_fullscreen=f11;\n";
-    file << "toggle_debug=f3;\n";
     return true;
 }
 
 bool ConfigManager::CreateGeneralConfigFile()
 {
     const path filePath = m_folderPath / "general.cfg";
-    GKC_FILE_ALREADY_EXISTS_BOOL(filePath);
+    if(Filesystem::CheckFile(filePath)) return true;
 
     ofstream file(filePath);
     GKC_ENSURE_FILE_OPEN_BOOL(file);
@@ -75,17 +74,17 @@ bool ConfigManager::CreateGeneralConfigFile()
     file << "general.cfg\n";
     file << "# Galaktic Engine " << GKC_VERSION_STR << "\n";
     file << "# Format: variable=value;\n";
-    file << "# Booleans: true / false | Colors: 0xRRGGBBAA\n";
+    file << "# Booleans: true / false\n";
 
     file << "\n# ---------------- Window ----------------\n";
-    file << "window_title=Galaktic;\n";
+    file << "# Leave the title empty to use the scene name\n";
+    file << "window_title=;\n";
     file << "# Fullscreen, Borderless, Transparent, Resizable, Hidden, OpenGL\n";
     file << "window_type=Resizable;\n";
     file << "# 0 = use the display resolution\n";
     file << "window_width=0;\n";
     file << "window_height=0;\n";
     file << "window_fullscreen=false;\n";
-    file << "window_clear_color=0xFFFFFFFF;\n";
 
     file << "\n# ---------------- Paths ----------------\n";
     file << "texture_path=" << GKC_TEXTURE_PATH.generic_string() << ";\n";
@@ -97,52 +96,59 @@ bool ConfigManager::CreateGeneralConfigFile()
     file << "fallback_font_path=" << GKC_ARIAL_FONT.generic_string() << ";\n";
 
     file << "\n# ---------------- Physics ----------------\n";
-    file << "gravity=-9.81;\n";
-    file << "floor_height=0.0;\n";
-    file << "use_floor=true;\n";
+    file << "gravity=0.0;\n";
 
     file << "\n# ---------------- Camera ----------------\n";
     file << "camera_zoom=1.0;\n";
     file << "camera_smoothing=3.0;\n";
 
     file << "\n# ---------------- Debug ----------------\n";
+    file << "scene_paused=false;\n";
+    file << "cheats_enabled=false;\n";
     file << "show_wireframes=false;\n";
     file << "show_colliders=false;\n";
-    file << "show_fps=false;\n";
-    file << "show_debug_info=false;\n";
-    file << "wireframe_color=0xFFFF00FF;\n";
-    file << "collider_color=0x00FF00BF;\n";
 
     return true;
 }
 
 bool ConfigManager::SetFolder(const path& path)
 {
-    m_folderPath = path;
+    m_configFileMap.clear();
+    m_folderPath.clear();
+    if(path.empty()) return false;
+    std::error_code error;
+    m_folderPath = std::filesystem::absolute(path, error);
+    if(error) return false;
+    std::filesystem::create_directories(m_folderPath, error);
+    if(error) return false;
     CreateAudioConfigFile();
     CreateBindConfigFile();
     CreateGeneralConfigFile();
     
-    auto files = Filesystem::GetFilenamesInFolder(path);
-    if(files.empty())
+    auto files = std::filesystem::recursive_directory_iterator(m_folderPath,
+        std::filesystem::directory_options::skip_permission_denied, error);
+    const auto end = std::filesystem::recursive_directory_iterator();
+    for(; !error && files != end; files.increment(error))
     {
-        Debug::Logger::LogErrorWithType(ErrorType::DirectoryEmpty, "{} is empty!", path.string());
-        return false;
-    }    
-    for(auto& file : files)
-    {
+        const auto& file = files->path();
+        std::error_code entryError;
+        if(!files->is_regular_file(entryError) || entryError || file.extension() != ".cfg") continue;
         if(!AddConfigFile(file))
             Debug::Logger::LogErrorWithType(ErrorType::FileReadError, "{} couldn't load configuration file",
-                file);
+                file.string());
     }
-
-    return true;
+    if(error) GKC_ENGINE_WARNING("Could not finish reading configuration folder '{}': {}", m_folderPath.string(), error.message());
+    return !m_configFileMap.empty();
 }
 
 bool ConfigManager::AddConfigFile(const path& path)
 {
     GKC_CHECK_PATH_INTEGRITY_BOOL(path);
     auto configFile = Config::ConfigFile(path);
+    if(!configFile.IsValid())
+        return false;
+
+    m_configFileMap.insert_or_assign(path.filename().string(), std::move(configFile));
     return true;
 }
 

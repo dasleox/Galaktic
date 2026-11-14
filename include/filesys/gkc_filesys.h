@@ -154,7 +154,7 @@ namespace Galaktic::Filesystem {
 	extern bool CheckExtension(const std::filesystem::path& filepath, const std::vector<std::string>& allowedExtensions);
 
 	const inline std::vector<std::filesystem::path> APP_DIRECTORY_STRUCTURE = {
-		"assets", "assets/textures", "assets/sounds", "assets/animations",
+		"assets", "assets/textures", "assets/sounds", "assets/animations", "assets/fonts",
 		"scenes", "scripts", "scripts/local", "scripts/local/shared", "scripts/modules",
 		"scripts/modules/Galaktic", "config"
 	};

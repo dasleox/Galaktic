@@ -26,6 +26,7 @@
 #include "filesys/gkc_writer.h"
 #include "render/gkc_drawer.h"
 #include "script/gkc_script.h"
+#include "config/gkc_config_setter.h"
 #include "core/helpers/gkc_texture_helper.h"
 #include "core/helpers/gkc_animation_helper.h" 
 #include "core/managers/gkc_animation_man.h"
@@ -35,6 +36,7 @@
 #include <core/helpers/gkc_rpixels_helper.h>
 #include "core/managers/gkc_font_man.h"
 #include <core/managers/gkc_config_manager.h>
+#include <config/gkc_config_values.h>
 
 #include <algorithm>
 #include <cmath>
@@ -48,16 +50,43 @@ using std::vector;
 using namespace Galaktic::Core;
 using namespace Galaktic::Filesystem;
 
+namespace 
+{
+    auto CreateFirstWindow = [](const Galaktic::Core::DeviceInformation& device_information, const std::filesystem::path& app_path) {
+        const auto validDimension = [](int value) { return value >= 0 && value < 16000; };
+        const int width = Galaktic::Config::GetValueOrDefault<int>("general.cfg", "window_width", 0, validDimension);
+        const int height = Galaktic::Config::GetValueOrDefault<int>("general.cfg", "window_height", 0, validDimension);
+        const auto title = Galaktic::Config::GetValueOrDefault<std::string>("general.cfg", "window_title", "Galaktic",
+            [](const string& value) { return !value.empty() && value.find('\0') == string::npos; });
+        auto type = Galaktic::Render::Window_Type::Resizable;
+        const auto configuredType = Galaktic::Config::GetValueOrDefault<std::string>("general.cfg", "window_type", "Resizable");
+        if(configuredType == "Fullscreen") type = Galaktic::Render::Window_Type::Fullscreen;
+        else if(configuredType == "Borderless") type = Galaktic::Render::Window_Type::Borderless;
+        else if(configuredType == "Transparent") type = Galaktic::Render::Window_Type::Transparent;
+        else if(configuredType == "Hidden") type = Galaktic::Render::Window_Type::Hidden;
+        else if(configuredType == "OpenGL") type = Galaktic::Render::Window_Type::OpenGL;
+        auto window = make_shared<Galaktic::Render::Window>(title, width > 0 ? static_cast<Uint32>(width) : device_information.width_,
+            height > 0 ? static_cast<Uint32>(height) : device_information.height_, type, width == 0 && height == 0);
+        
+        return window;
+    };
+}
+
 Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformation& device_information, const path& path)
     : m_sceneInfo({name, sizeof(Scene)}), m_managerWrapper(wrapper) {
 
         
     GKC_ASSERT(!device_information.IsCorrupted(), "information from app is corrupted!");
-    if (Managers::WindowManager::GetWindowList().empty()) {
-        m_window = make_shared<Render::Window>(name, device_information.width_,
-            device_information.height_, Render::Window_Type::Resizable);
+    if (Managers::WindowManager::GetWindowList().empty()) 
+    {
+        m_window = CreateFirstWindow(device_information, path);
+        GKC_RELEASE_ASSERT(m_window != nullptr, "Failed to create the first window for the scene!");
+        m_window->SetFullScreen(Config::GetValueOrDefault<bool>("general.cfg", "window_fullscreen", false));
+        m_window->SetPixelResolution(320, 180);
         Managers::WindowManager::RegisterWindow(m_window);
-    } else {
+    } 
+    else 
+    {
         m_window = Managers::WindowManager::GetWindow(1);
         m_window->SetTitle(name);
         m_window->SetPixelResolution(320, 180);
@@ -66,6 +95,9 @@ Scene::Scene(const string& name, ManagersWrapper* wrapper, const DeviceInformati
     m_managerWrapper->m_textureManager->CreateMissingTexture(GKC_GET_RENDERER(m_window));
 
     m_appPath = path;
+    m_bPaused = Config::GetValueOrDefault<bool>("general.cfg", "scene_paused", m_bPaused);
+    m_bShowWireframe = Config::GetValueOrDefault<bool>("general.cfg", "show_wireframes", m_bShowWireframe);
+    m_bShowColliders = Config::GetValueOrDefault<bool>("general.cfg", "show_colliders", m_bShowColliders);
 
     InitializeECS();
     InitializeHelpers();
@@ -103,7 +135,8 @@ void Scene::InitializeSystems() {
     auto mouseSystem = make_shared<Systems::MouseSystem>();
 
     auto movementSystem = make_shared<Systems::MovementSystem>(*keySystem);
-    auto physicsSystem = make_shared<Systems::PhysicsSystem>();
+    auto physicsSystem = make_shared<Systems::PhysicsSystem>(
+        Config::GetValueOrDefault<float>("general.cfg", "gravity", 0.f));
     auto uiSystem = make_shared<Systems::UISystem>(*keySystem);
     auto windowSystem = make_shared<Systems::WindowSystem>();
     auto cameraSystem = make_shared<Systems::CameraSystem>(camera);
@@ -124,10 +157,10 @@ void Scene::InitializeSystems() {
 }
 
 void Scene::EnsureSceneScriptFolder(const string& name) {
-    auto sceneScriptFolderPath = m_appPath / GKC_SCRIPT_PATH / "local" / name;
-    if (!Filesystem::CheckDirectory(sceneScriptFolderPath)) {
-        Filesystem::CreateFolder(sceneScriptFolderPath);
-    }
+    auto sceneScriptFolderPath = Config::GetDirectoryOrDefault("script_path", m_appPath, GKC_SCRIPT_PATH) / "local" / name;
+    std::error_code error;
+    std::filesystem::create_directories(sceneScriptFolderPath, error);
+    if(error) GKC_ENGINE_WARNING("Could not create scene script folder '{}': {}", sceneScriptFolderPath.string(), error.message());
 }
 
 Scene::~Scene() {
@@ -167,6 +200,7 @@ void Scene::ReloadAssets(double deltaTime)
 }
 
 void Scene::Run()  {
+    Managers::AudioManager::SetPaused(m_bPaused);
     LoadRunAssets();
 
     // Route SDL events polled by the window into the scene's event pipeline
@@ -180,7 +214,7 @@ void Scene::Run()  {
     console->GetSceneContext(this); 
 
 
-    auto fontPath = path(m_appPath / "assets" / "fonts" / "console_font.ttf");
+    auto fontPath = Config::GetDirectoryOrDefault("font_path", m_appPath, "assets/fonts") / "console_font.ttf";
     TTF_Font* consoleFont = TTF_OpenFont(fontPath.string().c_str(), 13.f);
     if (consoleFont == nullptr)
     {
@@ -212,7 +246,8 @@ void Scene::Run()  {
     {
         Clock::Update();
         double deltaTime = std::min(Clock::GetDeltaTime(), 0.25);
-        accumulator += deltaTime;
+        if (!m_bPaused) accumulator += deltaTime;
+        else accumulator = 0.0;
 
         ReloadAssets(deltaTime);
 
@@ -222,9 +257,6 @@ void Scene::Run()  {
             Close();
         }
 
-        // @todo PhysicsSystem needs to be reworked to support the newer entity
-        // types before it runs again here; MovementSystem/CameraSystem are
-        // enough to drive the current sandbox scene.
         if (!m_bPaused)
         {
             while (accumulator >= FIXED_DELTA_TIME) {
@@ -244,7 +276,7 @@ void Scene::LoadRunAssets() {
 }
 
 TTF_Font* Scene::OpenConsoleFont() {
-    auto fontPath = m_appPath / "assets" / "fonts" / "galaktic_font.ttf";
+    auto fontPath = Config::GetDirectoryOrDefault("font_path", m_appPath, "assets/fonts") / "galaktic_font.ttf";
     TTF_Font* font = TTF_OpenFont(fontPath.string().c_str(), 12.f);
     if (font == nullptr) {
         Debug::Logger::LogErrorWithType(ErrorType::AssetNotLoaded, "Failed to open the debug console font at '{}'", fontPath.string());
@@ -262,6 +294,7 @@ void Scene::SpawnDebugEntities() {
     playerTransform.location = {150.f, 92.f};
     playerTransform.size = {24.f, 24.f};
     playerTransform.zIndex = 2;
+    player.Get<ECS::CollisionComponent>().collisionBox = playerTransform.size;
     m_textureHelper->SetTextureToEntity(player.GetID(), "cat.png");
     m_ecsManager->AddComponentToEntity<ECS::ShadowComponent>(player.GetID());
 
@@ -280,6 +313,7 @@ void Scene::SpawnDebugEntities() {
     wallTransform.location = {106.f, 52.f};
     wallTransform.size = {12.f, 48.f};
     wallTransform.zIndex = 1;
+    wall.Get<ECS::CollisionComponent>().collisionBox = wallTransform.size;
     wall.Get<ECS::ColorComponent>().color = {170, 120, 65, 255};
     m_ecsManager->AddComponentToEntity<ECS::ShadowComponent>(wall.GetID());
 
@@ -289,6 +323,7 @@ void Scene::SpawnDebugEntities() {
     rotatedTransform.size = {26.f, 12.f};
     rotatedTransform.rotation = 35.f;
     rotatedTransform.zIndex = 1;
+    rotated.Get<ECS::CollisionComponent>().collisionBox = rotatedTransform.size;
     rotated.Get<ECS::ColorComponent>().color = {110, 155, 175, 255};
     m_ecsManager->AddComponentToEntity<ECS::ShadowComponent>(rotated.GetID());
 
@@ -297,6 +332,7 @@ void Scene::SpawnDebugEntities() {
     spriteTransform.location = {174.f, 44.f};
     spriteTransform.size = {32.f, 32.f};
     spriteTransform.zIndex = 1;
+    sprite.Get<ECS::CollisionComponent>().collisionBox = spriteTransform.size;
     m_textureHelper->SetTextureToEntity(sprite.GetID(), "cat.png");
     m_ecsManager->AddComponentToEntity<ECS::ShadowComponent>(sprite.GetID());
 
@@ -318,11 +354,69 @@ void Scene::SpawnDebugEntities() {
         "Move the player to test its shadow; cat.png must be a transparent texture asset.");
 }
 
+void Scene::SpawnPhysicsDebugEntities() {
+    SetPixelResolution(320, 180, false);
+    SetAmbientLight(1.f);
+    m_bShowColliders = true;
+
+    auto player = m_ecsHelper->GetEntityByName("Player");
+    auto& transform = player.Get<ECS::TransformComponent>();
+    transform.location = {60.f, 75.f};
+    transform.size = {12.f, 12.f};
+    player.Get<ECS::CollisionComponent>() = ECS::CollisionComponent(transform.size);
+    player.Get<ECS::RigidBody>() = ECS::RigidBody();
+    player.Get<ECS::SpeedComponent>().maxSpeed = 70.f;
+    player.Get<ECS::ColorComponent>().color = {80, 180, 240, 255};
+
+    SpawnPhysicsDebugWalls();
+    for (int i = 0; i < 4; ++i) {
+        auto box = m_ecsHelper->CreatePhysicsObject("PhysicsDemoBox" + std::to_string(i));
+        auto& boxTransform = box.Get<ECS::TransformComponent>();
+        boxTransform.location = {110.f + i * 24.f, 75.f};
+        boxTransform.size = {16.f, 16.f};
+        box.Get<ECS::CollisionComponent>().collisionBox = boxTransform.size;
+        box.Get<ECS::RigidBody>().mass = 0.5f;
+        box.Get<ECS::ColorComponent>().color = {200, 145, 70, 255};
+    }
+
+    auto sensor = m_ecsHelper->CreateStaticObject("PhysicsDemoSensor");
+    auto& sensorTransform = sensor.Get<ECS::TransformComponent>();
+    sensorTransform.location = {240.f, 60.f};
+    sensorTransform.size = {32.f, 50.f};
+    auto& collider = sensor.Get<ECS::CollisionComponent>();
+    collider.collisionBox = sensorTransform.size;
+    collider.isSensor = true;
+    sensor.Get<ECS::ColorComponent>().color = {80, 210, 100, 100};
+    GKC_ENGINE_INFO("Physics demo: WASD moves the player, brown boxes are pushable, "
+        "green is a sensor. Read CollisionSystem::GetEvents() after each fixed tick.");
+}
+
+void Scene::SpawnPhysicsDebugWalls() {
+    const Render::Vec2 positions[] = {{0.f, 0.f}, {0.f, 172.f}, {0.f, 8.f},
+        {312.f, 8.f}, {150.f, 110.f}};
+    const Render::Vec2 sizes[] = {{320.f, 8.f}, {320.f, 8.f}, {8.f, 164.f},
+        {8.f, 164.f}, {8.f, 40.f}};
+    for (int i = 0; i < 5; ++i) {
+        auto wall = m_ecsHelper->CreateStaticObject("PhysicsDemoWall" + std::to_string(i));
+        auto& transform = wall.Get<ECS::TransformComponent>();
+        transform.location = positions[i];
+        transform.size = sizes[i];
+        wall.Get<ECS::CollisionComponent>().collisionBox = sizes[i];
+        wall.Get<ECS::ColorComponent>().color = {110, 115, 125, 255};
+    }
+}
+
 void Scene::FixedUpdate(float deltaTime, const shared_ptr<Systems::BaseSystem>& movementSystem,
     const shared_ptr<Systems::CameraSystem>& cameraSystem) {
     movementSystem->Update(m_ecsManager->GetEntityList(), deltaTime);
+    m_systemList.at("PhysicsSystem")->Update(m_ecsManager->GetEntityList(), deltaTime);
     cameraSystem->Update(m_ecsManager->GetEntityList(), deltaTime,
         m_window->GetViewWidth(), m_window->GetViewHeight());
+}
+
+Systems::CollisionSystem& Scene::GetCollisionSystem() {
+    return std::static_pointer_cast<Systems::PhysicsSystem>(
+        m_systemList.at("PhysicsSystem"))->GetCollisionSystem();
 }
 
 void Scene::RenderFrame(float deltaTime, TTF_Font* consoleFont, Console* console,
@@ -356,13 +450,42 @@ void Scene::RenderFrame(float deltaTime, TTF_Font* consoleFont, Console* console
 }
 
 void Scene::Save() {
-    FileWriter::WriteScene(m_appPath / "scenes" / path(m_sceneInfo.scene_name_ + ".gkscene")
+    FileWriter::WriteScene(Config::GetDirectoryOrDefault("scene_path", m_appPath, GKC_SCENE_PATH) / path(m_sceneInfo.scene_name_ + ".gkscene")
         , *this, m_registry);
 }
 
 void Scene::Pause() 
 {
-    m_bPaused = !m_bPaused;
+    SetPaused(!m_bPaused);
+}
+
+void Scene::SetPaused(bool paused)
+{
+    m_bPaused = paused;
+    Managers::AudioManager::SetPaused(paused);
+    Config::ConfigSetter::SetVariable("scene_paused", paused, "general.cfg");
+}
+
+void Scene::SetWireframes(bool visible)
+{
+    m_bShowWireframe = visible;
+    Config::ConfigSetter::SetVariable("show_wireframes", visible, "general.cfg");
+}
+
+void Scene::SetColliders(bool visible)
+{
+    m_bShowColliders = visible;
+    Config::ConfigSetter::SetVariable("show_colliders", visible, "general.cfg");
+}
+
+void Scene::ToggleWireframes()
+{
+    SetWireframes(!m_bShowWireframe);
+}
+
+void Scene::ToggleColliders()
+{
+    SetColliders(!m_bShowColliders);
 }
 
 void Scene::OnEvent(Events::GKC_Event& event) {
@@ -416,6 +539,10 @@ void Scene::CreatePlayer() {
 
 void Scene::CreateCamera(const string& name) {
     auto cameraComponent = ECS::CameraComponent();
+    cameraComponent.zoom = Config::GetValueOrDefault<float>("general.cfg", "camera_zoom", cameraComponent.zoom,
+        [](float value) { return value > 0.f; });
+    cameraComponent.smoothing = Config::GetValueOrDefault<float>("general.cfg", "camera_smoothing", cameraComponent.smoothing,
+        [](float value) { return value >= 0.f; });
     cameraComponent.isActive = true;
     m_ecsHelper->CreateCameraEntity(name);
     m_ecsHelper->ModifyEntity(name, cameraComponent);
@@ -430,9 +557,13 @@ void Scene::SetPixelResolution(int width, int height, bool integerScale)
     m_window->SetPixelResolution(width, height, integerScale);
 }
 
-void Scene::SetFullscreen()
+void Scene::ToggleFullscreen()
 {
-    m_window->SetFullScreen();
+    m_window->ToggleFullscreen();
+}
+
+void Scene::SetFullscreen(bool enabled) {
+    m_window->SetFullScreen(enabled);
 }
 
 void Scene::SetAmbientLight(float value)

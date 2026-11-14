@@ -170,16 +170,18 @@ void Drawer::DrawColliders(const ECS::Entity_List& list, SDL_Renderer* renderer,
         if (!entity.Has<ECS::CollisionComponent>()) continue;
 
         auto& transform    = entity.Get<ECS::TransformComponent>();
-        auto& collisionBox = entity.Get<ECS::CollisionComponent>().collisionBox;
+        auto& collider = entity.Get<ECS::CollisionComponent>();
+        if (!collider.collidable) continue;
+        auto& collisionBox = collider.collisionBox;
 
         SDL_FRect rect;
         rect.w = collisionBox.x;
         rect.h = collisionBox.y;
-        rect.x = ToScreen(transform.location.x, camera.location.x);
-        rect.y = ToScreen(transform.location.y, camera.location.y);
+        rect.x = ToScreen(transform.location.x + collider.collisionOffset.x, camera.location.x);
+        rect.y = ToScreen(transform.location.y + collider.collisionOffset.y, camera.location.y);
 
         SDL_Vertex verts[4];
-        CalculateVertices(rect, transform.rotation, {0, 200, 0, 80}, verts);
+        CalculateVertices(rect, 0.f, {0, 200, 0, 80}, verts);
         const int indices[6] = {0, 1, 2, 2, 3, 0};
         SDL_RenderGeometry(renderer, NULL, verts, 4, indices, 6);
 

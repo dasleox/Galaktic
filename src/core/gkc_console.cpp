@@ -10,9 +10,12 @@
 #include <core/gkc_scene.h>
 #include <core/gkc_clock.h>
 #include <core/gkc_debugger.h>
+#include <config/gkc_config_setter.h>
+#include <config/gkc_config_values.h>
 #include <core/events/gkc_dispatcher.h>
 #include <core/systems/gkc_key.h>
 #include <sstream>
+#include <cmath>
 
 using std::shared_ptr;
 using std::string;
@@ -22,6 +25,18 @@ using std::vector;
 using namespace Galaktic;
 using namespace Galaktic::Core;
 using namespace Galaktic::Core::Managers;
+
+namespace
+{
+    float ParseFiniteFloat(const string& input)
+    {
+        size_t parsed = 0;
+        const float value = std::stof(input, &parsed);
+        if(parsed != input.size() || !std::isfinite(value))
+            throw std::invalid_argument("Expected a finite number without trailing text");
+        return value;
+    }
+}
 
 /*
  * Sets the argument quantity for command validation.
@@ -83,9 +98,9 @@ void Console::OnEvent(Events::GKC_Event& e)
                 default: break;
             }
 
-            // F3 Command
+            // Keep the console and fullscreen shortcuts available while typing.
 
-            if (key == Systems::Key::F3)
+            if (key == Systems::Key::F3 || key == Systems::Key::F11)
                 return false;
 
             if (!m_isVisible)
@@ -197,8 +212,10 @@ void Console::SceneCommands(const CommandWrapper& wrapper)
         }
         case CommandTypes::PauseToggleScene:
         {
+            bool enabled;
+            if (!ReadSwitch(wrapper, enabled)) return;
             if (m_currentScene != nullptr)
-                m_currentScene->Pause();
+                m_currentScene->SetPaused(enabled);
             break;
         }
     }
@@ -219,8 +236,8 @@ void Console::EntityCommands(const CommandWrapper& wrapper)
         || wrapper.type == CommandTypes::SetRotationEntity;
 
 
-    if (isCheatCommand && !m_cheatsToggle) {
-        GKC_ENGINE_ERROR("Cheats are disabled! Enable them with 'set_cheats true' first.");
+    if (isCheatCommand && !Config::GetValueOrDefault<bool>("general.cfg", "cheats_enabled", false)) {
+        GKC_ENGINE_ERROR("Cheats are disabled! Enable them with 'set_cheats 1' first.");
         return;
     }
 
@@ -273,8 +290,8 @@ void Console::EntityCommands(const CommandWrapper& wrapper)
             SET_ARGUMENT_QUANTITY(3, args);
             try 
             {
-                float x = std::stof(args[1]);
-                float y = std::stof(args[2]);
+                float x = ParseFiniteFloat(args[1]);
+                float y = ParseFiniteFloat(args[2]);
                 manager->TeleportEntityByName(args[0], x, y);
             } 
             catch(const std::invalid_argument&) 
@@ -310,12 +327,16 @@ void Console::EntityCommands(const CommandWrapper& wrapper)
             SET_ARGUMENT_QUANTITY(2, args);
             try 
             {
-                float degrees = std::stof(args[1]);
+                float degrees = ParseFiniteFloat(args[1]);
                 manager->RotateEntityByName(args[0], degrees);
             } 
             catch(const std::invalid_argument&) 
             {   
                 INVALID_CONVERION_ERROR(float);
+            }
+            catch(const std::out_of_range&)
+            {
+                Debug::Logger::LogErrorWithType(ErrorType::OutOfRange, "rotation out of range!");
             }
             break;
         }
@@ -366,25 +387,19 @@ void Console::AppCommands(const CommandWrapper& wrapper)
     {
         case CommandTypes::FullscreenToggle: 
         {
+            bool enabled;
+            if (!ReadSwitch(wrapper, enabled)) return;
             if (m_currentScene != nullptr)
-                m_currentScene->SetFullscreen();
+            {
+                m_currentScene->SetFullscreen(enabled);
+            }
             break;
         }
         case CommandTypes::CheatsToggle:
         {
-            bool toggle = false;
-            if(args.empty()) {
-                InvalidArgumentError("missing argument!");
-                return;
-            }
-            if(args[0] == "true") toggle = true;
-            else if(args[0] == "false") toggle = false;
-            else { 
-                InvalidArgumentError("Argument should be true or false!");
-                return;
-            }
-    
-            m_cheatsToggle = toggle;
+            bool enabled;
+            if (!ReadSwitch(wrapper, enabled)) return;
+            Config::ConfigSetter::SetVariable("cheats_enabled", enabled, "general.cfg");
             break;
         }
         case CommandTypes::ClearConsole:
@@ -431,20 +446,25 @@ void Console::SoundCommands(const CommandWrapper& wrapper)
             break;
         }
         case CommandTypes::SetMasterVolume: {
-            if (wrapper.args.empty())
+            const auto args = GetListOfArguments(wrapper.args);
+            if (args.size() != 1)
             {
-                InvalidArgumentError("missing volume argument!, usage: set_master_volume <volume>");
+                InvalidArgumentError("usage: set_master_volume <volume>");
                 return;
             }
 
             try 
             {
-                float volume = std::stof(wrapper.args);
+                float volume = ParseFiniteFloat(args[0]);
                 Managers::AudioManager::SetMasterVolume(volume);
             } 
             catch(const std::invalid_argument&) 
             {   
                 INVALID_CONVERION_ERROR(float);
+            }
+            catch(const std::out_of_range&)
+            {
+                Debug::Logger::LogErrorWithType(ErrorType::OutOfRange, "volume out of range!");
             }
          
             break;
@@ -466,12 +486,16 @@ void Console::DebugCommands(const CommandWrapper& wrapper)
         }
         case CommandTypes::ShowWireframeToggle:
         {
-            m_currentScene->ToggleWireframes();
+            bool enabled;
+            if (!ReadSwitch(wrapper, enabled)) return;
+            m_currentScene->SetWireframes(enabled);
             break;
         }
         case CommandTypes::ShowCollidersToggle:
         {
-            m_currentScene->ToggleColliders();
+            bool enabled;
+            if (!ReadSwitch(wrapper, enabled)) return;
+            m_currentScene->SetColliders(enabled);
             break;
         }
         case CommandTypes::ShowDebugInformationToggle:
@@ -480,6 +504,16 @@ void Console::DebugCommands(const CommandWrapper& wrapper)
             break;
         }
     }
+}
+
+bool Console::ReadSwitch(const CommandWrapper& wrapper, bool& enabled) {
+    const auto args = GetListOfArguments(wrapper.args);
+    if (args.size() != 1 || (args[0] != "1" && args[0] != "0")) {
+        InvalidArgumentError("usage: " + wrapper.command + " <1|0>");
+        return false;
+    }
+    enabled = args[0] == "1";
+    return true;
 }
 
 void Console::InvalidArgumentError(const string& message)
@@ -511,6 +545,7 @@ CommandWrapper Console::NoArgumentCommands(const string& command)
 {
     auto wrapper = CommandWrapper(command, "", CommandTypes::Unknown);
 
+    COM_WRAPPER_RETURN("set_cheats", CommandTypes::CheatsToggle);
     COM_WRAPPER_RETURN("save", CommandTypes::SaveCurrentScene);
     COM_WRAPPER_RETURN("pause", CommandTypes::PauseToggleScene);
     COM_WRAPPER_RETURN("show_scene_list", CommandTypes::ShowSceneList);
@@ -537,6 +572,10 @@ CommandWrapper Console::ArgumentCommands(const string& command, const string& ar
 
     auto wrapper = CommandWrapper(command, args, CommandTypes::Unknown);
 
+    COM_WRAPPER_RETURN("pause", CommandTypes::PauseToggleScene);
+    COM_WRAPPER_RETURN("set_fullscreen", CommandTypes::FullscreenToggle);
+    COM_WRAPPER_RETURN("show_wireframe", CommandTypes::ShowWireframeToggle);
+    COM_WRAPPER_RETURN("show_colliders", CommandTypes::ShowCollidersToggle);
     COM_WRAPPER_RETURN("load", CommandTypes::LoadScene);
     COM_WRAPPER_RETURN("create_static_object", CommandTypes::CreateStaticObject);
     COM_WRAPPER_RETURN("create_physics_object", CommandTypes::CreatePhysicsObject);

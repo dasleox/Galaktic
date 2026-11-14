@@ -87,6 +87,10 @@ void LuaGalaktic::SetupModules(const path& scriptRootFolder) {
 }
 
 void LuaGalaktic::AddModuleFolders(const path& sriptModulesPath) {
+    if(!Filesystem::CheckDirectory(sriptModulesPath)) {
+        m_modulePathList.clear();
+        return;
+    }
     auto folderPaths = Filesystem::GetFoldersInFolder(sriptModulesPath);
     m_modulePathList = folderPaths;
     if(m_modulePathList.empty()) {

@@ -10,22 +10,34 @@ using namespace Galaktic::Core;
 
 Managers::Window_List Managers::WindowManager::m_windowList;
 
-void Managers::WindowManager::CreateGKCWindow(const string& title, Uint32 width,
+namespace {
+    GKC_WindowID FindAvailableWindowID(const Managers::Window_List& windows) {
+        for(GKC_WindowID id = 1; id <= MAX_WINDOW_QUANTITY; ++id) {
+            if(!windows.contains(id)) return id;
+        }
+        return 0;
+    }
+}
+
+bool Managers::WindowManager::CreateGKCWindow(const string& title, Uint32 width,
     Uint32 height, Render::Window_Type type) {
+    const auto id = FindAvailableWindowID(m_windowList);
+    if(id == 0) {
+        GKC_ENGINE_ERROR("Too many windows already exist!");
+        return false;
+    }
     auto window = make_shared<Render::Window>(title, width, height, type);
     if (!window->IsValid()) {
         GKC_ENGINE_ERROR("Window couldn't be created correctly!");
-        return;
+        return false;
     }
 
-    GKC_WindowID id = m_windowList.size() + 1;
+    if(!m_windowList.emplace(id, window).second) return false;
     window->SetWindowID(id);
-    m_windowList.emplace(id, window);
+    return true;
 }
 
 void Managers::WindowManager::RegisterWindow(shared_ptr<Render::Window> window) {
-    GKC_WindowID id = m_windowList.size() + 1;
-
     GKC_PASSED_PARAM_NULL(window, "Window");
     
     if (!window->IsValid()) {
@@ -33,19 +45,25 @@ void Managers::WindowManager::RegisterWindow(shared_ptr<Render::Window> window) 
         return;
     }
 
-    if (id + 1 > MAX_WINDOW_QUANTITY) {
+    const auto id = FindAvailableWindowID(m_windowList);
+    if (id == 0) {
         GKC_ENGINE_ERROR("Too many windows already exist!");
         return;
     }
 
+    if(!m_windowList.emplace(id, window).second) return;
     window->SetWindowID(id);
-    m_windowList.emplace(id, window);
-    GKC_ENGINE_INFO("'{0}' window (ID: {1}) has been added", id, window->GetTitle());
+    GKC_ENGINE_INFO("'{0}' window (ID: {1}) has been added", window->GetTitle(), id);
 }
 
 void Managers::WindowManager::UnregisterWindow(GKC_WindowID id) {
-    GKC_ENGINE_INFO("'{0}' window (ID: {1}) has been deleted", id, GetWindow(id)->GetTitle());
-    m_windowList.erase(id);
+    const auto it = m_windowList.find(id);
+    if(it == m_windowList.end()) {
+        GKC_ENGINE_WARNING("Window with ID: {} to unregister doesn't exist!", id);
+        return;
+    }
+    GKC_ENGINE_INFO("'{0}' window (ID: {1}) has been deleted", it->second->GetTitle(), id);
+    m_windowList.erase(it);
 }
 
 shared_ptr<Galaktic::Render::Window> Managers::WindowManager::GetWindow(GKC_WindowID id) {

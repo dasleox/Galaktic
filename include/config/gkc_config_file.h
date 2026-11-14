@@ -24,6 +24,7 @@
 #pragma once
 #include <pch.hpp>
 #include <core/gkc_error.h>
+#include <cmath>
 
 namespace Galaktic::Config
 {
@@ -88,7 +89,7 @@ namespace Galaktic::Config
 
                 else if constexpr (std::is_same_v<T, char>)
                 {
-                    if(raw.empty()) return std::nullopt;
+                    if(raw.size() != 1) return std::nullopt;
                     return raw[0];
                 }
                 else if constexpr (std::is_same_v<T, bool>)
@@ -102,6 +103,12 @@ namespace Galaktic::Config
                     std::istringstream ss(raw);
                     T value{};
                     if(!(ss >> value)) return std::nullopt;
+                    ss >> std::ws;
+                    if(!ss.eof()) return std::nullopt;
+                    if constexpr (std::is_floating_point_v<T>)
+                        if(!std::isfinite(value)) return std::nullopt;
+                    if constexpr (std::is_unsigned_v<T>)
+                        if(!raw.empty() && raw.front() == '-') return std::nullopt;
                     return value;
                 }
             }

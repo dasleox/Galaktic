@@ -44,11 +44,11 @@ ConfigFile::ConfigFile(const path& filepath) : m_path(filepath)
 
 bool ConfigFile::Load()
 {
-    ifstream file(m_path);
-    GKC_ENSURE_FILE_OPEN_BOOL(file);
-
     m_lines.clear();
     m_variableToLineMap.clear();
+
+    ifstream file(m_path);
+    GKC_ENSURE_FILE_OPEN_BOOL(file);
 
     string lineStr;
     while(std::getline(file, lineStr))
@@ -57,6 +57,11 @@ bool ConfigFile::Load()
         string name = ParseName(lineStr);
         if(!name.empty())
             m_variableToLineMap[name] = m_lines.size() - 1;
+    }
+    if(file.bad()) {
+        m_lines.clear();
+        m_variableToLineMap.clear();
+        return false;
     }
     return true;
 }
@@ -70,7 +75,8 @@ bool ConfigFile::Save() const
     for(const auto& line : m_lines)
         file << line << '\n';
 
-    return true;
+    file.flush();
+    return file.good();
 }
 
 bool ConfigFile::Has(const string& varName) const

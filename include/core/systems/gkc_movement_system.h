@@ -36,7 +36,7 @@ namespace Galaktic::Core::Systems {
     /**
      * @class MovementSystem
      * 
-     * Manages player movement based on key inputs, updating entity positions accordingly.
+     * Manages normalized top-down movement, using body velocity when available.
      * A KeySystem reference is required to check for key states.
      */
     class MovementSystem final : public BaseSystem {
@@ -46,7 +46,6 @@ namespace Galaktic::Core::Systems {
              */
             explicit MovementSystem(KeySystem& system) : m_keySystem(system) {}
 
-            /// @todo Implement diagonal movement normalization
             /**
              * Updates the entities movement using delta time, with WASD keys for navigation.
              * @param list List of entities
@@ -56,11 +55,6 @@ namespace Galaktic::Core::Systems {
         private:
             KeySystem& m_keySystem;
 
-            /**
-             * @brief Adds the configured jump amount to the eligible player's vertical force.
-             * @param entity Entity
-             */
-            void ApplyJump(ECS::Entity& entity);
             /**
              * @brief Checks the configured keyboard binding, falling back to the supplied key when no binding exists.
              * @param action Engine action to query

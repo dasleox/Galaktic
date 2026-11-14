@@ -60,6 +60,8 @@ namespace Galaktic::Render {
              * @param type Type of the window
              */
             Window(const std::string& title, Uint32 width, Uint32 height, Window_Type type);
+            /** @brief Creates a window, optionally preserving explicit startup dimensions. */
+            Window(const std::string& title, Uint32 width, Uint32 height, Window_Type type, bool maximize);
 
             /**
              * @brief Releases the resources owned by this object.
@@ -124,12 +126,12 @@ namespace Galaktic::Render {
              * @brief Updates the native SDL window title and stores it when the operation succeeds.
              * @param title Title
              */
-            void SetTitle(const std::string& title) { if (SDL_SetWindowTitle(m_window, title.c_str())) m_title = title; }
+            void SetTitle(const std::string& title);
             /**
              * @brief Updates the stored window width; does not resize the native window.
              * @param width Width in pixels
              */
-            void SetWidth(Uint32 width) { m_width = width; }
+            void SetWidth(Uint32 width);
             /**
              * @brief Updates the stored SDL window ID.
              * @param id Entity or asset ID used by this operation
@@ -144,27 +146,25 @@ namespace Galaktic::Render {
              * @brief Updates the stored window height; does not resize the native window.
              * @param height Height in pixels
              */
-            void SetHeight(Uint32 height) { m_height = height; }
+            void SetHeight(Uint32 height);
             /**
              * @brief Updates the stored window type; does not recreate the native window.
              * @param type Engine type identifier used by this operation
              */
-            void SetType(Window_Type type) { m_type = type; }
+            void SetType(Window_Type type);
             /**
              * @brief Stores the event callback used by this window.
              * @param callback Callback
              */
             void SetCallback(const EventCallback& callback) { m_callback = callback; }
 
+            /** @brief Sets the shared fullscreen request without toggling it */
+            static void SetFullScreen(bool enabled);
+
             /**
              * @brief Toggles the shared fullscreen request applied by Window::Draw.
              */
-            static void SetFullScreen() {
-                if (m_isFullscreen)
-                    m_isFullscreen = false;
-                else
-                    m_isFullscreen = true;
-            }
+            static void ToggleFullscreen();
 
             /**
              * @brief Polls events using an SDL_Event changing the callback depending on the
@@ -206,6 +206,8 @@ namespace Galaktic::Render {
              * Goes back to drawing at the real window size
              */
             void DisablePixelResolution();
+
+            static bool IsFullscreen() { return m_isFullscreen; }
         private:
             std::string m_title;
             SDL_WindowID m_ID = 0;

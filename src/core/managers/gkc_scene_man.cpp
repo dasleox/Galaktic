@@ -3,6 +3,7 @@
 #include "core/gkc_logger.h"
 #include "core/gkc_scene.h"
 #include "filesys/gkc_reader.h"
+#include <config/gkc_config_values.h>
 
 using std::make_unique;
 using std::filesystem::path;
@@ -39,7 +40,7 @@ bool Managers::SceneManager::LoadSpecificScene(const string &name) const {
 }
 
 bool Managers::SceneManager::LoadSpecificSceneFromFile(const path &filepath) {
-    auto scenePath = m_folder / GKC_SCENE_PATH /filepath;
+    auto scenePath = Galaktic::Config::GetDirectoryOrDefault("scene_path", m_folder, GKC_SCENE_PATH) / filepath;
 
     #if GKC_DEBUG
         GKC_ENGINE_INFO("Loading scene from file: {}", scenePath.string());
@@ -68,7 +69,8 @@ void Managers::SceneManager::ShowSceneList()
 {
     for(auto& [name, scene] : m_sceneList)
     {
-        uint64_t fileSize = Filesystem::GetFileSize(m_folder / "scenes" / (name + ".gkscene"));
+        uint64_t fileSize = Filesystem::GetFileSize(
+            Galaktic::Config::GetDirectoryOrDefault("scene_path", m_folder, GKC_SCENE_PATH) / (name + ".gkscene"));
         GKC_ENGINE_INFO("Scene '{}' (Size: {} MB)", name, Core::BytesToMegabytes(fileSize));
     }
 }

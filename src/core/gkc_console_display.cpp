@@ -207,7 +207,7 @@ void Console::DisplayHelp(const string& type)
     if (type == "scene")
     {
         GKC_ENGINE_INFO("Scene commands:");
-        GKC_ENGINE_INFO(" save | load <file> | show_scene_list | pause");
+        GKC_ENGINE_INFO(" save | load <file> | show_scene_list | pause <1|0>");
     }
     else if (type == "entity")
     {
@@ -225,7 +225,7 @@ void Console::DisplayHelp(const string& type)
     else if (type == "app")
     {
         GKC_ENGINE_INFO("App commands:");
-        GKC_ENGINE_INFO(" set_fullscreen | set_cheats <true|false> | clear | help [section]");
+        GKC_ENGINE_INFO(" set_fullscreen <1|0> | set_cheats <1|0> | clear | help [section]");
     }
     else if (type == "sound")
     {
@@ -235,7 +235,7 @@ void Console::DisplayHelp(const string& type)
     else if (type == "debug")
     {
         GKC_ENGINE_INFO("Debug commands:");
-        GKC_ENGINE_INFO(" show_fps | show_wireframe | show_colliders | show_debug_info");
+        GKC_ENGINE_INFO(" show_fps | show_wireframe <1|0> | show_colliders <1|0> | show_debug_info");
     }
     else
     {

@@ -2,8 +2,10 @@
 #include <core/managers/gkc_audio_man.h>
 #include "core/gkc_logger.h"
 #include <config/gkc_config_setter.h>
+#include <config/gkc_config_values.h>
 #include "filesys/gkc_filesys.h"
 #include <audio/gkc_audio_group.h>
+#include <cmath>
 
 using std::string;
 using std::vector;
@@ -13,30 +15,55 @@ using namespace Galaktic::Core;
 
 static const vector<string> AUDIO_EXTENSIONS = {".wav", ".ogg", ".mp3", ".flac", ".mod", ".mid", ".mp3"};
 
+namespace {
+    void CollectFinishedTracks(std::multimap<AudioID, MIX_Track*>& tracks) {
+        for(auto it = tracks.begin(); it != tracks.end();) {
+            auto* track = it->second;
+            if(track != nullptr && (MIX_TrackPlaying(track) || MIX_TrackPaused(track))) {
+                ++it;
+                continue;
+            }
+            if(track != nullptr) MIX_DestroyTrack(track);
+            it = tracks.erase(it);
+        }
+    }
+
+    bool StopTrackWithFade(MIX_Track* track, Sint64 fadeOutMs) {
+        if(track == nullptr) return false;
+        const auto frames = fadeOutMs > 0 ? MIX_TrackMSToFrames(track, fadeOutMs) : 0;
+        if(frames < 0 || !MIX_StopTrack(track, frames)) {
+            GKC_ENGINE_ERROR("Failed to stop audio playback: {}", SDL_GetError());
+            return false;
+        }
+        return true;
+    }
+}
+
 std::multimap<AudioID, MIX_Track*> Managers::AudioManager::m_activeTracks;
 SDL_AudioSpec Managers::AudioManager::m_audioSpec{};
 SDL_AudioDeviceID Managers::AudioManager::m_deviceID;
 MIX_Mixer* Managers::AudioManager::m_mixer = nullptr;
 std::unordered_map<string, Audio::AudioGroup> Managers::AudioManager::m_audioGroupList;
 float Managers::AudioManager::m_maxVolume = 1.f;
+float Managers::AudioManager::m_masterVolume = 1.f;
+bool Managers::AudioManager::m_isPaused = false;
 
 Managers::AudioManager::AudioManager(const string &folder) {
-    m_audioSpec.channels = 2;
-    m_audioSpec.freq = 48000;
-    m_audioSpec.format = SDL_AUDIO_F32;
-
     Config::ConfigSetter::SetAudioConfigurationFromFile();
 
-    m_deviceID = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &m_audioSpec);
-    SDL_PauseAudioDevice(m_deviceID);
-
-    if (m_deviceID == 0) {
-        Debug::Logger::LogFatalWithType(ErrorType::DeviceNotFound,"failed to open audio device!");
-    }
-
-    m_mixer = MIX_CreateMixerDevice(m_deviceID, &m_audioSpec);
-    if (m_mixer == nullptr) {
-        Debug::Logger::LogFatalWithType(ErrorType::NullPointer, "audio mixer is NULL!");
+    if(!OpenAudioDevice()) {
+        const auto defaults = Config::AudioSettings{}.spec;
+        if(m_audioSpec.channels == defaults.channels && m_audioSpec.freq == defaults.freq &&
+            m_audioSpec.format == defaults.format) {
+            Debug::Logger::LogFatalWithType(ErrorType::DeviceNotFound, "Failed to open the default audio device!");
+            return;
+        }
+        GKC_ENGINE_WARNING("Configured audio specification is unavailable; using Galaktic defaults.");
+        m_audioSpec = defaults;
+        if(!OpenAudioDevice()) {
+            Debug::Logger::LogFatalWithType(ErrorType::DeviceNotFound, "Failed to open the default audio device!");
+            return;
+        }
     }
 
 
@@ -47,12 +74,41 @@ Managers::AudioManager::AudioManager(const string &folder) {
     }
 }
 
+void Managers::AudioManager::LoadConfiguration() {
+    const auto settings = Config::ReadAudioSettings();
+    const bool changed = m_audioSpec.channels != settings.spec.channels ||
+        m_audioSpec.freq != settings.spec.freq || m_audioSpec.format != settings.spec.format;
+    m_audioSpec = settings.spec;
+    m_maxVolume = settings.maxVolume;
+    m_masterVolume = std::min(settings.masterVolume, m_maxVolume);
+    if(m_mixer != nullptr) {
+        if(changed) RestartAudioDevice();
+        else MIX_SetMixerGain(m_mixer, m_masterVolume);
+    }
+}
+
+bool Managers::AudioManager::OpenAudioDevice() {
+    m_deviceID = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &m_audioSpec);
+    if(m_deviceID == 0) return false;
+    SDL_PauseAudioDevice(m_deviceID);
+    m_mixer = MIX_CreateMixerDevice(m_deviceID, &m_audioSpec);
+    if(m_mixer == nullptr) {
+        SDL_CloseAudioDevice(m_deviceID);
+        m_deviceID = 0;
+        return false;
+    }
+    MIX_SetMixerGain(m_mixer, m_masterVolume);
+    return true;
+}
+
 void Managers::AudioManager::PlayAudioFile(const string& name, int loops) {
+    CollectFinishedTracks(m_activeTracks);
     if(m_activeTracks.size() >= MAX_TRACKS_QUANTITY)
         return;
+    if(m_mixer == nullptr) return;
 
     auto* audioInfo = GetAssetInfo(name);
-    if (audioInfo != nullptr) {
+    if (audioInfo != nullptr && audioInfo->IsLoaded() && audioInfo->GetAsset() != nullptr) {
         auto audioFile = audioInfo->GetAsset()->GetAudioSample();
         auto id = GetAssetIDByName(name);
 
@@ -62,43 +118,27 @@ void Managers::AudioManager::PlayAudioFile(const string& name, int loops) {
             return;
         }
         MIX_Track* track = MIX_CreateTrack(m_mixer);
-        MIX_SetTrackAudio(track, audioFile);
-        MIX_SetTrackLoops(track, loops);
-        MIX_PlayTrack(track, 0);
+        const auto options = SDL_CreateProperties();
+        const bool started = track != nullptr && options != 0 &&
+            SDL_SetNumberProperty(options, MIX_PROP_PLAY_LOOPS_NUMBER, std::max(loops, -1)) &&
+            MIX_SetTrackAudio(track, audioFile) && MIX_PlayTrack(track, options);
+        if(options != 0) SDL_DestroyProperties(options);
+        if(!started || (m_isPaused && !MIX_PauseTrack(track))) {
+            GKC_ENGINE_ERROR("Failed to play '{}': {}", name, SDL_GetError());
+            if(track != nullptr) MIX_DestroyTrack(track);
+            return;
+        }
 
         m_activeTracks.emplace(id, track);
     }
 }
 
 void Managers::AudioManager::PlayMusicFile(const string &name) {
-    if(m_activeTracks.size() >= MAX_TRACKS_QUANTITY)
-        return;
-        
-    GKC_ENGINE_INFO("Playing {}", name);
-    auto* audioInfo = GetAssetInfo(name);
-    if (audioInfo != nullptr) {
-        auto audioFile = audioInfo->GetAsset()->GetAudioSample();
-        auto id = GetAssetIDByName(name);
-
-        if(id == 0)
-        {
-            Debug::Logger::LogErrorWithType(ErrorType::AssetInvalid, "Invalid audio ID!: {}", name);
-            return;
-        }
-
-        MIX_Track* track = MIX_CreateTrack(m_mixer);
-        MIX_SetTrackAudio(track, audioFile);
-
-        MIX_PlayTrack(track, 0);
-        MIX_SetTrackLoops(track, -1);
-
-        m_activeTracks.emplace(id, track);
-    } else {
-        Debug::Logger::LogErrorWithType(ErrorType::AssetNotFound, "File '{}' doesn't exist!", name);
-    }
+    PlayAudioFile(name, -1);
 }
 
 void Managers::AudioManager::StopSound(const string &name, Sint64 fadeOutMs) {
+    CollectFinishedTracks(m_activeTracks);
     auto* audioInfo = GetAssetInfo(name);
     if (audioInfo != nullptr) {
         auto id = GetAssetIDByName(name);
@@ -112,11 +152,8 @@ void Managers::AudioManager::StopSound(const string &name, Sint64 fadeOutMs) {
         auto trackIt = m_activeTracks.find(id);
         if (trackIt != m_activeTracks.end()) {
             MIX_Track* track = trackIt->second;
-            if (track != nullptr) {
-                MIX_StopTrack(track, fadeOutMs);
-                MIX_DestroyTrack(track);
-            }
-            m_activeTracks.erase(trackIt);
+            StopTrackWithFade(track, fadeOutMs);
+            CollectFinishedTracks(m_activeTracks);
         }
     }
 }
@@ -126,7 +163,7 @@ bool Managers::AudioManager::IsTrackActive(AudioID id) {
     for (auto trackIt = range.first; trackIt != range.second; ++trackIt)
     {
         MIX_Track* track = trackIt->second;
-        if (track != nullptr && MIX_TrackPlaying(track)) {
+        if (track != nullptr && (MIX_TrackPlaying(track) || MIX_TrackPaused(track))) {
             return true;
         }
     }
@@ -135,6 +172,7 @@ bool Managers::AudioManager::IsTrackActive(AudioID id) {
 }
 
 void Managers::AudioManager::StopAllTracksFromSound(const string &name, Sint64 fadeOutMs) {
+    CollectFinishedTracks(m_activeTracks);
     auto* audioInfo = GetAssetInfo(name);
     if (audioInfo != nullptr) {
         auto id = GetAssetIDByName(name);
@@ -146,32 +184,34 @@ void Managers::AudioManager::StopAllTracksFromSound(const string &name, Sint64 f
         }
 
         auto range = m_activeTracks.equal_range(id);
-        for (auto iter = range.first; iter != range.second; ) {
-            MIX_Track* track = iter->second;
-            if (track != nullptr) {
-                MIX_StopTrack(track, fadeOutMs);
-                MIX_DestroyTrack(track);
-            }
-            iter = m_activeTracks.erase(iter);
+        for (auto iter = range.first; iter != range.second; ++iter) {
+            StopTrackWithFade(iter->second, fadeOutMs);
         }
+        CollectFinishedTracks(m_activeTracks);
     }
 }
 
 void Managers::AudioManager::StopAllSounds(Sint64 fadeOutMs) {
-    MIX_StopAllTracks(m_mixer, fadeOutMs);
-    for (auto& [id, track] : m_activeTracks) {
-        if (track != nullptr) {
-            MIX_DestroyTrack(track);
-        }
-    }
-    m_activeTracks.clear();
+    if(m_mixer != nullptr && !MIX_StopAllTracks(m_mixer, std::max<Sint64>(fadeOutMs, 0)))
+        GKC_ENGINE_ERROR("Failed to stop all audio playback: {}", SDL_GetError());
+    CollectFinishedTracks(m_activeTracks);
 }
 
 void Managers::AudioManager::RegisterTrack(AudioID id, MIX_Track *track) {
     m_activeTracks.emplace(id, track);
 }
 
+void Managers::AudioManager::SetPaused(bool paused) {
+    if(m_isPaused == paused) return;
+    m_isPaused = paused;
+    if(m_mixer == nullptr) return;
+
+    const bool success = paused ? MIX_PauseAllTracks(m_mixer) : MIX_ResumeAllTracks(m_mixer);
+    if(!success) GKC_ENGINE_ERROR("Failed to {} audio playback: {}", paused ? "pause" : "resume", SDL_GetError());
+}
+
 void Managers::AudioManager::ReloadAudioFiles() {
+    CollectFinishedTracks(m_activeTracks);
     for (auto& [id, info] : m_assetList)
     {
         if (info == nullptr || !info->IsLoaded())
@@ -203,8 +243,17 @@ void Managers::AudioManager::SetVolumeByID(AudioID id, float volume) {
 }
 
 void Managers::AudioManager::SetMasterVolume(float volume) {
-    Config::ConfigSetter::SetVariable("master_volume", volume);
-    MIX_SetMixerGain(m_mixer, ClampVolume(volume));
+    if(!std::isfinite(volume)) return;
+    m_masterVolume = std::min(ClampVolume(volume), m_maxVolume);
+    Config::ConfigSetter::SetVariable("master_volume", m_masterVolume, "audio.cfg");
+    if(m_mixer != nullptr) MIX_SetMixerGain(m_mixer, m_masterVolume);
+}
+
+void Managers::AudioManager::SetMaxVolume(float volume) {
+    if(!std::isfinite(volume)) return;
+    m_maxVolume = ClampVolume(volume);
+    Config::ConfigSetter::SetVariable("max_volume", m_maxVolume, "audio.cfg");
+    SetMasterVolume(m_masterVolume);
 }
 
 void Managers::AudioManager::RestartAudioDevice() {
@@ -219,15 +268,8 @@ void Managers::AudioManager::RestartAudioDevice() {
         m_deviceID = 0;
     }
 
-    m_deviceID = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &m_audioSpec);
-    if (m_deviceID == 0) {
+    if(!OpenAudioDevice()) {
         GKC_ENGINE_FATAL("failed to reopen audio device!");
-        return;
-    }
-
-    m_mixer = MIX_CreateMixerDevice(m_deviceID, &m_audioSpec);
-    if (m_mixer == nullptr) {
-        GKC_ENGINE_FATAL("audio mixer is NULL after restarting the device!");
     }
 }
 
@@ -237,11 +279,12 @@ void Managers::AudioManager::SetAudioChannels(int channels) {
             "Audio channels must be between 1 and 8, got {}", channels);
         return;
     }
+    Config::ConfigSetter::SetVariable("audio_channels", channels, "audio.cfg");
     if (m_audioSpec.channels == channels)
         return;
 
     m_audioSpec.channels = channels;
-    RestartAudioDevice();
+    if(m_mixer != nullptr) RestartAudioDevice();
 }
 
 void Managers::AudioManager::SetAudioFrequency(int frequency) {
@@ -250,19 +293,30 @@ void Managers::AudioManager::SetAudioFrequency(int frequency) {
             "Audio frequency must be greater than 0, got {}", frequency);
         return;
     }
+    Config::ConfigSetter::SetVariable("audio_frequency", frequency, "audio.cfg");
     if (m_audioSpec.freq == frequency)
         return;
 
     m_audioSpec.freq = frequency;
-    RestartAudioDevice();
+    if(m_mixer != nullptr) RestartAudioDevice();
 }
 
 void Managers::AudioManager::SetAudioFormat(SDL_AudioFormat format) {
+    string configuredFormat;
+    switch(format) {
+        case SDL_AUDIO_U8: configuredFormat = "U8"; break;
+        case SDL_AUDIO_S8: configuredFormat = "S8"; break;
+        case SDL_AUDIO_S16: configuredFormat = "S16"; break;
+        case SDL_AUDIO_S32: configuredFormat = "S32"; break;
+        case SDL_AUDIO_F32: configuredFormat = "F32"; break;
+        default: return;
+    }
+    Config::ConfigSetter::SetVariable("audio_format", configuredFormat, "audio.cfg");
     if (m_audioSpec.format == format)
         return;
 
     m_audioSpec.format = format;
-    RestartAudioDevice();
+    if(m_mixer != nullptr) RestartAudioDevice();
 }
 
 void Managers::AudioManager::SetAudioFormat(std::string format) {
@@ -274,8 +328,7 @@ void Managers::AudioManager::SetAudioFormat(std::string format) {
     else if (format == "F32") sdlFormat = SDL_AUDIO_F32;
     else return;
 
-    m_audioSpec.format = sdlFormat;
-    RestartAudioDevice();
+    SetAudioFormat(sdlFormat);
 }
 
 void Managers::AudioManager::CreateAudioGroup(const string& name, float maxVolume) {

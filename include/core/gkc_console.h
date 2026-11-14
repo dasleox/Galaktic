@@ -199,7 +199,6 @@ namespace Galaktic::Core {
             std::unique_ptr<DebugInformation> m_pDebugInfo = nullptr;
             std::shared_ptr<Debug::ConsoleMutex_mt> m_sink = nullptr;
 
-            bool m_cheatsToggle = false;
             bool m_isVisible = false;
 
             /// Text currently being typed into the console's input line.
@@ -358,6 +357,9 @@ namespace Galaktic::Core {
              * @brief Logs the engine's diagnostic information.
              */
             void ShowDebugInformation();
+
+            /** @brief Reads exactly one on/off argument, rejecting values other than 1 or 0 */
+            bool ReadSwitch(const CommandWrapper& wrapper, bool& enabled);
 
             /**
              * @brief Logs a console argument error.
